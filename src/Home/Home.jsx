@@ -5,7 +5,9 @@ import { useNavigate } from 'react-router-dom';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import Navbar from '../Component/Navbar';
-import TamilAvatarExplainer from '../Component/TamilAvatarExplainer';
+import Launch from '../Component/Launch';
+import WhyDeepaCrackersModal from '../Component/WhyDeepaCrackersModal';
+import WhatsAppButton from '../Component/WhatsAppButton';
 import { API_BASE_URL } from '../../Config';
 import { translateProduct } from '../utils/tamilTranslation';
 
@@ -179,10 +181,12 @@ export default function Home() {
   const [aiPreferences, setAiPreferences] = useState({ kids: false, sound: false, night: false, kidsnight: false });
   const [suggestedCart, setSuggestedCart] = useState({});
 
-  // Tamil Avatar Explainer state — auto-opens once per session
-  const [showAvatarExplainer, setShowAvatarExplainer] = useState(() => {
-    return !sessionStorage.getItem("deepa_explainer_seen");
+  // Launcher: shown only once per session (first visit)
+  const [showLauncher, setShowLauncher] = useState(() => {
+    return !sessionStorage.getItem("deepa_crackers_launched");
   });
+  // Why modal: shown right after launcher finishes
+  const [showWhyModal, setShowWhyModal] = useState(false);
 
 
   const [customer, setCustomer] = useState({
@@ -1269,9 +1273,9 @@ export default function Home() {
             className="fixed bottom-4 left-4 right-4 z-40 max-w-4xl mx-auto rounded-2xl p-4 bg-amber-100 border-2 border-slate-900 shadow-[6px_6px_0px_0px_rgba(30,41,59,0.9)] flex items-center justify-between gap-4"
           >
             <div>
-              <p className="text-xs font-bold text-slate-700">{cartItems.length} Products Selected</p>
+              <p className="text-xs font-bold text-slate-700">{cartItems.length} Selected</p>
               <p className="text-xl md:text-2xl font-black text-slate-900">
-                Estimate Total: ₹{finalCheckoutTotal.toFixed(2)}
+                ₹{finalCheckoutTotal.toFixed(2)}
               </p>
             </div>
 
@@ -1283,7 +1287,7 @@ export default function Home() {
               }}
               className="px-6 py-3 rounded-xl bg-amber-300 hover:bg-amber-400 text-slate-900 border-2 border-slate-900 font-black text-xs md:text-sm shadow-[3px_3px_0px_0px_#0f172a] transition-all flex items-center gap-2"
             >
-              <span>Submit Order Enquiry</span>
+              <span>Submit</span>
               <ArrowRight className="h-4 w-4" />
             </button>
           </motion.div>
@@ -1629,44 +1633,26 @@ export default function Home() {
         </div>
       </footer>
 
-      {/* Floating Tamil Avatar Explainer Trigger Button */}
-      <motion.button
-        onClick={() => {
-          setShowAvatarExplainer(true);
-          sessionStorage.removeItem("deepa_explainer_seen");
-        }}
-        initial={{ scale: 0, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ delay: 2, type: "spring", stiffness: 260, damping: 20 }}
-        whileHover={{ scale: 1.08 }}
-        whileTap={{ scale: 0.95 }}
-        className="fixed bottom-5 left-5 z-50 flex items-center gap-2 px-4 py-3 rounded-2xl bg-amber-400 border-3 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a] font-black text-slate-900 text-xs hover:bg-amber-300 transition-colors"
-        style={{ zIndex: 50 }}
-      >
-        <motion.span
-          animate={{ rotate: [0, 10, -10, 10, 0] }}
-          transition={{ repeat: Infinity, duration: 3, repeatDelay: 2 }}
-          className="text-xl"
-        >
-          👩🏽
-        </motion.span>
-        <div className="text-left">
-          <div className="font-black text-[11px]">தீபா விளக்கம்</div>
-          <div className="text-[10px] font-bold text-slate-700">Why Deepa Crackers?</div>
-        </div>
-      </motion.button>
+      {/* Floating WhatsApp Quick Chat Button */}
+      <WhatsAppButton hasActiveCart={cartItems.length > 0} />
 
-      {/* Tamil Avatar Explainer Modal */}
-      <AnimatePresence>
-        {showAvatarExplainer && (
-          <TamilAvatarExplainer
-            onClose={() => {
-              setShowAvatarExplainer(false);
-              sessionStorage.setItem("deepa_explainer_seen", "1");
-            }}
-          />
-        )}
-      </AnimatePresence>
+      {/* Fireworks Launch Screen — shown once per session */}
+      {showLauncher && (
+        <Launch
+          onComplete={() => {
+            sessionStorage.setItem("deepa_crackers_launched", "1");
+            setShowLauncher(false);
+            setShowWhyModal(true);
+          }}
+        />
+      )}
+
+      {/* Why Deepa Crackers modal — auto-dismisses after 10 seconds */}
+      {showWhyModal && (
+        <WhyDeepaCrackersModal
+          onClose={() => setShowWhyModal(false)}
+        />
+      )}
 
     </div>
   );
