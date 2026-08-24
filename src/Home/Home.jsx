@@ -10,6 +10,7 @@ import WhyDeepaCrackersModal from '../Component/WhyDeepaCrackersModal';
 import WhatsAppButton from '../Component/WhatsAppButton';
 import { API_BASE_URL } from '../../Config';
 import { translateProduct } from '../utils/tamilTranslation';
+import defaultImage from '../default.jpeg';
 
 // Media Item Parser Helper
 const parseMediaItems = (media) => {
@@ -30,9 +31,8 @@ const parseMediaItems = (media) => {
 // Base64 Image Preloader for PDF Generation
 const loadBase64Image = (url) => {
   return new Promise((resolve) => {
-    if (!url) return resolve(null);
     const mediaList = parseMediaItems(url);
-    const firstUrl = mediaList[0];
+    const firstUrl = mediaList[0] || defaultImage;
     if (!firstUrl || typeof firstUrl !== 'string') return resolve(null);
     if (firstUrl.includes('/video/') || firstUrl.endsWith('.mp4') || firstUrl.endsWith('.webm')) return resolve(null);
 
@@ -51,7 +51,28 @@ const loadBase64Image = (url) => {
         resolve(null);
       }
     };
-    img.onerror = () => resolve(null);
+    img.onerror = () => {
+      if (firstUrl !== defaultImage) {
+        const fallbackImg = new Image();
+        fallbackImg.crossOrigin = 'Anonymous';
+        fallbackImg.onload = () => {
+          try {
+            const canvas = document.createElement('canvas');
+            canvas.width = fallbackImg.naturalWidth || fallbackImg.width || 80;
+            canvas.height = fallbackImg.naturalHeight || fallbackImg.height || 80;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(fallbackImg, 0, 0);
+            resolve(canvas.toDataURL('image/jpeg', 0.7));
+          } catch {
+            resolve(null);
+          }
+        };
+        fallbackImg.onerror = () => resolve(null);
+        fallbackImg.src = defaultImage;
+      } else {
+        resolve(null);
+      }
+    };
     img.src = firstUrl;
   });
 };
@@ -62,16 +83,41 @@ const getProductUniqueKey = (p) => {
   return p.serial_number || `${p.product_type || 'gen'}_${p.id}_${p.productname || ''}`;
 };
 
+// Helper to check if product is active ('on')
+const isProductOn = (p) => {
+  if (!p) return false;
+  const s = String(p.status ?? '').trim().toLowerCase();
+  return s === 'on' || s === 'true' || p.status === true || p.status === 1 || s === '1';
+};
+
 // Small Thumbnail Renderer for Checkout Item Review
 const renderProductThumbnail = (media) => {
   const items = parseMediaItems(media);
-  if (items.length === 0) return <div className="w-12 h-12 rounded-xl bg-amber-100 border border-slate-900 flex items-center justify-center text-xs">🎆</div>;
+  if (items.length === 0) {
+    return (
+      <img
+        src={defaultImage}
+        alt="Crackers"
+        className="w-12 h-12 rounded-xl border border-slate-900 object-contain bg-white p-0.5 shrink-0"
+      />
+    );
+  }
   const first = items[0];
   const isVid = typeof first === 'string' && (first.includes('/video/') || first.endsWith('.mp4') || first.endsWith('.webm'));
   if (isVid) {
     return <video src={first} className="w-12 h-12 rounded-xl border border-slate-900 object-contain bg-white p-0.5 shrink-0" muted />;
   }
-  return <img src={first} alt="" className="w-12 h-12 rounded-xl border border-slate-900 object-contain bg-white p-0.5 shrink-0" onError={(e) => { e.target.style.display = 'none'; }} />;
+  return (
+    <img
+      src={first}
+      alt=""
+      className="w-12 h-12 rounded-xl border border-slate-900 object-contain bg-white p-0.5 shrink-0"
+      onError={(e) => {
+        e.target.onerror = null;
+        e.target.src = defaultImage;
+      }}
+    />
+  );
 };
 
 // Pencil Sketch Product Image Carousel Component
@@ -81,8 +127,12 @@ const ProductCarousel = ({ media, onImageClick }) => {
 
   if (mediaItems.length === 0) {
     return (
-      <div className="w-full h-32 sm:h-44 rounded-xl border-2 border-slate-900 bg-amber-50/50 flex items-center justify-center text-slate-400 font-mono text-xs shadow-[2px_2px_0px_0px_#0f172a]">
-        <span>🎆 Fireworks</span>
+      <div className="relative w-full h-32 sm:h-44 rounded-xl border-2 border-slate-900 overflow-hidden bg-white shadow-[2px_2px_0px_0px_#0f172a] select-none flex items-center justify-center">
+        <img
+          src={defaultImage}
+          alt="Default Crackers"
+          className="w-full h-full object-contain p-1"
+        />
       </div>
     );
   }
@@ -109,7 +159,8 @@ const ProductCarousel = ({ media, onImageClick }) => {
           onClick={() => onImageClick && onImageClick(mediaItems)}
           className="w-full h-full object-contain p-1 cursor-pointer hover:scale-105 transition-transform duration-300"
           onError={(e) => {
-            e.target.style.display = 'none';
+            e.target.onerror = null;
+            e.target.src = defaultImage;
           }}
         />
       )}
@@ -275,11 +326,13 @@ export default function Home() {
       const prodData = prodRes && prodRes.ok ? await prodRes.json() : [];
       const catData = catRes && catRes.ok ? await catRes.json() : [];
 
+      let rawList = [];
       if (prodData && prodData.data) {
-        setProducts(prodData.data);
+        rawList = prodData.data;
       } else if (Array.isArray(prodData)) {
-        setProducts(prodData);
+        rawList = prodData;
       }
+      setProducts(rawList.filter(isProductOn));
 
       if (Array.isArray(catData) && catData.length > 0) {
         setCategoryOrder(catData.map((c) => (typeof c === "string" ? c : c.product_type)));
@@ -297,7 +350,7 @@ export default function Home() {
 
   // Compute Available Categories Sorted by Admin Drag & Drop Sequence
   const categories = useMemo(() => {
-    const availableTypes = Array.from(new Set(products.map((p) => p.product_type))).filter(Boolean);
+    const availableTypes = Array.from(new Set(products.filter(isProductOn).map((p) => p.product_type))).filter(Boolean);
     const sorted = [...availableTypes].sort((a, b) => {
       const idxA = categoryOrder.indexOf(a);
       const idxB = categoryOrder.indexOf(b);
@@ -379,7 +432,7 @@ export default function Home() {
   // Group Products by Admin Category Sequence
   const groupedProducts = useMemo(() => {
     const term = searchTerm.toLowerCase().trim();
-    let list = products.filter((p) => p.status === 'on' || p.status === undefined || p.status === null || p.status === 'off');
+    let list = products.filter(isProductOn);
 
     if (selectedCategory !== "All") {
       list = list.filter((p) => p.product_type === selectedCategory);
@@ -422,9 +475,10 @@ export default function Home() {
     try {
       const doc = new jsPDF();
       const pageWidth = doc.internal.pageSize.getWidth();
+      const activeProducts = products.filter(isProductOn);
 
-      // Pre-load base64 images for products with unique product key mapping
-      const imagePromises = products.map(async (p) => {
+      // Pre-load base64 images for active products with unique product key mapping
+      const imagePromises = activeProducts.map(async (p) => {
         const key = getProductUniqueKey(p);
         const base64 = await loadBase64Image(p.image || p.images);
         return { key, base64 };
@@ -454,7 +508,7 @@ export default function Home() {
       const activeTypes = categories.filter((c) => c !== "All");
 
       activeTypes.forEach((type) => {
-        const typeItems = products.filter((p) => p.product_type === type);
+        const typeItems = activeProducts.filter((p) => p.product_type === type);
         if (typeItems.length === 0) return;
 
         const tableData = typeItems.map((p) => {
@@ -542,7 +596,7 @@ export default function Home() {
 
     // Filter available products & calculate net price with UNIQUE KEYS
     const activeProducts = products
-      .filter((p) => p.status === 'on' || p.status === undefined || p.status === null)
+      .filter(isProductOn)
       .map((p) => {
         const price = parseFloat(p.price || 0);
         const discount = parseFloat(p.discount || 0);
@@ -1255,6 +1309,10 @@ export default function Home() {
                   src={Array.isArray(previewMedia) ? previewMedia[0] : previewMedia}
                   alt="Product Enlarged"
                   className="max-h-[75vh] w-auto object-contain rounded-2xl border-2 border-slate-900"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = defaultImage;
+                  }}
                 />
               </div>
             </motion.div>
