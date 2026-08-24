@@ -1670,6 +1670,7 @@ export default function Home() {
             <p className="text-xs font-serif text-slate-700">Main Store Outlet Center,</p>
             <p className="text-xs font-serif text-slate-700">RS Road, THIRUTHURAIPOONDI, Tamil Nadu</p>
             <a href="tel:+918072897834" className="text-xs font-bold block mt-2 hover:underline">+91 8072 897 834</a>
+            <a href="https://www.instagram.com/deepa_crackers/" target="_blank" rel="noopener noreferrer" className="text-xs font-bold block mt-1 text-[#bc1888] hover:underline flex items-center gap-1">📸 @deepa_crackers</a>
             <a href="mailto:deepatraders1985@gmail.com" className="text-xs font-bold block mt-1 hover:underline">deepatraders1985@gmail.com</a>
             <p className="text-xs text-slate-500 mt-1">info@deepacrackers.com</p>
           </div>
