@@ -1,15 +1,20 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import { 
-  ArrowRight,
-  Sparkles,
-  X
+  ArrowRight, 
+  Sparkles, 
+  X, 
+  AlertTriangle, 
+  CheckCircle2,
+  Truck,
+  HeartHandshake
 } from "lucide-react";
 
-const DURATION_MS = 10000; // 10 seconds auto-dismiss
+const DURATION_MS = 14000; // 14 seconds auto-dismiss
 
 export default function WhyDeepaCrackersModal({ onClose }) {
   const [progress, setProgress] = useState(0);
-  const [secondsLeft, setSecondsLeft] = useState(10);
+  const [secondsLeft, setSecondsLeft] = useState(14);
   const [visible, setVisible] = useState(false);
   const [exiting, setExiting] = useState(false);
 
@@ -26,7 +31,7 @@ export default function WhyDeepaCrackersModal({ onClose }) {
       if (pct >= 100) {
         clearInterval(tick);
         setExiting(true);
-        setTimeout(() => onClose && onClose(), 450);
+        setTimeout(() => onClose && onClose(), 400);
       }
     }, 40);
 
@@ -38,596 +43,292 @@ export default function WhyDeepaCrackersModal({ onClose }) {
 
   const handleClose = () => {
     setExiting(true);
-    setTimeout(() => onClose && onClose(), 350);
+    setTimeout(() => onClose && onClose(), 300);
   };
 
   return (
     <div
-      style={{
-        position: "fixed",
-        inset: 0,
-        zIndex: 100000,
-        background: "rgba(3, 1, 1, 0.88)",
-        backdropFilter: "blur(14px)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "10px",
-        opacity: visible && !exiting ? 1 : 0,
-        transform: visible && !exiting ? "scale(1)" : exiting ? "scale(0.95)" : "scale(0.9)",
-        transition: "all 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
-      }}
+      className={`fixed inset-0 z-[100000] bg-black/90 backdrop-blur-md flex items-center justify-center p-3 sm:p-5 transition-all duration-300 ${
+        visible && !exiting ? "opacity-100 scale-100" : "opacity-0 scale-95"
+      }`}
     >
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@500;700;800;900&family=Cinzel:wght@800;900&display=swap');
+      {/* Modal Main Frame */}
+      <div className="w-full max-w-5xl max-h-[94vh] bg-[#0a0a0a] border border-neutral-800 rounded-3xl flex flex-col overflow-hidden shadow-2xl relative text-white">
         
-        @keyframes subtleGlow {
-          0%, 100% { box-shadow: 0 20px 80px rgba(255, 85, 0, 0.3), 0 0 0 1.5px rgba(255, 170, 0, 0.3) inset; }
-          50% { box-shadow: 0 25px 100px rgba(255, 120, 0, 0.5), 0 0 0 2px rgba(255, 220, 0, 0.6) inset; }
-        }
-        @keyframes floatItem {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-4px); }
-        }
-        @keyframes pulseBadge {
-          0%, 100% { transform: scale(1); }
-          50% { transform: scale(1.04); }
-        }
-      `}</style>
-
-      {/* Main Container */}
-      <div
-        style={{
-          width: "100%",
-          maxWidth: "920px",
-          maxHeight: "94vh",
-          background: "linear-gradient(160deg, #1d0902 0%, #0e0401 45%, #050201 100%)",
-          borderRadius: "26px",
-          border: "2px solid rgba(255, 160, 0, 0.4)",
-          display: "flex",
-          flexDirection: "column",
-          overflow: "hidden",
-          position: "relative",
-          animation: "subtleGlow 4s ease-in-out infinite",
-        }}
-      >
-        {/* Festive Golden Top Ribbon */}
-        <div style={{
-          height: "4px",
-          width: "100%",
-          background: "linear-gradient(90deg, #ff0055, #ff6600, #ffd700, #00ff88, #00d4ff, #ff6600)",
-        }} />
-
         {/* Top Header */}
-        <div style={{
-          padding: "12px 20px",
-          borderBottom: "1px solid rgba(255, 120, 0, 0.2)",
-          background: "radial-gradient(ellipse at center top, rgba(255, 100, 0, 0.22), transparent 75%)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          flexShrink: 0,
-        }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-            <div style={{
-              width: "44px",
-              height: "44px",
-              borderRadius: "14px",
-              background: "linear-gradient(135deg, #ff4500, #ffaa00)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: "22px",
-              boxShadow: "0 0 20px rgba(255, 100, 0, 0.6)",
-              flexShrink: 0,
-            }}>
-              🏆
+        <div className="p-4 sm:p-5 border-b border-neutral-800 flex items-center justify-between bg-black/90">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-red-600 flex items-center justify-center font-black text-white text-base shadow-md shadow-red-600/30">
+              <Truck className="w-5 h-5" />
             </div>
-
             <div>
-              <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
-                <h2 style={{
-                  margin: 0,
-                  fontFamily: "'Cinzel', serif",
-                  fontWeight: 900,
-                  fontSize: "clamp(17px, 3.6vw, 23px)",
-                  letterSpacing: "0.04em",
-                  background: "linear-gradient(135deg, #ffffff 0%, #ffe600 45%, #ff7700 100%)",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                }}>
-                  DEEPA CRACKERS
-                </h2>
-                <span style={{
-                  background: "linear-gradient(90deg, rgba(255,180,0,0.3), rgba(255,70,0,0.3))",
-                  border: "1px solid rgba(255, 200, 0, 0.6)",
-                  color: "#ffd700",
-                  fontFamily: "'Outfit', sans-serif",
-                  fontWeight: 900,
-                  fontSize: "11px",
-                  padding: "2px 10px",
-                  borderRadius: "20px",
-                  letterSpacing: "0.06em",
-                }}>
-                  SINCE 1985 · 40 YRS TRUST
+              <div className="flex items-center gap-2 flex-wrap">
+                <h3 className="text-base sm:text-xl font-black tracking-tight text-white">
+                  WHY CHOOSE DEEPA CRACKERS?
+                </h3>
+                <span className="px-2 py-0.5 rounded-full bg-red-950 border border-red-800 text-[10px] font-bold text-red-200 uppercase">
+                  Real Curved Highway Drive Animation
                 </span>
               </div>
-              <p style={{
-                margin: "2px 0 0",
-                fontSize: "11px",
-                color: "rgba(255, 210, 170, 0.8)",
-                fontFamily: "'Outfit', sans-serif",
-                fontWeight: 600,
-              }}>
-                RS Road, Thiruthuraipoondi & Sivakasi Wholesale Hub
+              <p className="text-xs text-neutral-400 font-medium mt-0.5">
+                Watch the delivery truck drive: 4 Middlemen toll stops vs. Direct Deepa Express Highway
               </p>
             </div>
           </div>
 
           <button
             onClick={handleClose}
-            aria-label="Close"
-            style={{
-              width: "34px",
-              height: "34px",
-              borderRadius: "50%",
-              background: "rgba(255, 255, 255, 0.08)",
-              border: "1px solid rgba(255, 120, 0, 0.35)",
-              color: "rgba(255, 200, 150, 0.9)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              cursor: "pointer",
-              transition: "all 0.2s",
-              flexShrink: 0,
-            }}
-            onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,80,0,0.35)"; e.currentTarget.style.color = "#fff"; }}
-            onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,0.08)"; e.currentTarget.style.color = "rgba(255,200,150,0.9)"; }}
+            className="w-8 h-8 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-white flex items-center justify-center hover:bg-neutral-800 transition-colors cursor-pointer"
           >
             <X size={16} />
           </button>
         </div>
 
-        {/* PICTORIAL GRAPHICAL SHOWCASE BODY (Images & Badges, No Sentences) */}
-        <div style={{
-          padding: "14px 18px",
-          overflowY: "auto",
-          flex: 1,
-          display: "flex",
-          flexDirection: "column",
-          gap: "12px",
-        }}>
+        {/* Both Animated Curves Side-by-Side */}
+        <div className="p-4 sm:p-6 overflow-y-auto flex-1 space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-          {/* MAIN PICTORIAL SOURCING & PRICE COMPARISON BANNER */}
-          <div style={{
-            background: "linear-gradient(135deg, rgba(20, 8, 3, 0.9), rgba(10, 4, 1, 0.95))",
-            border: "1.5px solid rgba(255, 150, 0, 0.35)",
-            borderRadius: "18px",
-            padding: "10px 14px",
-            display: "flex",
-            flexDirection: "column",
-            gap: "8px",
-          }}>
-            {/* Visual Header */}
-            <div style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              fontSize: "11px",
-              fontWeight: 800,
-              color: "#ffc107",
-              fontFamily: "'Outfit', sans-serif",
-              letterSpacing: "0.1em",
-              textTransform: "uppercase",
-            }}>
-              <span>📊 FACTORY SOURCING & PRICE BLUEPRINT</span>
-              <span style={{ color: "#00ff88" }}>✓ 100% TRANSPARENT</span>
-            </div>
-
-            <div style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-              gap: "10px",
-            }}>
-              {/* Image Card 1: 80-90% Trap */}
-              <div style={{
-                background: "linear-gradient(135deg, rgba(239, 68, 68, 0.18), rgba(60, 10, 10, 0.4))",
-                border: "1.5px solid rgba(239, 68, 68, 0.5)",
-                borderRadius: "14px",
-                padding: "10px",
-                display: "flex",
-                alignItems: "center",
-                gap: "10px",
-              }}>
-                <div style={{
-                  width: "56px",
-                  height: "56px",
-                  borderRadius: "12px",
-                  background: "linear-gradient(135deg, #ef4444, #991b1b)",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: "#fff",
-                  fontWeight: 900,
-                  boxShadow: "0 0 15px rgba(239, 68, 68, 0.4)",
-                  flexShrink: 0,
-                }}>
-                  <span style={{ fontSize: "14px", textDecoration: "line-through", opacity: 0.85 }}>90%</span>
-                  <span style={{ fontSize: "18px", lineHeight: 1 }}>❌</span>
+            {/* ── LEFT: Traditional Multi-Middlemen Winding Road (RED) ── */}
+            <div className="bg-[#140606] border-2 border-red-600/70 rounded-2xl p-4 sm:p-5 flex flex-col justify-between space-y-4 shadow-[0_10px_30px_rgba(220,38,38,0.15)] relative overflow-hidden">
+              <div className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <span className="px-2.5 py-1 rounded-lg bg-red-950 border border-red-700/80 text-xs font-black text-red-400 flex items-center gap-1.5 uppercase">
+                    <AlertTriangle className="h-3.5 w-3.5 text-red-500" />
+                    OTHER SHOPS (WINDING & EXPENSIVE)
+                  </span>
+                  <span className="px-2 py-0.5 rounded bg-red-950/80 text-red-300 text-[10px] font-bold">
+                    4 Toll Hikes
+                  </span>
                 </div>
-                <div>
-                  <div style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 900, fontSize: "13px", color: "#fca5a5" }}>
-                    Fake 80%, 90% Discounts Trap
-                  </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: "4px", marginTop: "3px", fontSize: "11px", color: "#f87171", fontWeight: 700 }}>
-                    <span>🏭 Factory</span>
-                    <span>➔</span>
-                    <span>👨‍💼 4 Middlemen</span>
-                    <span>➔</span>
-                    <span>📈 Inflated Cost</span>
-                  </div>
-                </div>
+                <h4 className="text-sm sm:text-base font-black text-red-200">
+                  Traditional Retail Supply Chain
+                </h4>
               </div>
 
-              {/* Image Card 2: Real Price Direct Model */}
-              <div style={{
-                background: "linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(10, 50, 30, 0.4))",
-                border: "2px solid rgba(16, 185, 129, 0.6)",
-                borderRadius: "14px",
-                padding: "10px",
-                display: "flex",
-                alignItems: "center",
-                gap: "10px",
-                boxShadow: "0 0 20px rgba(16, 185, 129, 0.2)",
-              }}>
-                <div style={{
-                  width: "56px",
-                  height: "56px",
-                  borderRadius: "12px",
-                  background: "linear-gradient(135deg, #10b981, #047857)",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: "#fff",
-                  fontWeight: 900,
-                  boxShadow: "0 0 15px rgba(16, 185, 129, 0.5)",
-                  flexShrink: 0,
-                }}>
-                  <span style={{ fontSize: "10px", letterSpacing: "0.05em" }}>REAL</span>
-                  <span style={{ fontSize: "20px", lineHeight: 1 }}>✅</span>
-                </div>
-                <div>
-                  <div style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 900, fontSize: "13px", color: "#6ee7b7" }}>
-                    Real Discounted Wholesale Price
-                  </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: "4px", marginTop: "3px", fontSize: "11px", color: "#34d399", fontWeight: 800 }}>
-                    <span>🏭 Sivakasi</span>
-                    <span>➔</span>
-                    <span style={{ background: "rgba(255,180,0,0.3)", padding: "1px 5px", borderRadius: "4px", color: "#ffd700" }}>DEEPA SHOP</span>
-                    <span>➔</span>
-                    <span>👨‍👩‍👧 You</span>
-                  </div>
-                </div>
+              {/* SVG Real Winding Road with Driving Lorry */}
+              <div className="relative w-full aspect-[4/3] bg-black/60 rounded-xl border border-red-900/40 p-2 overflow-hidden flex items-center justify-center">
+                <svg viewBox="0 0 380 280" className="w-full h-full">
+                  <defs>
+                    {/* Winding road path */}
+                    <path
+                      id="redRoadPath"
+                      d="M 40,40 C 280,30 330,100 200,120 C 70,140 70,210 200,225 C 290,235 330,245 330,250"
+                      fill="none"
+                    />
+                  </defs>
+
+                  {/* Road Base Asphalt */}
+                  <use href="#redRoadPath" stroke="#220808" strokeWidth="26" strokeLinecap="round" strokeLinejoin="round" />
+                  {/* Road Borders */}
+                  <use href="#redRoadPath" stroke="#7f1d1d" strokeWidth="28" strokeDasharray="none" fill="none" opacity="0.4" />
+                  <use href="#redRoadPath" stroke="#220808" strokeWidth="22" fill="none" />
+                  {/* Center dashed line */}
+                  <use href="#redRoadPath" stroke="#ef4444" strokeWidth="2" strokeDasharray="5,6" opacity="0.8" fill="none" />
+
+                  {/* Checkpoint 1: Factory */}
+                  <g transform="translate(40, 40)">
+                    <circle r="14" fill="#450a0a" stroke="#ef4444" strokeWidth="2" />
+                    <text textAnchor="middle" dy="4" fontSize="11">🏭</text>
+                    <text x="20" y="4" fontSize="10" fontWeight="bold" fill="#fca5a5">Factory (Base Rate)</text>
+                  </g>
+
+                  {/* Checkpoint 2: Agent Toll Stop */}
+                  <g transform="translate(265, 80)">
+                    <circle r="12" fill="#7f1d1d" stroke="#f87171" strokeWidth="1.5" />
+                    <text textAnchor="middle" dy="4" fontSize="10">👨‍💼</text>
+                    <rect x="16" y="-12" width="76" height="18" rx="4" fill="#450a0a" stroke="#991b1b" />
+                    <text x="22" y="1" fontSize="8.5" fontWeight="bold" fill="#fca5a5">+20% Agent Cut</text>
+                  </g>
+
+                  {/* Checkpoint 3: Distributor Warehouse */}
+                  <g transform="translate(100, 155)">
+                    <circle r="12" fill="#7f1d1d" stroke="#f87171" strokeWidth="1.5" />
+                    <text textAnchor="middle" dy="4" fontSize="10">🏢</text>
+                    <rect x="-88" y="-12" width="80" height="18" rx="4" fill="#450a0a" stroke="#991b1b" />
+                    <text x="-82" y="1" fontSize="8.5" fontWeight="bold" fill="#fca5a5">+25% Distributor</text>
+                  </g>
+
+                  {/* Checkpoint 4: Retail Shop */}
+                  <g transform="translate(240, 225)">
+                    <circle r="12" fill="#7f1d1d" stroke="#f87171" strokeWidth="1.5" />
+                    <text textAnchor="middle" dy="4" fontSize="10">🏪</text>
+                    <rect x="16" y="-12" width="76" height="18" rx="4" fill="#450a0a" stroke="#991b1b" />
+                    <text x="22" y="1" fontSize="8.5" fontWeight="bold" fill="#fca5a5">+35% Shop Cut</text>
+                  </g>
+
+                  {/* Checkpoint 5: Customer Inflated */}
+                  <g transform="translate(330, 250)">
+                    <circle r="15" fill="#ef4444" stroke="#ffffff" strokeWidth="2" />
+                    <text textAnchor="middle" dy="4" fontSize="12">💸</text>
+                  </g>
+
+                  {/* Driving Red Lorry steering along the winding road */}
+                  <g>
+                    <animateMotion
+                      repeatCount="indefinite"
+                      dur="6.5s"
+                      rotate="auto"
+                    >
+                      <mpath href="#redRoadPath" />
+                    </animateMotion>
+                    
+                    {/* Truck Vehicle Vector Body */}
+                    <rect x="-14" y="-8" width="22" height="16" rx="3" fill="#dc2626" stroke="#ffffff" strokeWidth="1" />
+                    <rect x="8" y="-6" width="9" height="12" rx="2" fill="#991b1b" />
+                    {/* Wheels */}
+                    <circle cx="-8" cy="-8" r="2.5" fill="#000000" />
+                    <circle cx="6" cy="-8" r="2.5" fill="#000000" />
+                    <circle cx="-8" cy="8" r="2.5" fill="#000000" />
+                    <circle cx="6" cy="8" r="2.5" fill="#000000" />
+                    {/* Headlights */}
+                    <circle cx="17" cy="-3" r="1.5" fill="#fef08a" />
+                    <circle cx="17" cy="3" r="1.5" fill="#fef08a" />
+                  </g>
+                </svg>
+              </div>
+
+              {/* Status Footer */}
+              <div className="p-2.5 rounded-xl bg-red-950 border border-red-700/60 flex items-center justify-between text-xs font-black text-red-300">
+                <span>Slow Delivery • Multiple Middlemen</span>
+                <span className="px-2 py-0.5 rounded bg-red-600 text-white font-black text-[11px]">
+                  FINAL: +400% HIGH ❌
+                </span>
               </div>
             </div>
+
+            {/* ── RIGHT: Deepa Direct Express Curved Highway (GREEN) ── */}
+            <div className="bg-[#051408] border-2 border-emerald-500/80 rounded-2xl p-4 sm:p-5 flex flex-col justify-between space-y-4 shadow-[0_10px_30px_rgba(16,185,129,0.15)] relative overflow-hidden">
+              <div className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <span className="px-2.5 py-1 rounded-lg bg-emerald-950 border border-emerald-700/80 text-xs font-black text-emerald-400 flex items-center gap-1.5 uppercase">
+                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
+                    OUR SHOP (DEEPA DIRECT EXPRESS)
+                  </span>
+                  <span className="px-2 py-0.5 rounded bg-emerald-950/80 text-emerald-300 text-[10px] font-bold">
+                    0% Middlemen
+                  </span>
+                </div>
+                <h4 className="text-sm sm:text-base font-black text-emerald-200">
+                  Deepa Crackers Direct Model
+                </h4>
+              </div>
+
+              {/* SVG Real Express Curved Highway with Green Lorry */}
+              <div className="relative w-full aspect-[4/3] bg-black/60 rounded-xl border border-emerald-900/40 p-2 overflow-hidden flex items-center justify-center">
+                <svg viewBox="0 0 380 280" className="w-full h-full">
+                  <defs>
+                    {/* Smooth Direct Express Highway Curve */}
+                    <path
+                      id="greenRoadPath"
+                      d="M 40,40 C 260,30 310,130 200,165 C 120,195 240,240 330,250"
+                      fill="none"
+                    />
+                  </defs>
+
+                  {/* Road Base Asphalt */}
+                  <use href="#greenRoadPath" stroke="#05240e" strokeWidth="28" strokeLinecap="round" strokeLinejoin="round" />
+                  {/* Road Borders & Glow */}
+                  <use href="#greenRoadPath" stroke="#047857" strokeWidth="30" strokeDasharray="none" fill="none" opacity="0.4" />
+                  <use href="#greenRoadPath" stroke="#05240e" strokeWidth="24" fill="none" />
+                  {/* Center dashed line */}
+                  <use href="#greenRoadPath" stroke="#10b981" strokeWidth="2.5" strokeDasharray="6,6" opacity="0.9" fill="none" />
+
+                  {/* Node 1: Sivakasi Factory Direct */}
+                  <g transform="translate(40, 40)">
+                    <circle r="15" fill="#064e3b" stroke="#10b981" strokeWidth="2" />
+                    <text textAnchor="middle" dy="4" fontSize="12">🏭</text>
+                    <text x="20" y="4" fontSize="10.5" fontWeight="bold" fill="#6ee7b7">Sivakasi Factory</text>
+                  </g>
+
+                  {/* Node 2: Deepa Central Depot Hub */}
+                  <g transform="translate(200, 165)">
+                    <circle r="16" fill="#047857" stroke="#34d399" strokeWidth="2.5" />
+                    <text textAnchor="middle" dy="5" fontSize="13">🏬</text>
+                    <rect x="22" y="-14" width="130" height="24" rx="6" fill="#064e3b" stroke="#059669" strokeWidth="1.5" />
+                    <text x="28" y="-1" fontSize="9" fontWeight="900" fill="#ffffff">DEEPA CENTRAL HUB</text>
+                    <text x="28" y="7" fontSize="7.5" fontWeight="bold" fill="#6ee7b7">Thiruthuraipoondi (0% Markup)</text>
+                  </g>
+
+                  {/* Node 3: Direct to Customer */}
+                  <g transform="translate(330, 250)">
+                    <circle r="16" fill="#10b981" stroke="#ffffff" strokeWidth="2.5" />
+                    <text textAnchor="middle" dy="5" fontSize="13">👨‍👩‍👧</text>
+                    <rect x="-115" y="-12" width="90" height="20" rx="4" fill="#064e3b" stroke="#10b981" />
+                    <text x="-108" y="2" fontSize="9" fontWeight="900" fill="#a7f3d0">Direct Customer</text>
+                  </g>
+
+                  {/* Driving Green Express Lorry cruising smoothly along the express highway */}
+                  <g>
+                    <animateMotion
+                      repeatCount="indefinite"
+                      dur="3.8s"
+                      rotate="auto"
+                    >
+                      <mpath href="#greenRoadPath" />
+                    </animateMotion>
+                    
+                    {/* Truck Vehicle Vector Body */}
+                    <rect x="-16" y="-9" width="25" height="18" rx="4" fill="#10b981" stroke="#ffffff" strokeWidth="1.2" />
+                    <rect x="9" y="-7" width="10" height="14" rx="2" fill="#047857" />
+                    {/* Text badge on truck */}
+                    <text x="-4" y="3" fontSize="6.5" fontWeight="900" fill="#ffffff" textAnchor="middle">DEEPA</text>
+                    {/* Wheels */}
+                    <circle cx="-10" cy="-9" r="3" fill="#000000" stroke="#047857" strokeWidth="0.8" />
+                    <circle cx="7" cy="-9" r="3" fill="#000000" stroke="#047857" strokeWidth="0.8" />
+                    <circle cx="-10" cy="9" r="3" fill="#000000" stroke="#047857" strokeWidth="0.8" />
+                    <circle cx="7" cy="9" r="3" fill="#000000" stroke="#047857" strokeWidth="0.8" />
+                    {/* Headlights */}
+                    <circle cx="19" cy="-4" r="2" fill="#fef08a" />
+                    <circle cx="19" cy="4" r="2" fill="#fef08a" />
+                  </g>
+                </svg>
+              </div>
+
+              {/* Status Footer */}
+              <div className="p-2.5 rounded-xl bg-emerald-950 border border-emerald-500/70 flex items-center justify-between text-xs font-black text-emerald-300 shadow-md">
+                <span>Express Highway • 0% Middlemen</span>
+                <span className="px-2 py-0.5 rounded bg-emerald-500 text-black font-black text-[11px] shadow-sm">
+                  FINAL: WHOLESALE SAVINGS ✅
+                </span>
+              </div>
+            </div>
+
           </div>
 
-          {/* 8 PICTORIAL VISUAL GRAPHIC TILES (Visual Badges, Icons & Stamps) */}
-          <div style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-            gap: "10px",
-          }}>
-
-            {/* Tile 1: 40 Yrs Shop */}
-            <div style={{
-              background: "linear-gradient(135deg, rgba(255, 180, 0, 0.12), rgba(40, 20, 5, 0.5))",
-              border: "1.5px solid rgba(255, 180, 0, 0.4)",
-              borderRadius: "16px",
-              padding: "10px",
-              display: "flex",
-              alignItems: "center",
-              gap: "12px",
-            }}>
-              <div style={{
-                width: "48px", height: "48px", borderRadius: "14px",
-                background: "linear-gradient(135deg, #ffd700, #ff8800)",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: "24px", color: "#fff", flexShrink: 0,
-                boxShadow: "0 0 15px rgba(255, 180, 0, 0.4)",
-              }}>
-                🏛️
-              </div>
-              <div>
-                <div style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 900, fontSize: "13px", color: "#ffd700" }}>
-                  SINCE 1985
-                </div>
-                <div style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 800, fontSize: "11px", color: "#fed7aa" }}>
-                  40 YRS TRUSTED SHOP
-                </div>
-              </div>
-            </div>
-
-            {/* Tile 2: Wholesale Cum Retail */}
-            <div style={{
-              background: "linear-gradient(135deg, rgba(255, 107, 0, 0.12), rgba(40, 15, 5, 0.5))",
-              border: "1.5px solid rgba(255, 107, 0, 0.4)",
-              borderRadius: "16px",
-              padding: "10px",
-              display: "flex",
-              alignItems: "center",
-              gap: "12px",
-            }}>
-              <div style={{
-                width: "48px", height: "48px", borderRadius: "14px",
-                background: "linear-gradient(135deg, #ff6b00, #d946ef)",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: "24px", color: "#fff", flexShrink: 0,
-                boxShadow: "0 0 15px rgba(255, 107, 0, 0.4)",
-              }}>
-                🏬
-              </div>
-              <div>
-                <div style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 900, fontSize: "13px", color: "#ff922b" }}>
-                  WHOLESALE + RETAIL
-                </div>
-                <div style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 800, fontSize: "11px", color: "#fed7aa" }}>
-                  Direct Shop & Counter Sales
-                </div>
-              </div>
-            </div>
-
-            {/* Tile 3: No Middleman */}
-            <div style={{
-              background: "linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(5, 30, 20, 0.5))",
-              border: "1.5px solid rgba(16, 185, 129, 0.4)",
-              borderRadius: "16px",
-              padding: "10px",
-              display: "flex",
-              alignItems: "center",
-              gap: "12px",
-            }}>
-              <div style={{
-                width: "48px", height: "48px", borderRadius: "14px",
-                background: "linear-gradient(135deg, #10b981, #06b6d4)",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: "24px", color: "#fff", flexShrink: 0,
-                boxShadow: "0 0 15px rgba(16, 185, 129, 0.4)",
-              }}>
-                🚫
-              </div>
-              <div>
-                <div style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 900, fontSize: "13px", color: "#34d399" }}>
-                  NO MIDDLEMAN
-                </div>
-                <div style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 800, fontSize: "11px", color: "#a7f3d0" }}>
-                  0% Agent Commission
-                </div>
-              </div>
-            </div>
-
-            {/* Tile 4: GSTN Verified Badge */}
-            <div style={{
-              background: "linear-gradient(135deg, rgba(6, 182, 212, 0.12), rgba(5, 25, 35, 0.5))",
-              border: "1.5px solid rgba(6, 182, 212, 0.4)",
-              borderRadius: "16px",
-              padding: "10px",
-              display: "flex",
-              alignItems: "center",
-              gap: "12px",
-            }}>
-              <div style={{
-                width: "48px", height: "48px", borderRadius: "14px",
-                background: "linear-gradient(135deg, #06b6d4, #3b82f6)",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: "24px", color: "#fff", flexShrink: 0,
-                boxShadow: "0 0 15px rgba(6, 182, 212, 0.4)",
-              }}>
-                🪪
-              </div>
-              <div>
-                <div style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 900, fontSize: "12px", color: "#22d3ee" }}>
-                  GSTN VERIFIED
-                </div>
-                <div style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 800, fontSize: "11px", color: "#bae6fd" }}>
-                  33AAGPM1717Q1ZH
-                </div>
-              </div>
-            </div>
-
-            {/* Tile 5: Mobile Friendly View / Checkout */}
-            <div style={{
-              background: "linear-gradient(135deg, rgba(168, 85, 247, 0.12), rgba(25, 10, 40, 0.5))",
-              border: "1.5px solid rgba(168, 85, 247, 0.4)",
-              borderRadius: "16px",
-              padding: "10px",
-              display: "flex",
-              alignItems: "center",
-              gap: "12px",
-            }}>
-              <div style={{
-                width: "48px", height: "48px", borderRadius: "14px",
-                background: "linear-gradient(135deg, #a855f7, #ec4899)",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: "24px", color: "#fff", flexShrink: 0,
-                boxShadow: "0 0 15px rgba(168, 85, 247, 0.4)",
-              }}>
-                📱
-              </div>
-              <div>
-                <div style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 900, fontSize: "12px", color: "#c084fc" }}>
-                  MOBILE FRIENDLY
-                </div>
-                <div style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 800, fontSize: "11px", color: "#f5d0fe" }}>
-                  1-Tap View / PDF Bill
-                </div>
-              </div>
-            </div>
-
-            {/* Tile 6: Guaranteed Delivery Date */}
-            <div style={{
-              background: "linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(40, 25, 5, 0.5))",
-              border: "1.5px solid rgba(245, 158, 11, 0.4)",
-              borderRadius: "16px",
-              padding: "10px",
-              display: "flex",
-              alignItems: "center",
-              gap: "12px",
-            }}>
-              <div style={{
-                width: "48px", height: "48px", borderRadius: "14px",
-                background: "linear-gradient(135deg, #f59e0b, #ef4444)",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: "24px", color: "#fff", flexShrink: 0,
-                boxShadow: "0 0 15px rgba(245, 158, 11, 0.4)",
-              }}>
-                🚚
-              </div>
-              <div>
-                <div style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 900, fontSize: "12px", color: "#fbbf24" }}>
-                  DELIVERY DATE
-                </div>
-                <div style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 800, fontSize: "11px", color: "#fef08a" }}>
-                  Proper Commitment
-                </div>
-              </div>
-            </div>
-
-            {/* Tile 7: Guest Checkout (No Forced Signup) */}
-            <div style={{
-              background: "linear-gradient(135deg, rgba(236, 72, 153, 0.12), rgba(40, 10, 25, 0.5))",
-              border: "1.5px solid rgba(236, 72, 153, 0.4)",
-              borderRadius: "16px",
-              padding: "10px",
-              display: "flex",
-              alignItems: "center",
-              gap: "12px",
-            }}>
-              <div style={{
-                width: "48px", height: "48px", borderRadius: "14px",
-                background: "linear-gradient(135deg, #ec4899, #f43f5e)",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: "24px", color: "#fff", flexShrink: 0,
-                boxShadow: "0 0 15px rgba(236, 72, 153, 0.4)",
-              }}>
-                🛒
-              </div>
-              <div>
-                <div style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 900, fontSize: "12px", color: "#f472b6" }}>
-                  GUEST CHECKOUT
-                </div>
-                <div style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 800, fontSize: "11px", color: "#fbcfe8" }}>
-                  No Forced Signup
-                </div>
-              </div>
-            </div>
-
-            {/* Tile 8: Trustworthy Website */}
-            <div style={{
-              background: "linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(5, 30, 20, 0.5))",
-              border: "1.5px solid rgba(16, 185, 129, 0.4)",
-              borderRadius: "16px",
-              padding: "10px",
-              display: "flex",
-              alignItems: "center",
-              gap: "12px",
-            }}>
-              <div style={{
-                width: "48px", height: "48px", borderRadius: "14px",
-                background: "linear-gradient(135deg, #10b981, #22c55e)",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: "24px", color: "#fff", flexShrink: 0,
-                boxShadow: "0 0 15px rgba(16, 185, 129, 0.4)",
-              }}>
-                🔒
-              </div>
-              <div>
-                <div style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 900, fontSize: "12px", color: "#34d399" }}>
-                  TRUSTWORTHY SITE
-                </div>
-                <div style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 800, fontSize: "11px", color: "#a7f3d0" }}>
-                  Not a Fake Website
-                </div>
-              </div>
-            </div>
-
+          {/* Bottom Trust Guarantee Strip */}
+          <div className="p-3.5 rounded-2xl bg-neutral-900 border border-neutral-800 flex items-center justify-between flex-wrap gap-2 text-xs">
+            <span className="font-black text-white flex items-center gap-1.5">
+              <Sparkles className="w-4 h-4 text-emerald-400" />
+              SAVE BIG! GET REAL VALUE DIRECT FROM SIVAKASI MANUFACTURER
+            </span>
+            <span className="text-neutral-400 font-medium">
+              40 Years of Trust (Est. 1985) • Thiruthuraipoondi
+            </span>
           </div>
         </div>
 
-        {/* Modal Footer with 10-Second Progress Timer & Instant CTA */}
-        <div style={{
-          padding: "12px 20px",
-          borderTop: "1px solid rgba(255, 120, 0, 0.2)",
-          background: "linear-gradient(180deg, rgba(20, 8, 3, 0.8), rgba(8, 2, 1, 0.98))",
-          display: "flex",
-          flexDirection: "column",
-          gap: "8px",
-          flexShrink: 0,
-        }}>
-          {/* 10-Second Progress Line */}
-          <div style={{
-            height: "4px",
-            width: "100%",
-            background: "rgba(255, 255, 255, 0.08)",
-            borderRadius: "4px",
-            overflow: "hidden",
-          }}>
-            <div style={{
-              height: "100%",
-              width: `${progress}%`,
-              background: "linear-gradient(90deg, #ff4500, #ffaa00, #00ff88)",
-              transition: "width 0.04s linear",
-              boxShadow: "0 0 10px #ff5500",
-            }} />
+        {/* Modal Bottom Action & Progress Bar */}
+        <div className="p-4 border-t border-neutral-800 bg-black/90 flex flex-col gap-2.5">
+          {/* Progress timer indicator */}
+          <div className="h-1.5 w-full bg-neutral-900 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-gradient-to-r from-red-600 via-amber-500 to-emerald-500 transition-all duration-75"
+              style={{ width: `${progress}%` }}
+            />
           </div>
 
-          <div style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: "12px",
-            flexWrap: "wrap",
-          }}>
-            <div style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "6px",
-              fontFamily: "'Outfit', sans-serif",
-              fontSize: "12px",
-              color: "rgba(255, 180, 100, 0.9)",
-              fontWeight: 700,
-            }}>
-              <Sparkles size={15} color="#ffd700" />
-              <span>Opening Deepa Crackers catalog in <strong style={{ color: "#00ff88", fontSize: "14px" }}>{secondsLeft}s</strong></span>
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <div className="text-xs text-neutral-400 font-medium flex items-center gap-1.5">
+              <Sparkles className="h-4 w-4 text-emerald-400" />
+              <span>Opening product catalog in <strong className="text-white font-bold">{secondsLeft}s</strong></span>
             </div>
 
             <button
               onClick={handleClose}
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "8px",
-                background: "linear-gradient(135deg, #ff4500, #ff8800)",
-                border: "1.5px solid rgba(255, 220, 100, 0.6)",
-                color: "#ffffff",
-                fontFamily: "'Outfit', sans-serif",
-                fontWeight: 900,
-                fontSize: "12px",
-                letterSpacing: "0.08em",
-                textTransform: "uppercase",
-                padding: "8px 22px",
-                borderRadius: "30px",
-                cursor: "pointer",
-                boxShadow: "0 4px 20px rgba(255, 85, 0, 0.45)",
-                transition: "all 0.2s",
-              }}
-              onMouseEnter={e => { e.currentTarget.style.transform = "scale(1.04)"; }}
-              onMouseLeave={e => { e.currentTarget.style.transform = "scale(1)"; }}
+              className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-red-600 to-emerald-600 hover:from-red-500 hover:to-emerald-500 text-white font-bold text-xs flex items-center gap-2 transition-all cursor-pointer shadow-lg shadow-red-600/20"
             >
               <span>Explore Products Now</span>
-              <ArrowRight size={14} />
+              <ArrowRight className="h-4 w-4" />
             </button>
           </div>
         </div>
@@ -635,4 +336,3 @@ export default function WhyDeepaCrackersModal({ onClose }) {
     </div>
   );
 }
-

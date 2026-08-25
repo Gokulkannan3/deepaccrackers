@@ -1,779 +1,615 @@
-import { useEffect, useRef, useState, useCallback } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 
 const rand = (a, b) => Math.random() * (b - a) + a;
 const randInt = (a, b) => Math.floor(rand(a, b));
 
-// Vibrant Festive Fireworks Palettes
-const FIREWORK_PALETTES = [
-  ["#ffd700", "#ff9100", "#ff3d00", "#ffffff"], // Royal Gold & Amber
-  ["#ff007f", "#ff4081", "#e040fb", "#ffffff"], // Vivid Magenta Pink
-  ["#00e5ff", "#00b0ff", "#76ff03", "#ffffff"], // Electric Cyan & Emerald
-  ["#ff9100", "#ffea00", "#ffffff", "#ff1744"], // Festive Sunburst
-  ["#b388ff", "#7c4dff", "#00e5ff", "#ffffff"], // Cosmic Violet
+// Strict Red, White, and Black Firework Palettes
+const BURST_PALETTES = [
+  ["#ff0033", "#ffffff", "#cc0022", "#ffffff", "#ff4466"],
+  ["#ffffff", "#ef4444", "#ffffff", "#990022", "#dc2626"],
+  ["#ff1744", "#ffffff", "#b71c1c", "#ffffff", "#ff5252"],
+  ["#ffffff", "#ffffff", "#ff0033", "#ffffff", "#cc0000"],
 ];
 
-function useSmoothFireworks(canvasRef) {
+// ── Multi-Point Sky Fireworks Engine ────────────────────────
+function useSkyFireworksEngine(canvasRef) {
   const animRef = useRef(null);
+  const particles = useRef([]);
   const rockets = useRef([]);
-  const sparks = useRef([]);
-  const fountains = useRef([]);
-  const stars = useRef([]);
   const frame = useRef(0);
   const W = useRef(0);
   const H = useRef(0);
-  const isMobile = useRef(false);
 
-  // Trigger aerial rocket burst (lightweight & mobile optimized)
-  const explodeRocket = useCallback((x, y, palette) => {
-    const pal = palette || FIREWORK_PALETTES[randInt(0, FIREWORK_PALETTES.length)];
-    const count = isMobile.current ? randInt(22, 34) : randInt(40, 60);
-    const burstSpeed = isMobile.current ? rand(3.0, 5.5) : rand(3.5, 6.5);
-
+  const burst = useCallback((x, y, palette, countOverride = null) => {
+    const pal = palette || BURST_PALETTES[randInt(0, BURST_PALETTES.length)];
+    const count = countOverride || randInt(110, 160);
     for (let i = 0; i < count; i++) {
-      const angle = rand(0, Math.PI * 2);
-      const speed = rand(0.6, burstSpeed);
-      sparks.current.push({
+      const angle = (i / count) * Math.PI * 2 + rand(-0.06, 0.06);
+      const speed = rand(3, 11);
+      particles.current.push({
         x,
         y,
         vx: Math.cos(angle) * speed,
         vy: Math.sin(angle) * speed,
         color: pal[randInt(0, pal.length)],
         alpha: 1,
-        size: rand(2.0, 3.4),
-        decay: rand(0.018, 0.032),
-        gravity: 0.05,
-        drag: 0.98,
-        twinkle: Math.random() > 0.4,
+        size: rand(2.0, 4.5),
+        decay: rand(0.013, 0.024),
+        gravity: rand(0.06, 0.12),
         tail: [],
+        twinkle: Math.random() > 0.45,
+        twinkleSpeed: rand(0.09, 0.22),
+        twinklePhase: rand(0, Math.PI * 2),
       });
     }
-  }, []);
-
-  // Launch a sky rocket from bottom
-  const launchRocket = useCallback((targetX, targetY) => {
-    const startX = targetX ? targetX + rand(-25, 25) : rand(W.current * 0.15, W.current * 0.85);
-    const startY = H.current + 10;
-    const destX = targetX || rand(W.current * 0.2, W.current * 0.8);
-    const destY = targetY || rand(H.current * 0.12, H.current * 0.4);
-
-    const dx = destX - startX;
-    const dy = destY - startY;
-    const dist = Math.sqrt(dx * dx + dy * dy);
-    const speed = rand(9, 13);
-    const duration = dist / speed;
-
-    rockets.current.push({
-      x: startX,
-      y: startY,
-      vx: dx / duration,
-      vy: dy / duration,
-      targetY: destY,
-      tail: [],
-      palette: FIREWORK_PALETTES[randInt(0, FIREWORK_PALETTES.length)],
-    });
-  }, []);
-
-  // Corner flower pot (anar) fountains
-  const emitFountain = useCallback((cx, cy, direction = 1) => {
-    const sparkCount = isMobile.current ? 1 : 2;
-    for (let i = 0; i < sparkCount; i++) {
-      const angle = -Math.PI / 2 + rand(-0.35, 0.35) * direction;
-      const speed = rand(3.5, 8);
-      fountains.current.push({
-        x: cx + rand(-5, 5),
-        y: cy,
-        vx: Math.cos(angle) * speed * 0.55,
-        vy: Math.sin(angle) * speed,
-        color: Math.random() > 0.3 ? "#ffd700" : (Math.random() > 0.5 ? "#ff9100" : "#ffffff"),
+    // Crisp white ring
+    for (let i = 0; i < 24; i++) {
+      const angle = (i / 24) * Math.PI * 2;
+      particles.current.push({
+        x,
+        y,
+        vx: Math.cos(angle) * rand(7, 12),
+        vy: Math.sin(angle) * rand(7, 12),
+        color: "#ffffff",
         alpha: 1,
-        size: rand(1.6, 2.8),
-        decay: rand(0.026, 0.045),
-        gravity: 0.14,
+        size: rand(1.4, 2.5),
+        decay: rand(0.025, 0.04),
+        gravity: 0.03,
         tail: [],
+        twinkle: false,
+        twinkleSpeed: 0,
+        twinklePhase: 0,
       });
     }
+  }, []);
+
+  const launchSkyBurst = useCallback((tx, ty, pal) => {
+    const sx = W.current * rand(0.2, 0.8);
+    const sy = H.current + 10;
+    const dur = rand(38, 55);
+    rockets.current.push({
+      x: sx,
+      y: sy,
+      vx: (tx - sx) / dur,
+      vy: (ty - sy) / dur,
+      trail: [],
+      life: dur,
+      palette: pal,
+    });
   }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext("2d", { alpha: false });
+    const ctx = canvas.getContext("2d");
 
     const resize = () => {
-      const width = window.innerWidth;
-      const height = window.innerHeight;
-      isMobile.current = width < 768;
-
-      canvas.width = width;
-      canvas.height = height;
-      W.current = width;
-      H.current = height;
-
-      // Twinkling background stars
-      stars.current = [];
-      const starCount = isMobile.current ? 20 : 35;
-      for (let i = 0; i < starCount; i++) {
-        stars.current.push({
-          x: rand(0, W.current),
-          y: rand(0, H.current * 0.7),
-          size: rand(0.8, 1.8),
-          alpha: rand(0.2, 0.8),
-          pulseSpeed: rand(0.02, 0.04),
-        });
-      }
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      W.current = canvas.width;
+      H.current = canvas.height;
     };
     resize();
-    window.addEventListener("resize", resize, { passive: true });
+    window.addEventListener("resize", resize);
 
-    let lastLaunch = 0;
-    const tailMax = isMobile.current ? 3 : 5;
+    const ids = [];
+
+    // Instant initial center welcoming bursts
+    ids.push(setTimeout(() => burst(W.current * 0.5, H.current * 0.22, BURST_PALETTES[0], 220), 150));
+    ids.push(setTimeout(() => burst(W.current * 0.28, H.current * 0.18, BURST_PALETTES[1], 180), 400));
+    ids.push(setTimeout(() => burst(W.current * 0.72, H.current * 0.18, BURST_PALETTES[2], 180), 650));
+
+    // Staggered sky rockets bursting across multiple positions
+    const skyPositions = [
+      [0.2, 0.26],
+      [0.8, 0.26],
+      [0.38, 0.14],
+      [0.62, 0.14],
+      [0.15, 0.18],
+      [0.85, 0.18],
+      [0.5, 0.12],
+    ];
+
+    skyPositions.forEach(([tx, ty], i) => {
+      ids.push(
+        setTimeout(() => {
+          launchSkyBurst(
+            W.current * tx,
+            H.current * ty,
+            BURST_PALETTES[i % BURST_PALETTES.length]
+          );
+        }, 800 + i * 280)
+      );
+    });
+
+    // Continuous celebration loops
+    ids.push(
+      setInterval(() => {
+        launchSkyBurst(
+          W.current * rand(0.12, 0.88),
+          H.current * rand(0.08, 0.35),
+          BURST_PALETTES[randInt(0, BURST_PALETTES.length)]
+        );
+      }, 380)
+    );
 
     const draw = () => {
       frame.current++;
-      const now = Date.now();
+      ctx.clearRect(0, 0, W.current, H.current);
 
-      // Clear with dark festive background
-      ctx.fillStyle = "rgba(7, 2, 1, 0.24)";
-      ctx.fillRect(0, 0, W.current, H.current);
-
-      // 1. Ambient Starlight Twinkles
-      stars.current.forEach((st) => {
-        st.alpha += Math.sin(frame.current * st.pulseSpeed) * 0.012;
-        ctx.beginPath();
-        ctx.arc(st.x, st.y, st.size, 0, Math.PI * 2);
-        ctx.fillStyle = "#ffd54f";
-        ctx.globalAlpha = Math.max(0.1, Math.min(st.alpha, 0.85));
-        ctx.fill();
-      });
-      ctx.globalAlpha = 1;
-
-      // 2. Corner Anar Fountains
-      if (frame.current % 2 === 0) {
-        emitFountain(W.current * 0.06, H.current - 8, 1);
-        emitFountain(W.current * 0.94, H.current - 8, -1);
-      }
-
-      // 3. Sky Rockets Launch
-      if (now - lastLaunch > rand(450, 750)) {
-        launchRocket();
-        lastLaunch = now;
-      }
-
-      // 4. Update & Draw Rockets
+      // 1. Draw Rising Rockets
       rockets.current = rockets.current.filter((r) => {
-        r.tail.push({ x: r.x, y: r.y });
-        if (r.tail.length > tailMax) r.tail.shift();
-
+        r.trail.push({ x: r.x, y: r.y });
+        if (r.trail.length > 12) r.trail.shift();
         r.x += r.vx;
         r.y += r.vy;
+        r.life--;
 
-        // Tail
-        r.tail.forEach((pt, i) => {
+        r.trail.forEach((pt, i) => {
+          const a = (i / r.trail.length) * 0.75;
           ctx.beginPath();
-          ctx.arc(pt.x, pt.y, (i / r.tail.length) * 2, 0, Math.PI * 2);
-          ctx.fillStyle = "#ffaa00";
-          ctx.globalAlpha = (i / r.tail.length) * 0.75;
+          ctx.arc(pt.x, pt.y, (i / r.trail.length) * 3.2, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(239, 68, 68, ${a})`;
           ctx.fill();
         });
-
-        // Head spark
         ctx.beginPath();
-        ctx.arc(r.x, r.y, 2.2, 0, Math.PI * 2);
+        ctx.arc(r.x, r.y, 3.5, 0, Math.PI * 2);
         ctx.fillStyle = "#ffffff";
-        ctx.globalAlpha = 1;
+        ctx.shadowColor = "#ff0033";
+        ctx.shadowBlur = 10;
         ctx.fill();
+        ctx.shadowBlur = 0;
 
-        if (r.y <= r.targetY || r.vy >= 0) {
-          explodeRocket(r.x, r.y, r.palette);
+        if (r.life <= 0) {
+          burst(r.x, r.y, r.palette);
           return false;
         }
         return true;
       });
 
-      // 5. Update & Draw Fountains
-      fountains.current = fountains.current.filter((p) => {
+      // 2. Draw Firework Particles
+      particles.current = particles.current.filter((p) => {
         p.tail.push({ x: p.x, y: p.y });
-        if (p.tail.length > 3) p.tail.shift();
-
+        if (p.tail.length > 5) p.tail.shift();
         p.x += p.vx;
         p.y += p.vy;
         p.vy += p.gravity;
+        p.vx *= 0.985;
         p.alpha -= p.decay;
-
-        if (p.alpha <= 0 || p.y > H.current + 10) return false;
-
-        p.tail.forEach((pt, i) => {
-          ctx.beginPath();
-          ctx.arc(pt.x, pt.y, p.size * 0.5, 0, Math.PI * 2);
-          ctx.fillStyle = p.color;
-          ctx.globalAlpha = (i / p.tail.length) * p.alpha * 0.45;
-          ctx.fill();
-        });
-
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fillStyle = p.color;
-        ctx.globalAlpha = p.alpha;
-        ctx.fill();
-
-        return true;
-      });
-
-      // 6. Update & Draw Sparks
-      sparks.current = sparks.current.filter((p) => {
-        p.tail.push({ x: p.x, y: p.y });
-        if (p.tail.length > tailMax) p.tail.shift();
-
-        p.x += p.vx;
-        p.y += p.vy;
-        p.vx *= p.drag;
-        p.vy = p.vy * p.drag + p.gravity;
-        p.alpha -= p.decay;
-
         if (p.alpha <= 0) return false;
 
+        const tm = p.twinkle
+          ? 0.5 + 0.5 * Math.sin(frame.current * p.twinkleSpeed + p.twinklePhase)
+          : 1;
+
         p.tail.forEach((pt, i) => {
           ctx.beginPath();
-          ctx.arc(pt.x, pt.y, p.size * 0.45, 0, Math.PI * 2);
+          ctx.arc(pt.x, pt.y, p.size * 0.35, 0, Math.PI * 2);
           ctx.fillStyle = p.color;
-          ctx.globalAlpha = (i / p.tail.length) * p.alpha * 0.35;
+          ctx.globalAlpha = (i / p.tail.length) * p.alpha * 0.35 * tm;
           ctx.fill();
         });
-
-        const tw = p.twinkle ? 0.7 + 0.3 * Math.sin(frame.current * 0.3) : 1;
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
         ctx.fillStyle = p.color;
-        ctx.globalAlpha = Math.max(0, p.alpha * tw);
+        ctx.globalAlpha = p.alpha * tm;
+        ctx.shadowColor = p.color;
+        ctx.shadowBlur = 8;
         ctx.fill();
-
+        ctx.shadowBlur = 0;
+        ctx.globalAlpha = 1;
         return true;
       });
 
       animRef.current = requestAnimationFrame(draw);
     };
-
     animRef.current = requestAnimationFrame(draw);
 
     return () => {
       cancelAnimationFrame(animRef.current);
+      ids.forEach((id) => {
+        clearTimeout(id);
+        clearInterval(id);
+      });
       window.removeEventListener("resize", resize);
-      sparks.current = [];
+      particles.current = [];
       rockets.current = [];
-      fountains.current = [];
     };
-  }, [launchRocket, explodeRocket, emitFountain]);
-
-  const triggerClickExplosion = useCallback((x, y) => {
-    explodeRocket(x, y);
-  }, [explodeRocket]);
-
-  return { triggerClickExplosion };
+  }, [burst, launchSkyBurst]);
 }
 
+// ── Stars ───────────────────────────────────────────────────
+function Stars() {
+  return (
+    <div style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none" }}>
+      {Array.from({ length: 70 }, (_, i) => (
+        <div
+          key={i}
+          style={{
+            position: "absolute",
+            left: `${(i * 137.5) % 100}%`,
+            top: `${(i * 79.3) % 100}%`,
+            width: i % 8 === 0 ? 2 : 1,
+            height: i % 8 === 0 ? 2 : 1,
+            borderRadius: "50%",
+            background: i % 4 === 0 ? "#ff4444" : "#ffffff",
+            opacity: 0.35,
+            animation: `twinkle ${2 + (i % 3) * 0.6}s ${(i * 0.08) % 3}s ease-in-out infinite`,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+// ── Skyline ─────────────────────────────────────────────────
+function Skyline() {
+  return (
+    <svg
+      viewBox="0 0 1440 320"
+      preserveAspectRatio="xMidYMax slice"
+      style={{
+        position: "absolute",
+        bottom: 0,
+        left: 0,
+        width: "100%",
+        height: "45%",
+        pointerEvents: "none",
+        zIndex: 1,
+      }}
+    >
+      <defs>
+        <linearGradient id="skyGlowRed" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#dc2626" stopOpacity="0.12" />
+          <stop offset="100%" stopColor="#000000" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <rect width="1440" height="320" fill="url(#skyGlowRed)" />
+
+      {/* Buildings */}
+      {[
+        [0, 210, 90, 110],
+        [100, 195, 65, 125],
+        [175, 185, 80, 135],
+        [265, 200, 60, 120],
+        [335, 178, 95, 142],
+        [440, 190, 70, 130],
+        [520, 172, 100, 148],
+        [630, 188, 65, 132],
+        [705, 175, 85, 145],
+        [800, 192, 70, 128],
+        [880, 180, 90, 140],
+        [980, 198, 60, 122],
+        [1050, 172, 80, 148],
+        [1140, 188, 70, 132],
+        [1220, 202, 85, 118],
+        [1315, 210, 90, 110],
+      ].map(([x, y, w, h], i) => (
+        <g key={`b${i}`}>
+          <rect x={x} y={y} width={w} height={h} fill="#0d0d0d" />
+          {Array.from({ length: Math.floor(h / 26) }, (_, r) =>
+            Array.from({ length: Math.floor(w / 20) }, (_, c) => (
+              <rect
+                key={`${r}${c}`}
+                x={x + 4 + c * 20}
+                y={y + 6 + r * 26}
+                width={7}
+                height={9}
+                fill={(r + c) % 3 === 0 ? "#ff3333" : "#ffffff"}
+                opacity={0.7}
+              />
+            ))
+          )}
+        </g>
+      ))}
+
+      <rect x="0" y="314" width="1440" height="6" fill="#141414" />
+      <line x1="0" y1="314" x2="1440" y2="314" stroke="#262626" strokeWidth="1" />
+    </svg>
+  );
+}
+
+// ── Reveal Text Word ────────────────────────────────────────
+function Word({ text, delay, gradient }) {
+  return (
+    <span style={{ display: "block" }}>
+      {text.split("").map((ch, i) => (
+        <span
+          key={i}
+          style={{
+            display: "inline-block",
+            opacity: 0,
+            fontSize: "clamp(34px,9vw,96px)",
+            fontWeight: 900,
+            fontFamily: "'Plus Jakarta Sans', sans-serif",
+            background: gradient,
+            backgroundSize: "200% auto",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            backgroundClip: "text",
+            letterSpacing: "0.04em",
+            animation: `drop .35s cubic-bezier(.23,1.5,.6,1) both`,
+            animationDelay: `${delay + i * 0.03}s`,
+            animationFillMode: "forwards",
+          }}
+        >
+          {ch === " " ? "\u00A0" : ch}
+        </span>
+      ))}
+    </span>
+  );
+}
+
+// ── Main Launch Screen Component ─────────────────────────────
 export default function Launch({ onComplete }) {
   const canvasRef = useRef(null);
-  const [progress, setProgress] = useState(0);
-  const [exiting, setExiting] = useState(false);
 
-  const { triggerClickExplosion } = useSmoothFireworks(canvasRef);
+  const [showContent, setShowContent] = useState(false);
+  const [exiting, setExiting] = useState(false);
+  const [progress, setProgress] = useState(0);
+
+  useSkyFireworksEngine(canvasRef);
 
   useEffect(() => {
-    const timers = [];
+    const ids = [];
     const t = (fn, ms) => {
       const id = setTimeout(fn, ms);
-      timers.push(id);
+      ids.push(id);
       return id;
     };
 
-    // Reduced Snappy Show Duration: 2.6s Total
-    const TOTAL_MS = 2600;
+    // Instant smooth content reveal on first firework
+    t(() => setShowContent(true), 250);
+
+    // Progress bar
+    const totalMs = 5000;
     const start = Date.now();
     const tick = setInterval(() => {
-      const pct = Math.min(((Date.now() - start) / TOTAL_MS) * 100, 100);
+      const pct = Math.min(((Date.now() - start) / totalMs) * 100, 100);
       setProgress(pct);
       if (pct >= 100) clearInterval(tick);
-    }, 20);
-    timers.push(tick);
+    }, 30);
+    ids.push(tick);
 
-    // Smooth exit starts at 2.25s
-    t(() => setExiting(true), 2250);
+    // Exit
+    t(() => setExiting(true), 4600);
+    t(() => onComplete && onComplete(), 5000);
 
-    // Complete callback at 2.6s
-    t(() => onComplete && onComplete(), 2600);
-
-    return () => timers.forEach((id) => {
+    return () => ids.forEach((id) => {
       clearTimeout(id);
       clearInterval(id);
     });
   }, [onComplete]);
 
-  const handleSkip = (e) => {
-    e.stopPropagation();
+  const handleSkip = () => {
     setExiting(true);
-    setTimeout(() => onComplete && onComplete(), 200);
-  };
-
-  const handleUserInteract = (e) => {
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-    if (clientX && clientY) triggerClickExplosion(clientX, clientY);
+    setTimeout(() => onComplete && onComplete(), 150);
   };
 
   return (
     <div
-      onClick={handleUserInteract}
-      onTouchStart={handleUserInteract}
       style={{
         position: "fixed",
         inset: 0,
         zIndex: 99999,
-        background: "radial-gradient(ellipse at 50% 48%, #1f0701 0%, #0b0301 55%, #020100 100%)",
+        background: "#000000",
         overflow: "hidden",
-        transform: exiting ? "scale(1.03) translateY(-14px)" : "scale(1) translateY(0)",
-        opacity: exiting ? 0 : 1,
-        transition: "transform 0.38s cubic-bezier(0.65, 0, 0.35, 1), opacity 0.38s cubic-bezier(0.65, 0, 0.35, 1)",
-        cursor: "crosshair",
-        userSelect: "none",
-        touchAction: "manipulation",
-        WebkitTapHighlightColor: "transparent",
-        willChange: "transform, opacity",
+        transform: exiting ? "translateY(-100%)" : "translateY(0)",
+        transition: "transform 0.4s cubic-bezier(0.76,0,0.24,1)",
       }}
     >
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@800;900&family=Outfit:wght@600;800;900&display=swap');
-
-        @keyframes smoothFlame {
-          0%, 100% {
-            transform: scale(1) rotate(-1deg);
-            filter: drop-shadow(0 0 10px #ff8800) drop-shadow(0 0 20px #ffcc00);
-          }
-          33% {
-            transform: scale(1.04, 1.1) rotate(1.2deg) translateY(-2px);
-            filter: drop-shadow(0 0 16px #ff6600) drop-shadow(0 0 30px #ffee33);
-          }
-          66% {
-            transform: scale(0.97, 1.03) rotate(-1.2deg);
-            filter: drop-shadow(0 0 12px #ff7700) drop-shadow(0 0 24px #ffaa00);
-          }
-        }
-
-        @keyframes sparkPulse {
-          0%, 100% { transform: scale(1); opacity: 0.8; }
-          50% { transform: scale(1.15); opacity: 1; }
-        }
-
-        @keyframes festiveTitleGlow {
-          0%, 100% {
-            filter: drop-shadow(0 0 12px rgba(255, 215, 0, 0.55)) drop-shadow(0 0 25px rgba(255, 100, 0, 0.35));
-          }
-          50% {
-            filter: drop-shadow(0 0 20px rgba(255, 235, 100, 0.8)) drop-shadow(0 0 40px rgba(255, 70, 0, 0.6));
-          }
-        }
-
-        @keyframes rocketBob {
-          0%, 100% { transform: translateY(0) rotate(45deg); }
-          50% { transform: translateY(-3px) rotate(48deg); }
-        }
-
-        @keyframes smoothFadeIn {
-          0% {
-            opacity: 0;
-            transform: translateY(12px) scale(0.98);
-          }
-          100% {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-          }
-        }
+        @keyframes twinkle { 0%,100%{opacity:.2} 50%{opacity:.85} }
+        @keyframes drop    { 0%{opacity:0; transform:translateY(-20px)} 100%{opacity:1; transform:translateY(0)} }
+        @keyframes fadeUp  { 0%{opacity:0; transform:translateY(10px)} 100%{opacity:1; transform:translateY(0)} }
       `}</style>
 
-      {/* Silky Smooth Fireworks Canvas */}
+      {/* Stars */}
+      <Stars />
+
+      {/* Skyline */}
+      <Skyline />
+
+      {/* 60fps Canvas for Multi-Point Sky Fireworks */}
       <canvas
         ref={canvasRef}
-        style={{
-          position: "absolute",
-          inset: 0,
-          zIndex: 2,
-          pointerEvents: "none",
-        }}
+        style={{ position: "absolute", inset: 0, zIndex: 3, pointerEvents: "none" }}
       />
 
-      {/* Top Header Bar with Skip Button */}
+      {/* Content reveal */}
+      {showContent && (
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            zIndex: 9,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "0 20px",
+            textAlign: "center",
+            pointerEvents: "none",
+          }}
+        >
+          <p
+            style={{
+              fontFamily: "'Plus Jakarta Sans', sans-serif",
+              fontWeight: 700,
+              fontSize: "clamp(11px,1.8vw,14px)",
+              color: "#ef4444",
+              letterSpacing: "0.25em",
+              textTransform: "uppercase",
+              margin: "0 0 8px",
+              animation: "fadeUp .35s .02s ease both",
+              opacity: 0,
+              animationFillMode: "forwards",
+            }}
+          >
+            Thiruthuraipoondi &nbsp;·&nbsp; Direct Sivakasi Sourcing
+          </p>
+
+          <h1 style={{ margin: "0 0 4px", lineHeight: 1.0 }}>
+            <Word
+              text="DEEPA"
+              delay={0.05}
+              gradient="linear-gradient(135deg, #ffffff 0%, #ef4444 60%, #ffffff 100%)"
+            />
+            <Word
+              text="CRACKERS"
+              delay={0.2}
+              gradient="linear-gradient(135deg, #ffffff 0%, #dc2626 60%, #ffffff 100%)"
+            />
+          </h1>
+
+          <p
+            style={{
+              fontFamily: "'Plus Jakarta Sans', sans-serif",
+              fontSize: "clamp(12px,2vw,15px)",
+              color: "#a3a3a3",
+              letterSpacing: "0.02em",
+              maxWidth: 420,
+              lineHeight: 1.5,
+              margin: "10px 0 18px",
+              animation: "fadeUp .4s .35s ease both",
+              opacity: 0,
+              animationFillMode: "forwards",
+            }}
+          >
+            Illuminating celebrations with supreme quality fireworks direct from Sivakasi.
+          </p>
+
+          <div
+            style={{
+              animation: "fadeUp .4s .5s ease both",
+              opacity: 0,
+              animationFillMode: "forwards",
+            }}
+          >
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 8,
+                padding: "8px 20px",
+                borderRadius: "8px",
+                border: "1px solid #dc2626",
+                background: "#7f1d1d33",
+                color: "#ffffff",
+                fontSize: "11px",
+                fontWeight: 800,
+                letterSpacing: "0.15em",
+                textTransform: "uppercase",
+              }}
+            >
+              Entering Store
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Top Bar with Skip button */}
       <div
         style={{
           position: "absolute",
           top: 0,
           left: 0,
           right: 0,
-          zIndex: 20,
+          zIndex: 10,
           display: "flex",
-          alignItems: "center",
           justifyContent: "space-between",
-          padding: "12px 18px",
-          background: "linear-gradient(180deg, rgba(8, 3, 2, 0.85), transparent)",
+          alignItems: "center",
+          padding: "12px 20px",
+          borderBottom: "1px solid #1f1f1f",
+          background: "rgba(0,0,0,0.85)",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <div
             style={{
-              width: "8px",
-              height: "8px",
+              width: 6,
+              height: 6,
               borderRadius: "50%",
-              background: "#ff9900",
-              boxShadow: "0 0 10px #ff9900",
-              animation: "sparkPulse 1.6s ease-in-out infinite",
+              background: "#ef4444",
+              boxShadow: "0 0 8px #ef4444",
             }}
           />
           <span
             style={{
-              fontFamily: "'Cinzel', serif",
-              fontSize: "clamp(9px, 2.4vw, 11px)",
-              fontWeight: 800,
-              color: "#ffd700",
-              letterSpacing: "0.18em",
+              fontFamily: "'Plus Jakarta Sans', sans-serif",
+              fontSize: "11px",
+              letterSpacing: "0.15em",
+              color: "#ffffff",
               textTransform: "uppercase",
-              textShadow: "0 0 8px rgba(255, 215, 0, 0.5)",
+              fontWeight: 900,
             }}
           >
-            DEEPA CRACKERS
+            Deepa Crackers
           </span>
         </div>
 
         <button
           onClick={handleSkip}
-          onTouchStart={handleSkip}
           style={{
-            background: "linear-gradient(135deg, rgba(255, 140, 0, 0.3), rgba(255, 40, 0, 0.4))",
-            border: "1.2px solid rgba(255, 200, 50, 0.65)",
-            color: "#ffffff",
-            padding: "5px 14px",
-            borderRadius: "24px",
-            fontFamily: "'Outfit', sans-serif",
-            fontWeight: 800,
-            fontSize: "10px",
-            letterSpacing: "0.1em",
             cursor: "pointer",
-            backdropFilter: "blur(6px)",
-            boxShadow: "0 0 14px rgba(255, 120, 0, 0.25)",
-            transition: "transform 0.15s",
+            background: "#dc2626",
+            border: "1px solid #ef4444",
+            color: "#ffffff",
+            fontSize: "10px",
+            fontWeight: 800,
+            padding: "4px 12px",
+            borderRadius: "6px",
+            letterSpacing: "0.06em",
+            textTransform: "uppercase",
           }}
         >
-          SKIP ➔
+          Skip ➔
         </button>
       </div>
 
-      {/* CENTER CONTENT: Golden Diya Lamp + Company Name */}
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          zIndex: 10,
-          padding: "16px",
-          textAlign: "center",
-          pointerEvents: "none",
-          animation: "smoothFadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards",
-        }}
-      >
-        {/* Clean Golden Diya Lamp */}
-        <div
-          style={{
-            position: "relative",
-            width: "100px",
-            height: "80px",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            marginBottom: "8px",
-          }}
-        >
-          {/* Living Flame */}
-          <div
-            style={{
-              position: "absolute",
-              top: "-14px",
-              width: "30px",
-              height: "46px",
-              borderRadius: "50% 50% 35% 35% / 60% 60% 40% 40%",
-              background: "radial-gradient(ellipse at 50% 65%, #ffffff 0%, #fff176 30%, #ff9100 65%, #d50000 95%)",
-              animation: "smoothFlame 1.8s ease-in-out infinite",
-              transformOrigin: "bottom center",
-              willChange: "transform, filter",
-              zIndex: 3,
-            }}
-          >
-            {/* White-Hot Flame Core */}
-            <div
-              style={{
-                position: "absolute",
-                bottom: "4px",
-                left: "50%",
-                transform: "translateX(-50%)",
-                width: "11px",
-                height: "17px",
-                borderRadius: "50%",
-                background: "#ffffff",
-                boxShadow: "0 0 8px #ffffff, 0 0 14px #ffee55",
-              }}
-            />
-          </div>
-
-          {/* Diya Brass Vessel */}
-          <svg
-            width="100"
-            height="55"
-            viewBox="0 0 120 70"
-            fill="none"
-            style={{
-              marginTop: "18px",
-              filter: "drop-shadow(0 4px 10px rgba(255, 100, 0, 0.4))",
-              zIndex: 2,
-            }}
-          >
-            <defs>
-              <linearGradient id="diyaGoldMobile" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#fff275" />
-                <stop offset="25%" stopColor="#ffd700" />
-                <stop offset="60%" stopColor="#e65100" />
-                <stop offset="100%" stopColor="#7f0000" />
-              </linearGradient>
-              <linearGradient id="rimGoldMobile" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#ffd700" />
-                <stop offset="50%" stopColor="#ffffff" />
-                <stop offset="100%" stopColor="#ff9100" />
-              </linearGradient>
-            </defs>
-
-            <path
-              d="M10 24 C18 54, 102 54, 110 24 C100 40, 20 40, 10 24 Z"
-              fill="url(#diyaGoldMobile)"
-              stroke="#ffd700"
-              strokeWidth="1.5"
-            />
-            <ellipse
-              cx="60"
-              cy="24"
-              rx="50"
-              ry="12"
-              fill="#5d1000"
-              stroke="url(#rimGoldMobile)"
-              strokeWidth="2"
-            />
-            <ellipse
-              cx="60"
-              cy="25"
-              rx="40"
-              ry="8"
-              fill="radial-gradient(circle, #ffea00 0%, #b71c1c 80%)"
-            />
-            <path
-              d="M44 48 L76 48 L82 56 L38 56 Z"
-              fill="url(#diyaGoldMobile)"
-              stroke="#ffb300"
-              strokeWidth="1"
-            />
-          </svg>
-        </div>
-
-        {/* Heritage Trust Badge */}
-        <div
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "6px",
-            padding: "4px 14px",
-            borderRadius: "20px",
-            background: "rgba(255, 140, 0, 0.2)",
-            border: "1px solid rgba(255, 215, 0, 0.55)",
-            marginBottom: "6px",
-          }}
-        >
-          <span style={{ fontSize: "12px" }}>🪔</span>
-          <span
-            style={{
-              fontFamily: "'Outfit', sans-serif",
-              fontWeight: 800,
-              fontSize: "clamp(9px, 2.2vw, 11px)",
-              color: "#ffd700",
-              letterSpacing: "0.18em",
-              textTransform: "uppercase",
-            }}
-          >
-            SINCE 1985 · 40 YEARS OF JOY
-          </span>
-        </div>
-
-        {/* Grand Company Name */}
-        <h1
-          style={{
-            margin: "0 0 4px",
-            fontFamily: "'Cinzel', serif",
-            fontWeight: 900,
-            fontSize: "clamp(28px, 7vw, 56px)",
-            lineHeight: 1,
-            letterSpacing: "0.04em",
-            background: "linear-gradient(135deg, #ffffff 0%, #ffea79 25%, #ff9100 65%, #ffd700 100%)",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-            animation: "festiveTitleGlow 2.5s ease-in-out infinite",
-          }}
-        >
-          DEEPA CRACKERS
-        </h1>
-
-        {/* Tamil Subtitle */}
-        <div
-          style={{
-            fontFamily: "'Outfit', sans-serif",
-            fontWeight: 800,
-            fontSize: "clamp(12px, 2.6vw, 16px)",
-            color: "rgba(255, 235, 205, 0.92)",
-            letterSpacing: "0.1em",
-            marginBottom: "10px",
-            textShadow: "0 0 10px rgba(255, 120, 0, 0.5)",
-          }}
-        >
-          தீபா பட்டாசு · திருத்துறைப்பூண்டி & சிவகாசி
-        </div>
-
-        {/* Badges */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "6px",
-            flexWrap: "wrap",
-            maxWidth: "520px",
-          }}
-        >
-          <span
-            style={{
-              background: "rgba(16, 185, 129, 0.2)",
-              border: "1px solid rgba(52, 211, 153, 0.6)",
-              color: "#6ee7b7",
-              padding: "3px 10px",
-              borderRadius: "6px",
-              fontFamily: "'Outfit', sans-serif",
-              fontWeight: 800,
-              fontSize: "9px",
-              letterSpacing: "0.04em",
-            }}
-          >
-            ✓ Sivakasi Factory Direct
-          </span>
-          <span
-            style={{
-              background: "rgba(245, 158, 11, 0.2)",
-              border: "1px solid rgba(251, 191, 36, 0.6)",
-              color: "#fef3c7",
-              padding: "3px 10px",
-              borderRadius: "6px",
-              fontFamily: "'Outfit', sans-serif",
-              fontWeight: 800,
-              fontSize: "9px",
-              letterSpacing: "0.04em",
-            }}
-          >
-            ✓ 0% Middlemen Cut
-          </span>
-          <span
-            style={{
-              background: "rgba(14, 165, 233, 0.2)",
-              border: "1px solid rgba(56, 189, 248, 0.6)",
-              color: "#e0f2fe",
-              padding: "3px 10px",
-              borderRadius: "6px",
-              fontFamily: "'Outfit', sans-serif",
-              fontWeight: 800,
-              fontSize: "9px",
-              letterSpacing: "0.04em",
-            }}
-          >
-            ✓ Wholesale Price
-          </span>
-        </div>
-      </div>
-
-      {/* Bottom Progress Bar with Rocket Indicator */}
+      {/* Progress Bar */}
       <div
         style={{
           position: "absolute",
           bottom: 0,
           left: 0,
           right: 0,
-          zIndex: 20,
-          background: "linear-gradient(0deg, rgba(8, 3, 2, 0.95), transparent)",
-          padding: "10px 18px 14px",
+          zIndex: 10,
+          background: "rgba(0,0,0,0.9)",
         }}
       >
         <div
           style={{
             display: "flex",
             justifyContent: "space-between",
-            fontSize: "10px",
-            color: "rgba(255, 200, 140, 0.9)",
-            fontFamily: "'Outfit', sans-serif",
-            fontWeight: 800,
-            letterSpacing: "0.12em",
+            padding: "6px 20px 4px",
+            fontSize: 9,
+            color: "#737373",
+            fontFamily: "monospace",
+            letterSpacing: "0.08em",
             textTransform: "uppercase",
-            marginBottom: "6px",
           }}
         >
-          <span style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-            <span>🚀</span>
-            <span>Launching Celebration...</span>
-          </span>
-          <span style={{ color: "#ffd700", fontWeight: 900 }}>{Math.round(progress)}%</span>
+          <span>Igniting Celebrations</span>
+          <span>{Math.round(progress)}%</span>
         </div>
-
-        {/* Progress Track */}
         <div
           style={{
+            height: 2,
+            background: "#171717",
             position: "relative",
-            height: "4px",
-            background: "rgba(255, 255, 255, 0.12)",
-            borderRadius: "4px",
-            overflow: "visible",
+            overflow: "hidden",
           }}
         >
           <div
             style={{
               height: "100%",
               width: `${progress}%`,
-              background: "linear-gradient(90deg, #ff1744, #ff9100, #ffd600, #00e676)",
-              borderRadius: "4px",
-              transition: "width 0.02s linear",
-              boxShadow: "0 0 10px #ff9100",
+              background: "linear-gradient(90deg, #991b1b, #ef4444, #ffffff)",
+              transition: "width .05s linear",
+              boxShadow: "0 0 10px #ef4444",
             }}
           />
-
-          {/* Travelling Rocket / Spark Head */}
-          <div
-            style={{
-              position: "absolute",
-              left: `calc(${progress}% - 7px)`,
-              top: "-6px",
-              width: "14px",
-              height: "14px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: "11px",
-              pointerEvents: "none",
-              filter: "drop-shadow(0 0 5px #ffea00)",
-              animation: "rocketBob 0.8s ease-in-out infinite",
-              transition: "left 0.02s linear",
-            }}
-          >
-            ✨
-          </div>
         </div>
       </div>
     </div>

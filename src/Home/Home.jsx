@@ -6,6 +6,9 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import Navbar from '../Component/Navbar';
 import Launch from '../Component/Launch';
+import BackgroundFireworks from '../Component/BackgroundFireworks';
+import PromoBurst from '../Component/PromoBurst';
+import Card3D from '../Component/Card3D';
 import WhyDeepaCrackersModal from '../Component/WhyDeepaCrackersModal';
 import WhatsAppButton from '../Component/WhatsAppButton';
 import { API_BASE_URL } from '../../Config';
@@ -127,11 +130,11 @@ const ProductCarousel = ({ media, onImageClick }) => {
 
   if (mediaItems.length === 0) {
     return (
-      <div className="relative w-full h-32 sm:h-44 rounded-xl border-2 border-slate-900 overflow-hidden bg-white shadow-[2px_2px_0px_0px_#0f172a] select-none flex items-center justify-center">
+      <div className="relative w-full h-36 sm:h-48 rounded-2xl bg-white border border-white/20 overflow-hidden select-none flex items-center justify-center p-2 shadow-sm">
         <img
           src={defaultImage}
           alt="Default Crackers"
-          className="w-full h-full object-contain p-1"
+          className="w-full h-full object-contain"
         />
       </div>
     );
@@ -141,7 +144,7 @@ const ProductCarousel = ({ media, onImageClick }) => {
   const isVideo = typeof currentItem === 'string' && (currentItem.includes('/video/') || currentItem.endsWith('.mp4') || currentItem.endsWith('.webm'));
 
   return (
-    <div className="relative w-full h-32 sm:h-44 rounded-xl border-2 border-slate-900 overflow-hidden bg-white shadow-[2px_2px_0px_0px_#0f172a] group select-none flex items-center justify-center">
+    <div className="relative w-full h-36 sm:h-48 rounded-2xl bg-white border border-white/20 overflow-hidden group select-none flex items-center justify-center p-2 shadow-sm">
       {isVideo ? (
         <video
           src={currentItem}
@@ -150,14 +153,14 @@ const ProductCarousel = ({ media, onImageClick }) => {
           muted
           loop
           playsInline
-          className="w-full h-full object-contain p-1"
+          className="w-full h-full object-contain"
         />
       ) : (
         <img
           src={currentItem}
           alt="Product media"
           onClick={() => onImageClick && onImageClick(mediaItems)}
-          className="w-full h-full object-contain p-1 cursor-pointer hover:scale-105 transition-transform duration-300"
+          className="w-full h-full object-contain cursor-pointer hover:scale-105 transition-transform duration-300"
           onError={(e) => {
             e.target.onerror = null;
             e.target.src = defaultImage;
@@ -362,8 +365,39 @@ export default function Home() {
     return ["All", ...sorted];
   }, [products, categoryOrder]);
 
-  // Cart operations using Unique Key
-  const updateQuantity = (productOrKey, delta) => {
+  // Micro Popper Sparkle Effect on Plus Button
+  const [popperSparks, setPopperSparks] = useState([]);
+
+  const triggerPopperSparkle = (e) => {
+    if (!e) return;
+    const rect = e.currentTarget?.getBoundingClientRect();
+    const x = rect ? rect.left + rect.width / 2 : e.clientX || window.innerWidth / 2;
+    const y = rect ? rect.top + rect.height / 2 : e.clientY || window.innerHeight / 2;
+    const id = Date.now() + Math.random();
+
+    const particles = Array.from({ length: 14 }).map((_, i) => {
+      const angle = (i * (360 / 14) + Math.random() * 20) * (Math.PI / 180);
+      const velocity = 35 + Math.random() * 45;
+      return {
+        id: `${id}-${i}`,
+        dx: Math.cos(angle) * velocity,
+        dy: Math.sin(angle) * velocity,
+        color: ['#ef4444', '#f59e0b', '#10b981', '#06b6d4', '#ec4899', '#ffd700', '#ffffff'][i % 7],
+        size: 3 + Math.random() * 3,
+      };
+    });
+
+    setPopperSparks((prev) => [...prev, { id, x, y, particles }]);
+    setTimeout(() => {
+      setPopperSparks((prev) => prev.filter((p) => p.id !== id));
+    }, 700);
+  };
+
+  // Cart operations using Unique Key with Sparkle on Plus
+  const updateQuantity = (productOrKey, delta, e = null) => {
+    if (delta > 0 && e) {
+      triggerPopperSparkle(e);
+    }
     const key = typeof productOrKey === 'object' ? getProductUniqueKey(productOrKey) : String(productOrKey);
     setCart((prev) => {
       const current = prev[key] || 0;
@@ -793,907 +827,938 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF6EE] text-slate-900 flex flex-col font-mono selection:bg-amber-300">
-      <Navbar />
+    <div className="min-h-screen bg-[#050505] text-white flex flex-col relative selection:bg-red-600 selection:text-white overflow-x-hidden">
+      {/* Continuous Background & Foreground Fireworks (paused during checkout address filling) */}
+      <BackgroundFireworks isPaused={showCheckoutModal} />
 
+      <div className="relative z-10 flex flex-col min-h-screen">
+        <Navbar />
 
-      <main className="flex-grow pt-24 pb-20 px-3 md:px-8 max-w-7xl mx-auto w-full space-y-10">
+        <main className="flex-grow pt-24 pb-20 px-3 md:px-8 max-w-7xl mx-auto w-full space-y-10">
 
-        {/* Dynamic Interactive Banner Slider Section */}
-        <section className="relative mt-15 w-full rounded-3xl border-2 border-slate-900 shadow-[6px_6px_0px_0px_rgba(30,41,59,0.9)] overflow-hidden bg-white">
-          {banners.length > 0 ? (
-            <div className="relative w-full hundred:h-96 mobile:h-44">
-              <AnimatePresence mode="wait">
-                <motion.img
-                  key={banners[currentBannerIdx]?.id || currentBannerIdx}
-                  src={banners[currentBannerIdx]?.image_url}
-                  alt={`Banner ${currentBannerIdx + 1}`}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.5 }}
-                  className="w-full h-full object-cover"
-                />
-              </AnimatePresence>
+          {/* Dynamic Interactive Banner Slider Section */}
+          <section className="relative hundred:mt-5 mobile:mt-5 w-full rounded-3xl border border-white/15 shadow-2xl overflow-hidden bg-neutral-900/90">
+            {banners.length > 0 ? (
+              <div className="relative w-full hundred:h-96 mobile:h-44">
+                <AnimatePresence mode="wait">
+                  <motion.img
+                    key={banners[currentBannerIdx]?.id || currentBannerIdx}
+                    src={banners[currentBannerIdx]?.image_url}
+                    alt={`Banner ${currentBannerIdx + 1}`}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.5 }}
+                    className="w-full h-full object-cover"
+                  />
+                </AnimatePresence>
 
-              {/* Slider Controls */}
-              {banners.length > 1 && (
-                <>
-                  <button
-                    onClick={() => setCurrentBannerIdx((prev) => (prev === 0 ? banners.length - 1 : prev - 1))}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-xl bg-amber-300 border-2 border-slate-900 text-slate-900 flex items-center justify-center font-bold shadow-[2px_2px_0px_0px_#0f172a] hover:bg-amber-400"
-                  >
-                    <ChevronLeft className="h-5 w-5" />
-                  </button>
-                  <button
-                    onClick={() => setCurrentBannerIdx((prev) => (prev + 1) % banners.length)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-xl bg-amber-300 border-2 border-slate-900 text-slate-900 flex items-center justify-center font-bold shadow-[2px_2px_0px_0px_#0f172a] hover:bg-amber-400"
-                  >
-                    <ChevronRight className="h-5 w-5" />
-                  </button>
+                {/* Slider Controls */}
+                {banners.length > 1 && (
+                  <>
+                    <button
+                      onClick={() => setCurrentBannerIdx((prev) => (prev === 0 ? banners.length - 1 : prev - 1))}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-xl bg-black/90 border border-white/20 text-white flex items-center justify-center font-bold shadow-lg hover:bg-neutral-800 hover:border-red-500 hover:text-red-500 transition-all"
+                    >
+                      <ChevronLeft className="h-5 w-5" />
+                    </button>
+                    <button
+                      onClick={() => setCurrentBannerIdx((prev) => (prev + 1) % banners.length)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-xl bg-black/90 border border-white/20 text-white flex items-center justify-center font-bold shadow-lg hover:bg-neutral-800 hover:border-red-500 hover:text-red-500 transition-all"
+                    >
+                      <ChevronRight className="h-5 w-5" />
+                    </button>
 
-                  <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
-                    {banners.map((_, idx) => (
-                      <button
-                        key={idx}
-                        onClick={() => setCurrentBannerIdx(idx)}
-                        className={`w-3 h-3 rounded-full border border-slate-900 transition-all ${idx === currentBannerIdx ? "bg-amber-400 scale-110" : "bg-white"
-                          }`}
-                      />
-                    ))}
-                  </div>
-                </>
-              )}
-            </div>
-          ) : (
-            <div className="p-8 md:p-12 text-center space-y-4">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-100 border-2 border-slate-900 text-slate-900 text-xs font-black uppercase shadow-[2px_2px_0px_0px_#0f172a]">
-                <Sparkles className="h-4 w-4" /> ✏️ Deepa Crackers • THIRUTHURAIPOONDI
+                    <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
+                      {banners.map((_, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => setCurrentBannerIdx(idx)}
+                          className={`w-3 h-3 rounded-full border transition-all ${idx === currentBannerIdx ? "bg-red-600 scale-125 border-red-500 shadow-sm shadow-red-600" : "bg-neutral-700 border-neutral-600"
+                            }`}
+                        />
+                      ))}
+                    </div>
+                  </>
+                )}
               </div>
-              <h1 className="text-3xl md:text-5xl font-black text-slate-900">
-                Illuminating Celebrations with Supreme Quality Fireworks
-              </h1>
-              <p className="text-slate-700 text-xs md:text-sm font-serif max-w-2xl mx-auto">
-                Discover supreme quality crackers, ground chakkars, sparklers, and multi-color sky shots. Directly dispatched to Thiruthuraipoondi & across Tamil Nadu with 100% legal compliance.
-              </p>
-            </div>
-          )}
-        </section>
+            ) : (
+              <div className="p-8 md:p-12 text-center space-y-4">
+                <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-red-600/20 border border-red-500/40 text-red-400 text-xs font-bold uppercase tracking-wider">
+                  <Sparkles className="h-4 w-4 text-red-500" /> ✏️ Deepa Crackers • THIRUTHURAIPOONDI
+                </div>
+                <h1 className="text-3xl md:text-5xl font-black text-white">
+                  Illuminating Celebrations with Supreme Quality Fireworks
+                </h1>
+                <p className="text-neutral-300 text-xs md:text-sm max-w-2xl mx-auto leading-relaxed">
+                  Discover supreme quality crackers, ground chakkars, sparklers, and multi-color sky shots. Directly dispatched to Thiruthuraipoondi & across Tamil Nadu with 100% legal compliance.
+                </p>
+              </div>
+            )}
+          </section>
 
-        {/* Hero Action Bar */}
-        <div className="flex flex-wrap items-center justify-center gap-4">
-          <button
-            onClick={() => setShowAiModal(true)}
-            className="px-6 py-3 rounded-xl bg-amber-300 hover:bg-amber-400 text-slate-900 border-2 border-slate-900 font-black text-xs md:text-sm shadow-[3px_3px_0px_0px_#0f172a] transition-all flex items-center gap-2"
-          >
-            <Bot className="h-4 w-4 text-slate-900" />
-            <span>AI Smart Fireworks Assistant</span>
-          </button>
-          <button
-            onClick={downloadPDFPricelist}
-            disabled={downloadingPDF}
-            className="px-6 py-3 rounded-xl bg-amber-100 hover:bg-amber-200 text-slate-900 border-2 border-slate-900 font-black text-xs md:text-sm shadow-[3px_3px_0px_0px_#0f172a] transition-all flex items-center gap-2 disabled:opacity-50"
-          >
-            <FileText className="h-4 w-4" />
-            <span>{downloadingPDF ? "Generating PDF..." : "Download PDF Pricelist"}</span>
-          </button>
-          <button
-            onClick={() => navigate("/status")}
-            className="px-6 py-3 rounded-xl bg-white hover:bg-amber-50 text-slate-900 border-2 border-slate-900 font-black text-xs md:text-sm shadow-[3px_3px_0px_0px_#0f172a] transition-all"
-          >
-            Track Order Status
-          </button>
-        </div>
-
-        {/* Product Catalog Showcase with Admin Dynamic Ordering */}
-        <section className="space-y-6">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-5 rounded-2xl border-2 border-slate-900 shadow-[4px_4px_0px_0px_rgba(30,41,59,0.9)]">
-            <div>
-              <h2 className="text-xl md:text-2xl font-black text-slate-900">Product Categories & Pricelist</h2>
-              <p className="text-slate-600 text-xs mt-0.5 font-serif">⚡ Display sequence dynamically arranged by Admin Drag & Drop</p>
-            </div>
-
-            {/* View Mode Controls */}
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setViewMode("grid")}
-                className={`px-3 py-1.5 rounded-xl border-2 border-slate-900 text-xs font-bold flex items-center gap-1.5 transition-all ${viewMode === "grid" ? "bg-amber-300 shadow-[2px_2px_0px_0px_#0f172a]" : "bg-white hover:bg-amber-50"
-                  }`}
-              >
-                <LayoutGrid className="h-4 w-4" /> Grid
-              </button>
-              <button
-                onClick={() => setViewMode("table")}
-                className={`px-3 py-1.5 rounded-xl border-2 border-slate-900 text-xs font-bold flex items-center gap-1.5 transition-all ${viewMode === "table" ? "bg-amber-300 shadow-[2px_2px_0px_0px_#0f172a]" : "bg-white hover:bg-amber-50"
-                  }`}
-              >
-                <ListIcon className="h-4 w-4" /> Table
-              </button>
-              <button
-                onClick={downloadPDFPricelist}
-                className="px-3 py-1.5 rounded-xl bg-amber-100 hover:bg-amber-200 border-2 border-slate-900 text-xs font-bold flex items-center gap-1.5 shadow-[2px_2px_0px_0px_#0f172a]"
-              >
-                <FileText className="h-4 w-4" /> PDF
-              </button>
-            </div>
+          {/* Hero Action Bar */}
+          <div className="flex flex-wrap items-center justify-center gap-4">
+            <button
+              onClick={() => setShowAiModal(true)}
+              className="px-6 py-3 rounded-xl bg-gradient-to-r from-red-600 to-red-700 text-white font-bold text-xs md:text-sm shadow-lg shadow-red-600/30 hover:from-red-500 hover:to-red-600 transition-all flex items-center gap-2 border border-red-500"
+            >
+              <Bot className="h-4 w-4 text-white" />
+              <span>AI Smart Fireworks Assistant</span>
+            </button>
+            <button
+              onClick={downloadPDFPricelist}
+              disabled={downloadingPDF}
+              className="px-6 py-3 rounded-xl bg-white hover:bg-neutral-200 text-black border border-white font-bold text-xs md:text-sm shadow-md transition-all flex items-center gap-2 disabled:opacity-50"
+            >
+              <FileText className="h-4 w-4 text-red-600" />
+              <span>{downloadingPDF ? "Generating PDF..." : "Download PDF Pricelist"}</span>
+            </button>
+            <button
+              onClick={() => navigate("/status")}
+              className="px-6 py-3 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white border border-neutral-700 font-bold text-xs md:text-sm shadow-md transition-all"
+            >
+              Track Order Status
+            </button>
           </div>
 
-          {/* Category Chips & Search Bar */}
-          <div data-tour="category-filter" className="space-y-4 p-3 bg-amber-100/40 rounded-2xl border-2 border-slate-900 shadow-[3px_3px_0px_0px_#0f172a]">
-            <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-thin">
-              {categories.map((cat) => (
+          {/* Product Catalog Showcase with Admin Dynamic Ordering */}
+          <section className="space-y-6">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-neutral-900/90 p-5 rounded-2xl border border-white/15 shadow-xl backdrop-blur-md">
+              <div>
+                <h2 className="text-xl md:text-2xl font-black text-white">Product Categories & Pricelist</h2>
+                <p className="text-neutral-400 text-xs mt-0.5">⚡ Display sequence dynamically arranged by Admin Drag & Drop</p>
+              </div>
+
+              {/* View Mode Controls */}
+              <div className="flex items-center gap-2">
                 <button
-                  key={cat}
-                  onClick={() => setSelectedCategory(cat)}
-                  className={`px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap border-2 border-slate-900 transition-all ${selectedCategory === cat
-                    ? "bg-amber-300 text-slate-900 shadow-[2px_2px_0px_0px_#0f172a]"
-                    : "bg-white text-slate-700 hover:bg-amber-100"
+                  onClick={() => setViewMode("grid")}
+                  className={`px-3.5 py-1.5 rounded-xl border text-xs font-bold flex items-center gap-1.5 transition-all ${viewMode === "grid" ? "bg-red-600 text-white border-red-500 shadow-md shadow-red-600/30 font-black" : "bg-neutral-800 text-neutral-300 border-neutral-700 hover:bg-neutral-700 hover:text-white"
                     }`}
                 >
-                  {cat}
+                  <LayoutGrid className="h-4 w-4" /> Grid
                 </button>
-              ))}
+                <button
+                  onClick={() => setViewMode("table")}
+                  className={`px-3.5 py-1.5 rounded-xl border text-xs font-bold flex items-center gap-1.5 transition-all ${viewMode === "table" ? "bg-red-600 text-white border-red-500 shadow-md shadow-red-600/30 font-black" : "bg-neutral-800 text-neutral-300 border-neutral-700 hover:bg-neutral-700 hover:text-white"
+                    }`}
+                >
+                  <ListIcon className="h-4 w-4" /> Table
+                </button>
+                <button
+                  onClick={downloadPDFPricelist}
+                  className="px-3.5 py-1.5 rounded-xl bg-white hover:bg-neutral-200 text-black border border-white text-xs font-bold flex items-center gap-1.5 shadow-md"
+                >
+                  <FileText className="h-4 w-4 text-red-600" /> PDF
+                </button>
+              </div>
             </div>
 
-            {/* Search Bar */}
-            <div className="relative max-w-md">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-600" />
-              <input
-                type="text"
-                placeholder="Search product in English or Tamil..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white border-2 border-slate-900 text-slate-900 placeholder-slate-500 text-xs font-mono focus:outline-none focus:bg-amber-50/40 shadow-[2px_2px_0px_0px_rgba(30,41,59,0.9)]"
-              />
+            {/* Category Chips & Search Bar */}
+            <div data-tour="category-filter" className="space-y-4 p-4 bg-gradient-to-b from-neutral-900/95 to-neutral-950/90 rounded-3xl border border-white/15 shadow-[0_10px_30px_rgba(0,0,0,0.5)] backdrop-blur-md">
+              <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-thin">
+                {categories.map((cat) => (
+                  <button
+                    key={cat}
+                    onClick={() => setSelectedCategory(cat)}
+                    className={`px-4 py-2.5 rounded-2xl text-xs font-bold whitespace-nowrap border transition-all transform-gpu active:scale-95 ${selectedCategory === cat
+                      ? "bg-gradient-to-r from-red-600 via-red-500 to-rose-600 text-white border-red-400 font-black shadow-[0_6px_20px_rgba(239,68,68,0.4)]"
+                      : "bg-neutral-800/80 text-neutral-300 border-white/10 hover:bg-neutral-700/80 hover:text-white hover:border-amber-400/40"
+                      }`}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+
+              {/* Search Bar */}
+              <div className="relative max-w-md">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
+                <input
+                  type="text"
+                  placeholder="Search product in English or Tamil..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-black border border-white/20 text-white placeholder-neutral-500 text-xs focus:outline-none focus:border-red-500 focus:bg-neutral-950 shadow-inner"
+                />
+              </div>
             </div>
-          </div>
 
-          {/* Products Rendered according to Admin Category Sequence */}
-          {loading ? (
-            <div className="text-center py-16">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900 mx-auto"></div>
-              <p className="text-slate-600 text-xs mt-3">Loading product catalog...</p>
-            </div>
-          ) : groupedProducts.length === 0 ? (
-            <div className="text-center py-12 rounded-2xl bg-white border-2 border-slate-900 p-6 shadow-[4px_4px_0px_0px_rgba(30,41,59,0.9)]">
-              <p className="text-slate-700 text-xs font-serif">No products found matching your search criteria.</p>
-            </div>
-          ) : (
-            <div data-tour="product-grid" className="space-y-8">
-              {groupedProducts.map((group) => (
-                <div key={group.category} className="space-y-4">
-                  {/* Category Header */}
-                  <div className="flex items-center gap-2 border-b-2 border-dashed border-slate-900 pb-2">
-                    <span className="w-6 h-6 rounded-lg bg-amber-300 border border-slate-900 flex items-center justify-center text-xs font-bold">
-                      ★
-                    </span>
-                    <h3 className="text-lg font-black text-slate-900 uppercase tracking-tight">{group.category}</h3>
-                  </div>
+            {/* Products Rendered according to Admin Category Sequence */}
+            {loading ? (
+              <div className="text-center py-16">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-500 mx-auto"></div>
+                <p className="text-neutral-400 text-xs mt-3">Loading product catalog...</p>
+              </div>
+            ) : groupedProducts.length === 0 ? (
+              <div className="text-center py-12 rounded-2xl bg-neutral-900/80 border border-white/10 p-6 shadow-xl">
+                <p className="text-neutral-300 text-xs">No products found matching your search criteria.</p>
+              </div>
+            ) : (
+              <div data-tour="product-grid" className="space-y-8">
+                {groupedProducts.map((group) => (
+                  <div key={group.category} className="space-y-4">
+                    {/* Category Header */}
+                    <div className="flex items-center gap-2 border-b border-dashed border-neutral-700 pb-2">
+                      <span className="w-6 h-6 rounded-lg bg-red-600 text-white border border-red-500 flex items-center justify-center text-xs font-black">
+                        ★
+                      </span>
+                      <h3 className="text-lg font-black text-white uppercase tracking-tight">{group.category}</h3>
+                    </div>
 
-                  {/* Grid View */}
-                  {viewMode === "grid" ? (
-                    <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-6">
-                      {group.items.map((prod) => {
-                        const uKey = getProductUniqueKey(prod);
-                        const qty = cart[uKey] || 0;
-                        const price = parseFloat(prod.price || 0);
-                        const discount = parseFloat(prod.discount || 0);
-                        const netPrice = discount > 0 ? Math.round(price * (1 - discount / 100)) : price;
-                        const tamilName = translateProduct(prod.productname);
+                    {/* Grid View */}
+                    {viewMode === "grid" ? (
+                      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-6">
+                        {group.items.map((prod) => {
+                          const uKey = getProductUniqueKey(prod);
+                          const qty = cart[uKey] || 0;
+                          const price = parseFloat(prod.price || 0);
+                          const discount = parseFloat(prod.discount || 0);
+                          const netPrice = discount > 0 ? Math.round(price * (1 - discount / 100)) : price;
+                          const tamilName = translateProduct(prod.productname);
 
-                        return (
-                          <div
-                            key={uKey}
-                            className="bg-white rounded-2xl p-3 md:p-5 border-2 border-slate-900 shadow-[3px_3px_0px_0px_rgba(30,41,59,0.9)] flex flex-col justify-between space-y-2.5 md:space-y-4 hover:translate-y-[-2px] transition-transform"
-                          >
-                            <div className="space-y-2 md:space-y-3">
-                              {/* Product Image Carousel */}
-                              <ProductCarousel media={prod.image || prod.images} onImageClick={setPreviewMedia} />
+                          return (
+                            <Card3D key={uKey}>
+                              <div className="group relative bg-[#0e0e0e] hover:bg-[#141414] rounded-3xl p-3.5 sm:p-5 border border-white/15 hover:border-amber-500/70 shadow-[0_8px_25px_rgba(0,0,0,0.7)] hover:shadow-[0_15px_35px_rgba(239,68,68,0.2)] flex flex-col justify-between space-y-3 sm:space-y-4 transition-all duration-200 overflow-hidden h-full">
+                                {/* Subtle top shine accent */}
+                                <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-amber-400/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
 
-                              <div>
-                                <div className="flex items-start justify-between gap-1 flex-wrap">
-                                  <span className="text-[9px] sm:text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-amber-100 border border-slate-900 text-slate-900">
-                                    #{prod.serial_number || prod.id}
-                                  </span>
-                                  {discount > 0 && (
-                                    <span className="text-[9px] sm:text-[10px] font-black px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-900 border border-slate-900">
-                                      {discount}% OFF
-                                    </span>
-                                  )}
+                                <div className="space-y-2 sm:space-y-3">
+                                  {/* Product Image Carousel */}
+                                  <div className="rounded-2xl overflow-hidden border border-white/10 shadow-sm group-hover:border-amber-500/30 transition-colors">
+                                    <ProductCarousel media={prod.image || prod.images} onImageClick={setPreviewMedia} />
+                                  </div>
+
+                                  <div>
+                                    <div className="flex items-start justify-between gap-1.5 flex-wrap">
+                                      <span className="text-[10px] sm:text-[11px] font-mono font-black px-2 py-0.5 rounded-lg bg-neutral-800 border border-white/15 text-neutral-200">
+                                        #{prod.serial_number || prod.id}
+                                      </span>
+                                      {discount > 0 && (
+                                        <span className="text-[10px] sm:text-[11px] font-black px-2 py-0.5 rounded-lg bg-gradient-to-r from-red-600 to-rose-600 text-white border border-red-500 shadow-md shadow-red-600/30">
+                                          {discount}% OFF
+                                        </span>
+                                      )}
+                                    </div>
+
+                                    <h4 className="font-extrabold text-white text-sm sm:text-base mt-2 line-clamp-2 group-hover:text-amber-300 transition-colors tracking-tight">{prod.productname}</h4>
+                                    {tamilName && <p className="text-xs text-neutral-400 mt-0.5 font-medium line-clamp-1">{tamilName}</p>}
+                                  </div>
                                 </div>
 
-                                <h4 className="font-black text-slate-900 text-xs sm:text-base mt-1 line-clamp-2">{prod.productname}</h4>
-                                {tamilName && <p className="text-[10px] sm:text-xs text-slate-600 font-serif mt-0.5 line-clamp-1">{tamilName}</p>}
-                              </div>
-                            </div>
+                                <div className="pt-3 border-t border-white/10 space-y-2.5">
+                                  <div className="flex items-baseline justify-between">
+                                    <div>
+                                      <span className="text-base sm:text-2xl font-black text-white group-hover:text-amber-400 transition-colors">
+                                        ₹{netPrice.toFixed(2)}
+                                      </span>
+                                      {discount > 0 && (
+                                        <span className="ml-1.5 text-xs text-neutral-500 line-through">
+                                          ₹{price.toFixed(2)}
+                                        </span>
+                                      )}
+                                    </div>
+                                    <span className="text-[10px] sm:text-xs text-neutral-400 uppercase font-bold tracking-wider">
+                                      per {prod.per || "pkt"}
+                                    </span>
+                                  </div>
 
-                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-2 border-t border-slate-200">
-                              <div>
-                                <span className="text-sm sm:text-lg font-black text-slate-900">₹{netPrice.toFixed(2)}</span>
-                                {discount > 0 && <span className="ml-1 text-[10px] sm:text-xs text-slate-400 line-through">₹{price.toFixed(2)}</span>}
-                                <span className="block text-[9px] sm:text-[10px] text-slate-500 uppercase">per {prod.per || "pkt"}</span>
-                              </div>
-
-                              <div className="inline-flex items-center gap-1 p-0.5 sm:p-1 rounded-xl bg-amber-50 border-2 border-slate-900 shadow-[1px_1px_0px_0px_#0f172a] self-start sm:self-auto">
-                                <button
-                                  onClick={() => updateQuantity(prod, -1)}
-                                  className="w-5 h-5 sm:w-6 sm:h-6 rounded-lg bg-white border border-slate-900 text-slate-900 flex items-center justify-center font-black text-xs hover:bg-amber-200"
-                                >
-                                  <Minus className="h-3 w-3" />
-                                </button>
-                                <span className="w-5 sm:w-7 text-center font-black text-xs text-slate-900">{qty}</span>
-                                <button
-                                  onClick={() => updateQuantity(prod, 1)}
-                                  className="w-5 h-5 sm:w-6 sm:h-6 rounded-lg bg-amber-300 border border-slate-900 text-slate-900 flex items-center justify-center font-black text-xs hover:bg-amber-400"
-                                >
-                                  <Plus className="h-3 w-3" />
-                                </button>
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  ) : (
-                    /* Table View */
-                    <div className="bg-white rounded-2xl border-2 border-slate-900 shadow-[4px_4px_0px_0px_rgba(30,41,59,0.9)] overflow-x-auto">
-                      <table className="w-full text-left text-xs">
-                        <thead className="bg-amber-100 border-b-2 border-slate-900 text-slate-900 font-bold uppercase">
-                          <tr>
-                            <th className="p-3 border-r border-slate-300">Code</th>
-                            <th className="p-3 border-r border-slate-300">Product Name</th>
-                            <th className="p-3 border-r border-slate-300">MRP</th>
-                            <th className="p-3 border-r border-slate-300">Discount</th>
-                            <th className="p-3 border-r border-slate-300">Net Rate</th>
-                            <th className="p-3 border-r border-slate-300">Per</th>
-                            <th className="p-3 text-center">Quantity</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-200">
-                          {group.items.map((prod) => {
-                            const uKey = getProductUniqueKey(prod);
-                            const qty = cart[uKey] || 0;
-                            const price = parseFloat(prod.price || 0);
-                            const discount = parseFloat(prod.discount || 0);
-                            const netPrice = discount > 0 ? Math.round(price * (1 - discount / 100)) : price;
-                            const tamilName = translateProduct(prod.productname);
-
-                            return (
-                              <tr key={uKey} className="hover:bg-amber-50/50">
-                                <td className="p-3 font-mono font-bold text-slate-900 border-r border-slate-200">
-                                  #{prod.serial_number || prod.id}
-                                </td>
-                                <td className="p-3 border-r border-slate-200">
-                                  <span className="font-bold text-slate-900 block">{prod.productname}</span>
-                                  {tamilName && <span className="text-[11px] text-slate-500 font-serif block">{tamilName}</span>}
-                                </td>
-                                <td className="p-3 text-slate-500 line-through border-r border-slate-200">
-                                  ₹{price.toFixed(2)}
-                                </td>
-                                <td className="p-3 text-emerald-800 font-bold border-r border-slate-200">
-                                  {discount > 0 ? `${discount}%` : "-"}
-                                </td>
-                                <td className="p-3 font-black text-slate-900 border-r border-slate-200">
-                                  ₹{netPrice.toFixed(2)}
-                                </td>
-                                <td className="p-3 uppercase text-slate-600 border-r border-slate-200">
-                                  {prod.per || "pkt"}
-                                </td>
-                                <td className="p-3 text-center">
-                                  <div className="inline-flex items-center gap-1.5 p-1 rounded-lg bg-amber-50 border border-slate-900">
+                                  {/* Full-width touch-friendly Stepper Control matching real card width */}
+                                  <div className="w-full flex items-center justify-between p-1 rounded-2xl bg-black/90 border border-white/20 shadow-inner">
                                     <button
                                       onClick={() => updateQuantity(prod, -1)}
-                                      className="w-5 h-5 rounded bg-white border border-slate-900 text-slate-900 flex items-center justify-center font-bold text-xs hover:bg-amber-200"
+                                      disabled={qty === 0}
+                                      className={`flex-1 h-8 sm:h-9 rounded-xl flex items-center justify-center font-black text-sm transition-all active:scale-95 ${qty > 0
+                                          ? "bg-neutral-800 hover:bg-neutral-700 text-white border border-white/10 cursor-pointer"
+                                          : "bg-neutral-900/60 text-neutral-600 cursor-not-allowed"
+                                        }`}
+                                    >
+                                      <Minus className="h-4 w-4" />
+                                    </button>
+                                    <span className="px-3 sm:px-4 text-center font-mono font-black text-sm sm:text-base text-white min-w-[36px]">
+                                      {qty}
+                                    </span>
+                                    <button
+                                      onClick={(e) => updateQuantity(prod, 1, e)}
+                                      className="flex-1 h-8 sm:h-9 rounded-xl bg-gradient-to-r from-red-600 via-red-500 to-rose-600 hover:from-red-500 hover:to-rose-500 border border-red-500 text-white flex items-center justify-center font-black text-sm shadow-md shadow-red-600/30 active:scale-95 transition-all cursor-pointer"
+                                    >
+                                      <Plus className="h-4 w-4" />
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            </Card3D>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      /* Table View */
+                      <div className="bg-neutral-900/90 rounded-2xl border border-white/15 shadow-xl overflow-x-auto">
+                        <table className="w-full text-left text-xs">
+                          <thead className="bg-neutral-800 text-red-400 font-bold uppercase border-b border-neutral-700">
+                            <tr>
+                              <th className="p-3 border-r border-neutral-700">Code</th>
+                              <th className="p-3 border-r border-neutral-700">Product Name</th>
+                              <th className="p-3 border-r border-neutral-700">MRP</th>
+                              <th className="p-3 border-r border-neutral-700">Discount</th>
+                              <th className="p-3 border-r border-neutral-700">Net Rate</th>
+                              <th className="p-3 border-r border-neutral-700">Per</th>
+                              <th className="p-3 text-center">Quantity</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-neutral-800">
+                            {group.items.map((prod) => {
+                              const uKey = getProductUniqueKey(prod);
+                              const qty = cart[uKey] || 0;
+                              const price = parseFloat(prod.price || 0);
+                              const discount = parseFloat(prod.discount || 0);
+                              const netPrice = discount > 0 ? Math.round(price * (1 - discount / 100)) : price;
+                              const tamilName = translateProduct(prod.productname);
+
+                              return (
+                                <tr key={uKey} className="hover:bg-neutral-800/60">
+                                  <td className="p-3 font-bold text-white border-r border-neutral-800">
+                                    #{prod.serial_number || prod.id}
+                                  </td>
+                                  <td className="p-3 border-r border-neutral-800">
+                                    <span className="font-bold text-white block">{prod.productname}</span>
+                                    {tamilName && <span className="text-[11px] text-neutral-400 block">{tamilName}</span>}
+                                  </td>
+                                  <td className="p-3 text-neutral-500 line-through border-r border-neutral-800">
+                                    ₹{price.toFixed(2)}
+                                  </td>
+                                  <td className="p-3 text-red-400 font-bold border-r border-neutral-800">
+                                    {discount > 0 ? `${discount}%` : "-"}
+                                  </td>
+                                  <td className="p-3 font-black text-white border-r border-neutral-800">
+                                    ₹{netPrice.toFixed(2)}
+                                  </td>
+                                  <td className="p-3 uppercase text-neutral-400 border-r border-neutral-800">
+                                    {prod.per || "pkt"}
+                                  </td>
+                                  <td className="p-3 text-center">
+                                    <div className="inline-flex items-center gap-1.5 p-1 rounded-lg bg-black border border-neutral-700">
+                                      <button
+                                        onClick={() => updateQuantity(prod, -1)}
+                                        className="w-5 h-5 rounded bg-neutral-800 border border-neutral-700 text-white flex items-center justify-center font-bold text-xs hover:bg-neutral-700"
+                                      >
+                                        -
+                                      </button>
+                                      <span className="w-6 text-center font-black text-xs text-white">{qty}</span>
+                                      <button
+                                        onClick={(e) => updateQuantity(prod, 1, e)}
+                                        className="w-5 h-5 rounded bg-red-600 border border-red-500 text-white flex items-center justify-center font-bold text-xs hover:bg-red-500 active:scale-95"
+                                      >
+                                        +
+                                      </button>
+                                    </div>
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+
+
+
+          {/* Statutory Compliance Notice */}
+          <section className="relative p-5 sm:p-6 rounded-3xl bg-gradient-to-r from-neutral-950 via-neutral-900 to-neutral-950 border border-white/15 shadow-[0_10px_30px_rgba(0,0,0,0.5)] space-y-2 overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-red-600 via-amber-400 to-rose-600" />
+            <h3 className="text-red-400 font-black text-xs sm:text-sm flex items-center gap-2">
+              <ShieldCheck className="h-4 w-4 text-red-500 shrink-0" /> Supreme Court Compliance & Statutory Legal Notice
+            </h3>
+            <p className="text-[11px] sm:text-xs text-neutral-400 leading-relaxed">
+              As per 2018 Supreme Court regulations, direct online e-commerce transactions of firecrackers are prohibited. Deepa Crackers operates in 100% legal compliance. Please add your desired items to the estimate list and submit your enquiry. Our team in Thiruthuraipoondi will contact you within 24 hours to confirm order booking and dispatch details.
+            </p>
+          </section>
+
+          {/* AI Assistant Modal */}
+          <AnimatePresence>
+            {showAiModal && (
+              <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+                <motion.div
+                  initial={{ scale: 0.9, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.9, opacity: 0 }}
+                  className="w-full max-w-lg rounded-3xl bg-neutral-900 border border-white/20 p-6 space-y-6 shadow-2xl relative text-white"
+                >
+                  <button
+                    onClick={() => {
+                      setShowAiModal(false);
+                      setAiStep(0);
+                      setAiBudget("");
+                      setAiPreferences({ kids: false, sound: false, night: false, kidsnight: false });
+                      setSuggestedCart({});
+                    }}
+                    className="absolute top-4 right-4 text-neutral-400 hover:text-white p-1"
+                  >
+                    <X className="h-6 w-6" />
+                  </button>
+
+                  <div className="flex items-center gap-2 border-b border-neutral-800 pb-3">
+                    <Bot className="h-6 w-6 text-red-500" />
+                    <h2 className="text-xl font-black text-white">Smart AI Fireworks Assistant</h2>
+                  </div>
+
+                  {aiStep === 0 && (
+                    <div className="space-y-4">
+                      <p className="text-xs font-bold text-neutral-300 uppercase">Step 1: What is your approximate festival budget? (₹)</p>
+                      <input
+                        type="number"
+                        value={aiBudget}
+                        onChange={(e) => setAiBudget(e.target.value)}
+                        placeholder="e.g. 3000"
+                        className="w-full px-4 py-3 rounded-xl bg-black border border-white/20 text-white text-sm focus:outline-none focus:border-red-500 shadow-inner"
+                      />
+                      <button
+                        onClick={() => {
+                          if (!aiBudget || Number(aiBudget) <= 0) {
+                            alert("Please enter a valid budget amount in ₹");
+                            return;
+                          }
+                          setAiStep(1);
+                        }}
+                        className="w-full py-3 rounded-xl bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white font-black text-xs shadow-lg shadow-red-600/30 transition-all border border-red-500"
+                      >
+                        Next: Select Preferences →
+                      </button>
+                    </div>
+                  )}
+
+                  {aiStep === 1 && (
+                    <div className="space-y-4">
+                      <p className="text-xs font-bold text-neutral-300 uppercase">Step 2: Select Firework Preferences</p>
+                      <div className="space-y-2.5">
+                        {[
+                          { key: "kids", label: "🎠 Kids Varieties (Twinkling Star, Pencils, Novelties)" },
+                          { key: "sound", label: "💥 Loud Sound Crackers (Bombs, Sound Crackers)" },
+                          { key: "night", label: "🚀 Night Sky (Rockets, Repeating Shots, Sky Shots)" },
+                          { key: "kidsnight", label: "✨ Kids Night (Sparklers, Flower Pots, Chakkars)" },
+                        ].map(({ key, label }) => (
+                          <label key={key} className="flex items-center gap-3 p-2.5 rounded-xl bg-black border border-neutral-800 shadow-md cursor-pointer hover:border-neutral-700">
+                            <input
+                              type="checkbox"
+                              checked={aiPreferences[key]}
+                              onChange={(e) => setAiPreferences((prev) => ({ ...prev, [key]: e.target.checked }))}
+                              className="w-4 h-4 accent-red-600 rounded border-neutral-700"
+                            />
+                            <span className="text-xs font-bold text-neutral-200">{label}</span>
+                          </label>
+                        ))}
+                      </div>
+
+                      <div className="flex gap-2 pt-2">
+                        <button
+                          onClick={() => setAiStep(0)}
+                          className="w-1/3 py-2.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-200 border border-neutral-700 font-bold text-xs shadow-md"
+                        >
+                          ← Back
+                        </button>
+                        <button
+                          onClick={generateSuggestions}
+                          className="w-2/3 py-2.5 rounded-xl bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white font-black text-xs shadow-lg shadow-red-600/30 border border-red-500"
+                        >
+                          Generate AI Combination ✨
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {aiStep === 2 && (
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between border-b border-neutral-800 pb-2">
+                        <div>
+                          <p className="text-xs font-black text-white uppercase">Suggested Combination</p>
+                          <p className="text-[11px] text-neutral-400">
+                            {Object.keys(suggestedCart).length} product variety(s) • Total: <strong className="text-red-400">₹{suggestedTotalAmount.toFixed(2)}</strong> (Max Budget: ₹{Number(aiBudget).toFixed(2)})
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => setAiStep(1)}
+                          className="px-2.5 py-1 rounded-lg bg-neutral-800 border border-neutral-700 text-[11px] font-bold text-neutral-300 hover:text-white"
+                        >
+                          Change Preferences
+                        </button>
+                      </div>
+
+                      <div className="max-h-60 overflow-y-auto space-y-2 pr-1 scrollbar-thin">
+                        {Object.entries(suggestedCart).map(([key, qty]) => {
+                          const p = products.find((x) => getProductUniqueKey(x) === key || x.serial_number === key || String(x.id) === String(key));
+                          if (!p) return null;
+                          const price = parseFloat(p.price || 0);
+                          const discount = parseFloat(p.discount || 0);
+                          const finalPrice = discount > 0 ? Math.round(price * (1 - discount / 100)) : price;
+
+                          return (
+                            <div key={key} className="flex items-center justify-between p-2.5 rounded-xl bg-black border border-neutral-800 text-xs">
+                              <div className="flex items-center gap-2 flex-1 min-w-0 pr-2">
+                                {renderProductThumbnail(p.image || p.images)}
+                                <div className="min-w-0 flex-1">
+                                  <p className="font-bold text-white truncate">{p.productname}</p>
+                                  <p className="text-[10px] text-neutral-400">₹{finalPrice.toFixed(2)} × {qty}</p>
+                                </div>
+                              </div>
+
+                              <div className="flex items-center gap-2">
+                                <div className="inline-flex items-center gap-1 p-0.5 rounded-lg bg-neutral-900 border border-neutral-800">
+                                  <button
+                                    onClick={() => updateSuggestedQty(key, -1)}
+                                    className="w-4 h-4 rounded bg-neutral-800 border border-neutral-700 text-neutral-300 flex items-center justify-center font-bold text-[10px]"
+                                  >
+                                    -
+                                  </button>
+                                  <span className="w-4 text-center font-black text-[10px] text-white">{qty}</span>
+                                  <button
+                                    onClick={() => updateSuggestedQty(key, 1)}
+                                    className="w-4 h-4 rounded bg-red-600 border border-red-500 text-white flex items-center justify-center font-bold text-[10px]"
+                                  >
+                                    +
+                                  </button>
+                                </div>
+                                <span className="font-black text-white w-14 text-right">₹{(finalPrice * qty).toFixed(2)}</span>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      <button
+                        onClick={addSuggestedToCart}
+                        className="w-full py-3.5 rounded-xl bg-white hover:bg-neutral-200 text-black font-black text-xs shadow-lg transition-all border border-white"
+                      >
+                        Add All Suggested Items to Cart 🛒
+                      </button>
+                    </div>
+                  )}
+                </motion.div>
+              </div>
+            )}
+          </AnimatePresence>
+
+          {/* Media Preview Modal */}
+          <AnimatePresence>
+            {previewMedia && (
+              <div
+                className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4"
+                onClick={() => setPreviewMedia(null)}
+              >
+                <motion.div
+                  initial={{ scale: 0.9, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.9, opacity: 0 }}
+                  className="bg-neutral-900 rounded-3xl p-4 border border-white/20 shadow-2xl max-w-2xl w-full max-h-[85vh] overflow-hidden relative flex flex-col items-center justify-center"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <button
+                    onClick={() => setPreviewMedia(null)}
+                    className="absolute top-3 right-3 text-white bg-red-600 hover:bg-red-500 border border-red-500 rounded-xl p-1 shadow-md z-10"
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
+
+                  <div className="w-full h-full flex items-center justify-center p-2">
+                    <img
+                      src={Array.isArray(previewMedia) ? previewMedia[0] : previewMedia}
+                      alt="Product Enlarged"
+                      className="max-h-[75vh] w-auto object-contain rounded-2xl border border-neutral-800"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = defaultImage;
+                      }}
+                    />
+                  </div>
+                </motion.div>
+              </div>
+            )}
+          </AnimatePresence>
+
+          {/* Floating Bottom Cart Summary Bar */}
+          <AnimatePresence>
+            {cartItems.length > 0 && (
+              <motion.div
+                data-tour="cart-summary"
+                initial={{ y: 100, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: 100, opacity: 0 }}
+                className="fixed bottom-4 left-4 right-4 z-40 max-w-4xl mx-auto rounded-2xl p-4 bg-black/95 backdrop-blur-xl border border-red-600/50 shadow-[0_10px_35px_rgba(220,38,38,0.3)] flex items-center justify-between gap-4 text-white"
+              >
+                <div>
+                  <p className="text-xs font-bold text-neutral-400">{cartItems.length} Selected</p>
+                  <p className="text-xl md:text-2xl font-black text-red-500">
+                    ₹{finalCheckoutTotal.toFixed(2)}
+                  </p>
+                </div>
+
+                <button
+                  data-tour="checkout-btn"
+                  onClick={() => {
+                    setShowCheckoutModal(true);
+                    setCheckoutStep(0);
+                  }}
+                  className="px-6 py-3 rounded-xl bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white border border-red-500 font-black text-xs md:text-sm shadow-lg shadow-red-600/40 transition-all flex items-center gap-2"
+                >
+                  <span>Submit</span>
+                  <ArrowRight className="h-4 w-4" />
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Multi-Step Product Purchase Checkout Modal */}
+          <AnimatePresence>
+            {showCheckoutModal && (
+              <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+                <motion.div
+                  initial={{ scale: 0.9, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.9, opacity: 0 }}
+                  className="w-full max-w-lg rounded-3xl bg-neutral-900 border border-white/20 p-5 md:p-8 space-y-6 shadow-2xl relative max-h-[90vh] overflow-y-auto scrollbar-thin text-white"
+                >
+                  <button
+                    onClick={() => {
+                      setShowCheckoutModal(false);
+                      setCheckoutStep(0);
+                    }}
+                    className="absolute top-4 right-4 text-neutral-400 hover:text-white p-1 z-10"
+                  >
+                    <X className="h-6 w-6" />
+                  </button>
+
+                  {/* Header Step Progress */}
+                  <div className="space-y-2">
+                    <h2 className="text-xl md:text-2xl font-black text-white">Checkout & Order Enquiry</h2>
+                    <div className="flex items-center gap-1.5 text-[11px] md:text-xs font-bold overflow-x-auto pb-1">
+                      <span className={`px-2 py-0.5 rounded-lg border whitespace-nowrap ${checkoutStep === 0 ? 'bg-red-600 text-white border-red-500 font-black' : 'bg-neutral-800 text-neutral-300 border-neutral-700'}`}>1. Customer Details</span>
+                      <span className="text-neutral-500">→</span>
+                      <span className={`px-2 py-0.5 rounded-lg border whitespace-nowrap ${checkoutStep === 1 ? 'bg-red-600 text-white border-red-500 font-black' : 'bg-neutral-800 text-neutral-300 border-neutral-700'}`}>2. Location & Offer</span>
+                      <span className="text-neutral-500">→</span>
+                      <span className={`px-2 py-0.5 rounded-lg border whitespace-nowrap ${checkoutStep === 2 ? 'bg-red-600 text-white border-red-500 font-black' : 'bg-neutral-800 text-neutral-300 border-neutral-700'}`}>3. Review Products</span>
+                    </div>
+                  </div>
+
+                  <form onSubmit={handleCheckoutSubmit} className="space-y-4">
+
+                    {/* Step 0: Customer Personal Details */}
+                    {checkoutStep === 0 && (
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-xs font-bold text-neutral-300 uppercase mb-1">Full Name *</label>
+                          <input
+                            type="text"
+                            required
+                            placeholder="Enter customer full name"
+                            value={customer.name}
+                            onChange={(e) => setCustomer({ ...customer, name: e.target.value })}
+                            className="w-full px-4 py-2.5 rounded-xl bg-black border border-white/20 text-white text-xs focus:outline-none focus:border-red-500 shadow-inner"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-bold text-neutral-300 uppercase mb-1">Mobile Number *</label>
+                          <input
+                            type="tel"
+                            required
+                            maxLength={10}
+                            placeholder="10-digit mobile number"
+                            value={customer.mobile}
+                            onChange={(e) => setCustomer({ ...customer, mobile: e.target.value.replace(/\D/g, "") })}
+                            className="w-full px-4 py-2.5 rounded-xl bg-black border border-white/20 text-white text-xs focus:outline-none focus:border-red-500 shadow-inner"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-bold text-neutral-300 uppercase mb-1">Email Address (Optional)</label>
+                          <input
+                            type="email"
+                            placeholder="email@example.com"
+                            value={customer.email || ""}
+                            onChange={(e) => setCustomer({ ...customer, email: e.target.value })}
+                            className="w-full px-4 py-2.5 rounded-xl bg-black border border-white/20 text-white text-xs focus:outline-none focus:border-red-500 shadow-inner"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-bold text-neutral-300 uppercase mb-1">Delivery Address *</label>
+                          <textarea
+                            rows={2}
+                            required
+                            placeholder="Full delivery street address..."
+                            value={customer.address}
+                            onChange={(e) => setCustomer({ ...customer, address: e.target.value })}
+                            className="w-full px-4 py-2 rounded-xl bg-black border border-white/20 text-white text-xs focus:outline-none focus:border-red-500 resize-none shadow-inner"
+                          ></textarea>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (!customer.name || !customer.mobile || customer.mobile.length !== 10 || !customer.address) {
+                              alert("Please fill in Name, 10-digit Mobile Number, and Address.");
+                              return;
+                            }
+                            setCheckoutStep(1);
+                          }}
+                          className="w-full py-3 rounded-xl bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white font-black text-xs shadow-lg shadow-red-600/30 transition-all border border-red-500"
+                        >
+                          Next: Location, Address & Offers →
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Step 1: Location, Address & Offer Summary */}
+                    {checkoutStep === 1 && (
+                      <div className="space-y-4">
+                        {/* Address Review Box */}
+                        <div className="p-3.5 rounded-xl bg-black border border-neutral-800 text-xs space-y-1 shadow-inner">
+                          <p className="font-bold text-red-500 flex items-center gap-1.5">
+                            <MapPin className="h-4 w-4 text-red-500" /> Delivery Target Address:
+                          </p>
+                          <p className="font-bold text-white">{customer.name} ({customer.mobile})</p>
+                          <p className="text-neutral-300 leading-tight">{customer.address}</p>
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-bold text-neutral-300 uppercase mb-1">State *</label>
+                          <select
+                            value={customer.state}
+                            onChange={(e) => setCustomer({ ...customer, state: e.target.value, district: "" })}
+                            className="w-full px-4 py-2.5 rounded-xl bg-black border border-white/20 text-white text-xs focus:outline-none focus:border-red-500"
+                          >
+                            <option value="Tamil Nadu">Tamil Nadu</option>
+                            {states.map((s) => (
+                              <option key={s.id || s.name} value={s.name}>{s.name}</option>
+                            ))}
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-bold text-neutral-300 uppercase mb-1">District *</label>
+                          <select
+                            value={customer.district}
+                            onChange={(e) => setCustomer({ ...customer, district: e.target.value })}
+                            className="w-full px-4 py-2.5 rounded-xl bg-black border border-white/20 text-white text-xs focus:outline-none focus:border-red-500"
+                          >
+                            <option value="Thiruthuraipoondi">Thiruthuraipoondi</option>
+                            {districts.map((d) => (
+                              <option key={d.id || d.name} value={d.name}>{d.name}</option>
+                            ))}
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-bold text-neutral-300 uppercase mb-1">Apply Promocode / Coupon</label>
+                          <select
+                            value={selectedPromoCode}
+                            onChange={(e) => handleApplyPromoCode(e.target.value)}
+                            className="w-full px-4 py-2.5 rounded-xl bg-black border border-white/20 text-white text-xs focus:outline-none focus:border-red-500"
+                          >
+                            <option value="">No Promocode Selected</option>
+                            {promoCodes.map((promo) => (
+                              <option key={promo.id || promo.code} value={promo.code}>
+                                {promo.code} ({promo.discount}% OFF)
+                              </option>
+                            ))}
+                          </select>
+
+                          {appliedPromo && (
+                            <p className="text-[11px] font-bold text-red-400 mt-1.5 flex items-center gap-1">
+                              <Tag className="h-3.5 w-3.5" /> Promocode {appliedPromo.code} applied! ({appliedPromo.discount}% OFF)
+                            </p>
+                          )}
+                        </div>
+
+                        <div className="flex gap-2 pt-2">
+                          <button
+                            type="button"
+                            onClick={() => setCheckoutStep(0)}
+                            className="w-1/3 py-2.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-200 border border-neutral-700 font-bold text-xs shadow-md"
+                          >
+                            ← Back
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setCheckoutStep(2)}
+                            className="w-2/3 py-2.5 rounded-xl bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white font-black text-xs shadow-lg shadow-red-600/30 border border-red-500"
+                          >
+                            Review Products & Images →
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Step 2: Product Review with Images & Mobile Optimised View */}
+                    {checkoutStep === 2 && (
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between border-b border-neutral-800 pb-2">
+                          <p className="text-xs font-black text-white uppercase">Review Order Items ({cartItems.length})</p>
+                          <p className="text-[11px] font-bold text-red-400">📍 {customer.district}, {customer.state}</p>
+                        </div>
+
+                        {/* Product List with Image Thumbnails */}
+                        <div className="max-h-64 overflow-y-auto space-y-2 pr-1 scrollbar-thin">
+                          {cartItems.map((item) => {
+                            const tamilName = translateProduct(item.productname);
+                            return (
+                              <div key={item.uniqueKey} className="flex items-center justify-between p-2.5 rounded-xl bg-black border border-neutral-800 shadow-md gap-2">
+                                <div className="flex items-center gap-2.5 flex-1 min-w-0">
+                                  {renderProductThumbnail(item.image || item.images)}
+                                  <div className="min-w-0 flex-1">
+                                    <div className="flex items-center gap-1">
+                                      <span className="text-[9px] px-1 rounded bg-white/10 border border-white/20 text-white font-bold">#{item.serial_number || item.id}</span>
+                                      <span className="text-xs font-bold text-white truncate">{item.productname}</span>
+                                    </div>
+                                    {tamilName && <p className="text-[10px] text-neutral-400 truncate">{tamilName}</p>}
+                                    <p className="text-[10px] text-neutral-400">₹{item.netPrice.toFixed(2)} per {item.per || 'pkt'}</p>
+                                  </div>
+                                </div>
+
+                                <div className="flex items-center gap-2">
+                                  <div className="inline-flex items-center gap-1 p-0.5 rounded-lg bg-neutral-900 border border-neutral-800">
+                                    <button
+                                      type="button"
+                                      onClick={() => updateQuantity(item, -1)}
+                                      className="w-5 h-5 rounded bg-neutral-800 border border-neutral-700 text-neutral-300 flex items-center justify-center font-bold text-xs hover:bg-neutral-700"
                                     >
                                       -
                                     </button>
-                                    <span className="w-6 text-center font-black text-xs">{qty}</span>
+                                    <span className="w-5 text-center font-black text-xs text-white">{item.qty}</span>
                                     <button
-                                      onClick={() => updateQuantity(prod, 1)}
-                                      className="w-5 h-5 rounded bg-amber-300 border border-slate-900 text-slate-900 flex items-center justify-center font-bold text-xs hover:bg-amber-400"
+                                      type="button"
+                                      onClick={() => updateQuantity(item, 1)}
+                                      className="w-5 h-5 rounded bg-red-600 border border-red-500 text-white flex items-center justify-center font-bold text-xs hover:bg-red-500"
                                     >
                                       +
                                     </button>
                                   </div>
-                                </td>
-                              </tr>
+                                  <span className="font-black text-xs text-white w-16 text-right">₹{item.subtotal.toFixed(2)}</span>
+                                </div>
+                              </div>
                             );
                           })}
-                        </tbody>
-                      </table>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
+                        </div>
 
-        {/* Statutory Compliance Notice */}
-        <section className="p-6 rounded-2xl bg-white border-2 border-slate-900 shadow-[4px_4px_0px_0px_rgba(30,41,59,0.9)] space-y-2">
-          <h3 className="text-slate-900 font-black text-sm flex items-center gap-2">
-            <ShieldCheck className="h-5 w-5 text-amber-600" /> Supreme Court Compliance & Legal Notice
-          </h3>
-          <p className="text-xs text-slate-700 font-serif leading-relaxed">
-            As per 2018 Supreme Court regulations, direct online e-commerce transactions of firecrackers are prohibited. Deepa Crackers operates in 100% legal compliance. Please add your desired items to the estimate list and submit your enquiry. Our team in Thiruthuraipoondi will contact you within 24 hours to confirm order booking and dispatch details.
-          </p>
-        </section>
-      </main>
-
-      {/* AI Assistant Modal */}
-      <AnimatePresence>
-        {showAiModal && (
-          <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="w-full max-w-lg rounded-3xl bg-[#FAF6EE] border-2 border-slate-900 p-6 space-y-6 shadow-[8px_8px_0px_0px_rgba(30,41,59,0.9)] relative"
-            >
-              <button
-                onClick={() => {
-                  setShowAiModal(false);
-                  setAiStep(0);
-                  setAiBudget("");
-                  setAiPreferences({ kids: false, sound: false, night: false, kidsnight: false });
-                  setSuggestedCart({});
-                }}
-                className="absolute top-4 right-4 text-slate-700 hover:text-slate-900 p-1"
-              >
-                <X className="h-6 w-6" />
-              </button>
-
-              <div className="flex items-center gap-2 border-b-2 border-slate-900 pb-3">
-                <Bot className="h-6 w-6 text-amber-600" />
-                <h2 className="text-xl font-black text-slate-900">Smart AI Fireworks Assistant</h2>
-              </div>
-
-              {aiStep === 0 && (
-                <div className="space-y-4">
-                  <p className="text-xs font-bold text-slate-800 uppercase">Step 1: What is your approximate festival budget? (₹)</p>
-                  <input
-                    type="number"
-                    value={aiBudget}
-                    onChange={(e) => setAiBudget(e.target.value)}
-                    placeholder="e.g. 3000"
-                    className="w-full px-4 py-3 rounded-xl bg-white border-2 border-slate-900 text-slate-900 text-sm font-mono focus:outline-none focus:bg-amber-50 shadow-[2px_2px_0px_0px_#0f172a]"
-                  />
-                  <button
-                    onClick={() => {
-                      if (!aiBudget || Number(aiBudget) <= 0) {
-                        alert("Please enter a valid budget amount in ₹");
-                        return;
-                      }
-                      setAiStep(1);
-                    }}
-                    className="w-full py-3 rounded-xl bg-amber-300 hover:bg-amber-400 text-slate-900 border-2 border-slate-900 font-black text-xs shadow-[3px_3px_0px_0px_#0f172a] transition-all"
-                  >
-                    Next: Select Preferences →
-                  </button>
-                </div>
-              )}
-
-              {aiStep === 1 && (
-                <div className="space-y-4">
-                  <p className="text-xs font-bold text-slate-800 uppercase">Step 2: Select Firework Preferences</p>
-                  <div className="space-y-2.5">
-                    {[
-                      { key: "kids", label: "🎠 Kids Varieties (Twinkling Star, Pencils, Novelties)" },
-                      { key: "sound", label: "💥 Loud Sound Crackers (Bombs, Sound Crackers)" },
-                      { key: "night", label: "🚀 Night Sky (Rockets, Repeating Shots, Sky Shots)" },
-                      { key: "kidsnight", label: "✨ Kids Night (Sparklers, Flower Pots, Chakkars)" },
-                    ].map(({ key, label }) => (
-                      <label key={key} className="flex items-center gap-3 p-2.5 rounded-xl bg-white border-2 border-slate-900 shadow-[2px_2px_0px_0px_#0f172a] cursor-pointer hover:bg-amber-50">
-                        <input
-                          type="checkbox"
-                          checked={aiPreferences[key]}
-                          onChange={(e) => setAiPreferences((prev) => ({ ...prev, [key]: e.target.checked }))}
-                          className="w-4 h-4 accent-amber-500 rounded border-slate-900"
-                        />
-                        <span className="text-xs font-bold text-slate-900">{label}</span>
-                      </label>
-                    ))}
-                  </div>
-
-                  <div className="flex gap-2 pt-2">
-                    <button
-                      onClick={() => setAiStep(0)}
-                      className="w-1/3 py-2.5 rounded-xl bg-white hover:bg-slate-100 text-slate-900 border-2 border-slate-900 font-bold text-xs shadow-[2px_2px_0px_0px_#0f172a]"
-                    >
-                      ← Back
-                    </button>
-                    <button
-                      onClick={generateSuggestions}
-                      className="w-2/3 py-2.5 rounded-xl bg-amber-300 hover:bg-amber-400 text-slate-900 border-2 border-slate-900 font-black text-xs shadow-[2px_2px_0px_0px_#0f172a]"
-                    >
-                      Generate AI Combination ✨
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {aiStep === 2 && (
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between border-b border-slate-300 pb-2">
-                    <div>
-                      <p className="text-xs font-black text-slate-900 uppercase">Suggested Combination</p>
-                      <p className="text-[11px] text-slate-600">
-                        {Object.keys(suggestedCart).length} product variety(s) • Total: <strong className="text-slate-900">₹{suggestedTotalAmount.toFixed(2)}</strong> (Max Budget: ₹{Number(aiBudget).toFixed(2)})
-                      </p>
-                    </div>
-                    <button
-                      onClick={() => setAiStep(1)}
-                      className="px-2.5 py-1 rounded-lg bg-amber-100 border border-slate-900 text-[11px] font-bold text-slate-900"
-                    >
-                      Change Preferences
-                    </button>
-                  </div>
-
-                  <div className="max-h-60 overflow-y-auto space-y-2 pr-1 scrollbar-thin">
-                    {Object.entries(suggestedCart).map(([key, qty]) => {
-                      const p = products.find((x) => getProductUniqueKey(x) === key || x.serial_number === key || String(x.id) === String(key));
-                      if (!p) return null;
-                      const price = parseFloat(p.price || 0);
-                      const discount = parseFloat(p.discount || 0);
-                      const finalPrice = discount > 0 ? Math.round(price * (1 - discount / 100)) : price;
-
-                      return (
-                        <div key={key} className="flex items-center justify-between p-2.5 rounded-xl bg-white border border-slate-900 shadow-[2px_2px_0px_0px_#0f172a] text-xs">
-                          <div className="flex items-center gap-2 flex-1 min-w-0 pr-2">
-                            {renderProductThumbnail(p.image || p.images)}
-                            <div className="min-w-0 flex-1">
-                              <p className="font-bold text-slate-900 truncate">{p.productname}</p>
-                              <p className="text-[10px] text-slate-600">₹{finalPrice.toFixed(2)} × {qty}</p>
-                            </div>
+                        {/* Cost Breakdown */}
+                        <div className="p-3.5 rounded-xl bg-black border border-neutral-800 space-y-1 text-xs shadow-inner">
+                          <div className="flex justify-between text-neutral-400">
+                            <span>Cart Estimate Subtotal:</span>
+                            <span>₹{totalAmount.toFixed(2)}</span>
                           </div>
-
-                          <div className="flex items-center gap-2">
-                            <div className="inline-flex items-center gap-1 p-0.5 rounded-lg bg-amber-50 border border-slate-900">
-                              <button
-                                onClick={() => updateSuggestedQty(key, -1)}
-                                className="w-4 h-4 rounded bg-white border border-slate-900 text-slate-900 flex items-center justify-center font-bold text-[10px]"
-                              >
-                                -
-                              </button>
-                              <span className="w-4 text-center font-black text-[10px]">{qty}</span>
-                              <button
-                                onClick={() => updateSuggestedQty(key, 1)}
-                                className="w-4 h-4 rounded bg-amber-300 border border-slate-900 text-slate-900 flex items-center justify-center font-bold text-[10px]"
-                              >
-                                +
-                              </button>
+                          {appliedPromo && (
+                            <div className="flex justify-between text-red-400 font-bold">
+                              <span>Promocode Discount ({appliedPromo.discount}%):</span>
+                              <span>-₹{promoDiscountAmount.toFixed(2)}</span>
                             </div>
-                            <span className="font-black text-slate-900 w-14 text-right">₹{(finalPrice * qty).toFixed(2)}</span>
+                          )}
+                          <div className="flex justify-between text-white font-black text-sm pt-1 border-t border-neutral-800">
+                            <span>Total Amount Payable:</span>
+                            <span className="text-red-500">₹{finalCheckoutTotal.toFixed(2)}</span>
                           </div>
                         </div>
-                      );
-                    })}
-                  </div>
 
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setCheckoutStep(1)}
+                            className="w-1/3 py-3 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-200 border border-neutral-700 font-bold text-xs shadow-md"
+                          >
+                            ← Back
+                          </button>
+                          <button
+                            type="submit"
+                            disabled={isSubmitting}
+                            className="w-2/3 py-3.5 rounded-xl bg-white hover:bg-neutral-200 text-black border border-white font-black text-xs shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                          >
+                            {isSubmitting ? "Submitting..." : "Confirm & Download Invoice Bill 📄"}
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                  </form>
+                </motion.div>
+              </div>
+            )}
+          </AnimatePresence>
+
+          {/* Success Modal */}
+          <AnimatePresence>
+            {bookingSuccess && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4"
+              >
+                <div className="p-8 rounded-3xl bg-neutral-900 border border-white/20 text-center max-w-md space-y-4 shadow-2xl text-white">
+                  <CheckCircle className="h-14 w-14 text-red-500 mx-auto" />
+                  <h2 className="text-2xl font-black text-white">Enquiry & Bill Generated!</h2>
+                  <p className="text-neutral-300 text-xs leading-relaxed">
+                    Thank you for inquiring with <strong className="text-red-500">Deepa Crackers, Thiruthuraipoondi</strong>. Your invoice PDF bill has been downloaded automatically. Our team will reach out to you shortly via phone or WhatsApp.
+                  </p>
                   <button
-                    onClick={addSuggestedToCart}
-                    className="w-full py-3.5 rounded-xl bg-emerald-300 hover:bg-emerald-400 text-slate-900 border-2 border-slate-900 font-black text-xs shadow-[3px_3px_0px_0px_#0f172a] transition-all"
+                    onClick={() => setBookingSuccess(false)}
+                    className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-red-600 to-red-700 text-white border border-red-500 font-black text-xs shadow-lg shadow-red-600/30 hover:from-red-500 hover:to-red-600"
                   >
-                    Add All Suggested Items to Cart 🛒
+                    Close & Continue
                   </button>
                 </div>
-              )}
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-      {/* Media Preview Modal */}
-      <AnimatePresence>
-        {previewMedia && (
-          <div
-            className="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4"
-            onClick={() => setPreviewMedia(null)}
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-white rounded-3xl p-4 border-2 border-slate-900 shadow-[8px_8px_0px_0px_rgba(30,41,59,0.9)] max-w-2xl w-full max-h-[85vh] overflow-hidden relative flex flex-col items-center justify-center"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <button
-                onClick={() => setPreviewMedia(null)}
-                className="absolute top-3 right-3 text-slate-900 bg-amber-300 hover:bg-amber-400 border-2 border-slate-900 rounded-xl p-1 shadow-[2px_2px_0px_0px_#0f172a] z-10"
-              >
-                <X className="h-5 w-5" />
-              </button>
-
-              <div className="w-full h-full flex items-center justify-center p-2">
-                <img
-                  src={Array.isArray(previewMedia) ? previewMedia[0] : previewMedia}
-                  alt="Product Enlarged"
-                  className="max-h-[75vh] w-auto object-contain rounded-2xl border-2 border-slate-900"
-                  onError={(e) => {
-                    e.target.onerror = null;
-                    e.target.src = defaultImage;
-                  }}
-                />
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-
-      {/* Floating Bottom Cart Summary Bar */}
-      <AnimatePresence>
-        {cartItems.length > 0 && (
-          <motion.div
-            data-tour="cart-summary"
-            initial={{ y: 100, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: 100, opacity: 0 }}
-            className="fixed bottom-4 left-4 right-4 z-40 max-w-4xl mx-auto rounded-2xl p-4 bg-amber-100 border-2 border-slate-900 shadow-[6px_6px_0px_0px_rgba(30,41,59,0.9)] flex items-center justify-between gap-4"
-          >
-            <div>
-              <p className="text-xs font-bold text-slate-700">{cartItems.length} Selected</p>
-              <p className="text-xl md:text-2xl font-black text-slate-900">
-                ₹{finalCheckoutTotal.toFixed(2)}
-              </p>
-            </div>
-
-            <button
-              data-tour="checkout-btn"
-              onClick={() => {
-                setShowCheckoutModal(true);
-                setCheckoutStep(0);
-              }}
-              className="px-6 py-3 rounded-xl bg-amber-300 hover:bg-amber-400 text-slate-900 border-2 border-slate-900 font-black text-xs md:text-sm shadow-[3px_3px_0px_0px_#0f172a] transition-all flex items-center gap-2"
-            >
-              <span>Submit</span>
-              <ArrowRight className="h-4 w-4" />
-            </button>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Multi-Step Pencil Sketch Product Purchase Checkout Modal */}
-      <AnimatePresence>
-        {showCheckoutModal && (
-          <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="w-full max-w-lg rounded-3xl bg-[#FAF6EE] border-2 border-slate-900 p-5 md:p-8 space-y-6 shadow-[8px_8px_0px_0px_rgba(30,41,59,0.9)] relative max-h-[90vh] overflow-y-auto scrollbar-thin"
-            >
-              <button
-                onClick={() => {
-                  setShowCheckoutModal(false);
-                  setCheckoutStep(0);
-                }}
-                className="absolute top-4 right-4 text-slate-700 hover:text-slate-900 p-1 z-10"
-              >
-                <X className="h-6 w-6" />
-              </button>
-
-              {/* Header Step Progress */}
-              <div className="space-y-2">
-                <h2 className="text-xl md:text-2xl font-black text-slate-900">Checkout & Order Enquiry</h2>
-                <div className="flex items-center gap-1.5 text-[11px] md:text-xs font-bold overflow-x-auto pb-1">
-                  <span className={`px-2 py-0.5 rounded-lg border border-slate-900 whitespace-nowrap ${checkoutStep === 0 ? 'bg-amber-300' : 'bg-white'}`}>1. Customer Details</span>
-                  <span>→</span>
-                  <span className={`px-2 py-0.5 rounded-lg border border-slate-900 whitespace-nowrap ${checkoutStep === 1 ? 'bg-amber-300' : 'bg-white'}`}>2. Location & Offer</span>
-                  <span>→</span>
-                  <span className={`px-2 py-0.5 rounded-lg border border-slate-900 whitespace-nowrap ${checkoutStep === 2 ? 'bg-amber-300' : 'bg-white'}`}>3. Review Products</span>
-                </div>
+          {/* Footer */}
+          <footer className="bg-black border-t border-white/10 text-neutral-400 py-12 px-6 mt-12 relative overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-red-500 via-amber-400 to-cyan-500" />
+            <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div>
+                <h2 className="text-xl font-black text-amber-400 mb-2">DEEPA CRACKERS</h2>
+                <p className="text-xs text-neutral-400 leading-relaxed mb-2">
+                  Spark joy, spread light—fireworks crafted for your family festival celebration.
+                </p>
+                <p className="text-xs text-neutral-300 font-bold uppercase">📍 Deepa Crackers, RS Road, THIRUTHURAIPOONDI</p>
               </div>
 
-              <form onSubmit={handleCheckoutSubmit} className="space-y-4">
+              <div>
+                <h2 className="text-lg font-black text-white mb-2">Contact Us</h2>
+                <p className="text-xs text-neutral-400">Main Store Outlet Center,</p>
+                <p className="text-xs text-neutral-400">RS Road, THIRUTHURAIPOONDI, Tamil Nadu</p>
+                <a href="tel:+918072897834" className="text-xs font-bold block mt-2 text-amber-400 hover:underline">+91 8072 897 834</a>
+                <a href="https://www.instagram.com/deepa_crackers/" target="_blank" rel="noopener noreferrer" className="text-xs font-bold block mt-1 text-[#ff5277] hover:underline flex items-center gap-1">📸 @deepa_crackers</a>
+                <a href="mailto:deepatraders1985@gmail.com" className="text-xs font-bold block mt-1 text-neutral-300 hover:underline">deepatraders1985@gmail.com</a>
+                <p className="text-xs text-neutral-500 mt-1">info@deepacrackers.com</p>
+              </div>
 
-                {/* Step 0: Customer Personal Details */}
-                {checkoutStep === 0 && (
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-xs font-bold text-slate-900 uppercase mb-1">Full Name *</label>
-                      <input
-                        type="text"
-                        required
-                        placeholder="Enter customer full name"
-                        value={customer.name}
-                        onChange={(e) => setCustomer({ ...customer, name: e.target.value })}
-                        className="w-full px-4 py-2.5 rounded-xl bg-white border-2 border-slate-900 text-slate-900 text-xs font-mono focus:outline-none focus:bg-amber-50 shadow-[2px_2px_0px_0px_#0f172a]"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold text-slate-900 uppercase mb-1">Mobile Number *</label>
-                      <input
-                        type="tel"
-                        required
-                        maxLength={10}
-                        placeholder="10-digit mobile number"
-                        value={customer.mobile}
-                        onChange={(e) => setCustomer({ ...customer, mobile: e.target.value.replace(/\D/g, "") })}
-                        className="w-full px-4 py-2.5 rounded-xl bg-white border-2 border-slate-900 text-slate-900 text-xs font-mono focus:outline-none focus:bg-amber-50 shadow-[2px_2px_0px_0px_#0f172a]"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold text-slate-900 uppercase mb-1">Email Address (Optional)</label>
-                      <input
-                        type="email"
-                        placeholder="email@example.com"
-                        value={customer.email || ""}
-                        onChange={(e) => setCustomer({ ...customer, email: e.target.value })}
-                        className="w-full px-4 py-2.5 rounded-xl bg-white border-2 border-slate-900 text-slate-900 text-xs font-mono focus:outline-none focus:bg-amber-50 shadow-[2px_2px_0px_0px_#0f172a]"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold text-slate-900 uppercase mb-1">Delivery Address *</label>
-                      <textarea
-                        rows={2}
-                        required
-                        placeholder="Full delivery street address..."
-                        value={customer.address}
-                        onChange={(e) => setCustomer({ ...customer, address: e.target.value })}
-                        className="w-full px-4 py-2 rounded-xl bg-white border-2 border-slate-900 text-slate-900 text-xs font-mono focus:outline-none focus:bg-amber-50 resize-none shadow-[2px_2px_0px_0px_#0f172a]"
-                      ></textarea>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (!customer.name || !customer.mobile || customer.mobile.length !== 10 || !customer.address) {
-                          alert("Please fill in Name, 10-digit Mobile Number, and Address.");
-                          return;
-                        }
-                        setCheckoutStep(1);
-                      }}
-                      className="w-full py-3 rounded-xl bg-amber-300 hover:bg-amber-400 text-slate-900 border-2 border-slate-900 font-black text-xs shadow-[3px_3px_0px_0px_#0f172a] transition-all"
-                    >
-                      Next: Location, Address & Offers →
-                    </button>
-                  </div>
-                )}
-
-                {/* Step 1: Location, Address & Offer Summary */}
-                {checkoutStep === 1 && (
-                  <div className="space-y-4">
-                    {/* Address Review Box */}
-                    <div className="p-3.5 rounded-xl bg-amber-50 border-2 border-slate-900 text-xs space-y-1 shadow-[2px_2px_0px_0px_#0f172a]">
-                      <p className="font-bold text-slate-900 flex items-center gap-1.5">
-                        <MapPin className="h-4 w-4 text-amber-600" /> Delivery Target Address:
-                      </p>
-                      <p className="font-bold text-slate-900">{customer.name} ({customer.mobile})</p>
-                      <p className="text-slate-700 font-serif leading-tight">{customer.address}</p>
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold text-slate-900 uppercase mb-1">State *</label>
-                      <select
-                        value={customer.state}
-                        onChange={(e) => setCustomer({ ...customer, state: e.target.value, district: "" })}
-                        className="w-full px-4 py-2.5 rounded-xl bg-white border-2 border-slate-900 text-slate-900 text-xs font-mono focus:outline-none focus:bg-amber-50 shadow-[2px_2px_0px_0px_#0f172a]"
-                      >
-                        <option value="Tamil Nadu">Tamil Nadu</option>
-                        {states.map((s) => (
-                          <option key={s.id || s.name} value={s.name}>{s.name}</option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold text-slate-900 uppercase mb-1">District *</label>
-                      <select
-                        value={customer.district}
-                        onChange={(e) => setCustomer({ ...customer, district: e.target.value })}
-                        className="w-full px-4 py-2.5 rounded-xl bg-white border-2 border-slate-900 text-slate-900 text-xs font-mono focus:outline-none focus:bg-amber-50 shadow-[2px_2px_0px_0px_#0f172a]"
-                      >
-                        <option value="Thiruthuraipoondi">Thiruthuraipoondi</option>
-                        {districts.map((d) => (
-                          <option key={d.id || d.name} value={d.name}>{d.name}</option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold text-slate-900 uppercase mb-1">Apply Promocode / Coupon</label>
-                      <select
-                        value={selectedPromoCode}
-                        onChange={(e) => handleApplyPromoCode(e.target.value)}
-                        className="w-full px-4 py-2.5 rounded-xl bg-white border-2 border-slate-900 text-slate-900 text-xs font-mono focus:outline-none focus:bg-amber-50 shadow-[2px_2px_0px_0px_#0f172a]"
-                      >
-                        <option value="">No Promocode Selected</option>
-                        {promoCodes.map((promo) => (
-                          <option key={promo.id || promo.code} value={promo.code}>
-                            {promo.code} ({promo.discount}% OFF)
-                          </option>
-                        ))}
-                      </select>
-
-                      {appliedPromo && (
-                        <p className="text-[11px] font-bold text-emerald-800 mt-1.5 flex items-center gap-1">
-                          <Tag className="h-3.5 w-3.5" /> Promocode {appliedPromo.code} applied! ({appliedPromo.discount}% OFF)
-                        </p>
-                      )}
-                    </div>
-
-                    <div className="flex gap-2 pt-2">
-                      <button
-                        type="button"
-                        onClick={() => setCheckoutStep(0)}
-                        className="w-1/3 py-2.5 rounded-xl bg-white hover:bg-slate-100 text-slate-900 border-2 border-slate-900 font-bold text-xs shadow-[2px_2px_0px_0px_#0f172a]"
-                      >
-                        ← Back
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setCheckoutStep(2)}
-                        className="w-2/3 py-2.5 rounded-xl bg-amber-300 hover:bg-amber-400 text-slate-900 border-2 border-slate-900 font-black text-xs shadow-[2px_2px_0px_0px_#0f172a]"
-                      >
-                        Review Products & Images →
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {/* Step 2: Product Review with Images & Mobile Optimised View */}
-                {checkoutStep === 2 && (
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between border-b border-slate-300 pb-2">
-                      <p className="text-xs font-black text-slate-900 uppercase">Review Order Items ({cartItems.length})</p>
-                      <p className="text-[11px] font-bold text-slate-700">📍 {customer.district}, {customer.state}</p>
-                    </div>
-
-                    {/* Product List with Image Thumbnails */}
-                    <div className="max-h-64 overflow-y-auto space-y-2 pr-1 scrollbar-thin">
-                      {cartItems.map((item) => {
-                        const tamilName = translateProduct(item.productname);
-                        return (
-                          <div key={item.uniqueKey} className="flex items-center justify-between p-2.5 rounded-xl bg-white border border-slate-900 shadow-[2px_2px_0px_0px_#0f172a] gap-2">
-                            <div className="flex items-center gap-2.5 flex-1 min-w-0">
-                              {renderProductThumbnail(item.image || item.images)}
-                              <div className="min-w-0 flex-1">
-                                <div className="flex items-center gap-1">
-                                  <span className="text-[9px] font-mono px-1 rounded bg-amber-100 border border-slate-900 text-slate-900">#{item.serial_number || item.id}</span>
-                                  <span className="text-xs font-bold text-slate-900 truncate">{item.productname}</span>
-                                </div>
-                                {tamilName && <p className="text-[10px] text-slate-500 font-serif truncate">{tamilName}</p>}
-                                <p className="text-[10px] text-slate-600">₹{item.netPrice.toFixed(2)} per {item.per || 'pkt'}</p>
-                              </div>
-                            </div>
-
-                            <div className="flex items-center gap-2">
-                              <div className="inline-flex items-center gap-1 p-0.5 rounded-lg bg-amber-50 border border-slate-900">
-                                <button
-                                  type="button"
-                                  onClick={() => updateQuantity(item, -1)}
-                                  className="w-5 h-5 rounded bg-white border border-slate-900 text-slate-900 flex items-center justify-center font-bold text-xs hover:bg-amber-200"
-                                >
-                                  -
-                                </button>
-                                <span className="w-5 text-center font-black text-xs text-slate-900">{item.qty}</span>
-                                <button
-                                  type="button"
-                                  onClick={() => updateQuantity(item, 1)}
-                                  className="w-5 h-5 rounded bg-amber-300 border border-slate-900 text-slate-900 flex items-center justify-center font-bold text-xs hover:bg-amber-400"
-                                >
-                                  +
-                                </button>
-                              </div>
-                              <span className="font-black text-xs text-slate-900 w-16 text-right">₹{item.subtotal.toFixed(2)}</span>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-
-                    {/* Cost Breakdown */}
-                    <div className="p-3.5 rounded-xl bg-amber-100 border-2 border-slate-900 space-y-1 text-xs shadow-[2px_2px_0px_0px_#0f172a]">
-                      <div className="flex justify-between text-slate-700">
-                        <span>Cart Estimate Subtotal:</span>
-                        <span>₹{totalAmount.toFixed(2)}</span>
-                      </div>
-                      {appliedPromo && (
-                        <div className="flex justify-between text-emerald-800 font-bold">
-                          <span>Promocode Discount ({appliedPromo.discount}%):</span>
-                          <span>-₹{promoDiscountAmount.toFixed(2)}</span>
-                        </div>
-                      )}
-                      <div className="flex justify-between text-slate-900 font-black text-sm pt-1 border-t border-slate-900">
-                        <span>Total Amount Payable:</span>
-                        <span>₹{finalCheckoutTotal.toFixed(2)}</span>
-                      </div>
-                    </div>
-
-                    <div className="flex gap-2">
-                      <button
-                        type="button"
-                        onClick={() => setCheckoutStep(1)}
-                        className="w-1/3 py-3 rounded-xl bg-white hover:bg-slate-100 text-slate-900 border-2 border-slate-900 font-bold text-xs shadow-[2px_2px_0px_0px_#0f172a]"
-                      >
-                        ← Back
-                      </button>
-                      <button
-                        type="submit"
-                        disabled={isSubmitting}
-                        className="w-2/3 py-3.5 rounded-xl bg-emerald-300 hover:bg-emerald-400 text-slate-900 border-2 border-slate-900 font-black text-xs shadow-[3px_3px_0px_0px_#0f172a] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
-                      >
-                        {isSubmitting ? "Submitting..." : "Confirm & Download Invoice Bill 📄"}
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-              </form>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-
-      {/* Success Modal */}
-      <AnimatePresence>
-        {bookingSuccess && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.8 }}
-            className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4"
-          >
-            <div className="p-8 rounded-3xl bg-[#FAF6EE] border-2 border-slate-900 text-center max-w-md space-y-4 shadow-[8px_8px_0px_0px_rgba(30,41,59,0.9)]">
-              <CheckCircle className="h-14 w-14 text-emerald-600 mx-auto" />
-              <h2 className="text-2xl font-black text-slate-900">Enquiry & Bill Generated!</h2>
-              <p className="text-slate-700 text-xs font-serif leading-relaxed">
-                Thank you for inquiring with <strong className="text-slate-900">Deepa Crackers, Thiruthuraipoondi</strong>. Your invoice PDF bill has been downloaded automatically. Our team will reach out to you shortly via phone or WhatsApp.
-              </p>
-              <button
-                onClick={() => setBookingSuccess(false)}
-                className="px-6 py-2.5 rounded-xl bg-amber-300 text-slate-900 border-2 border-slate-900 font-black text-xs shadow-[2px_2px_0px_0px_#0f172a] hover:bg-amber-400"
-              >
-                Close & Continue
-              </button>
+              <div>
+                <h2 className="text-lg font-black text-white mb-2">Quick Navigation</h2>
+                <ul className="space-y-1 text-xs text-neutral-400">
+                  <li><a href="/" className="hover:text-amber-400 transition">Home</a></li>
+                  <li><a href="/status" className="hover:text-amber-400 transition">Track Order</a></li>
+                  <li><a href="/safety-tips" className="hover:text-amber-400 transition">Safety Tips</a></li>
+                  <li><a href="/about-us" className="hover:text-amber-400 transition">About Us</a></li>
+                  <li><a href="/contact-us" className="hover:text-amber-400 transition">Contact Us</a></li>
+                </ul>
+              </div>
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
-      {/* Footer */}
-      <footer className="bg-white border-t-2 border-slate-900 text-slate-800 py-12 px-6 mt-12">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div>
-            <h2 className="text-xl font-black text-slate-900 mb-2">DEEPA CRACKERS</h2>
-            <p className="text-xs text-slate-600 font-serif leading-relaxed mb-2">
-              Spark joy, spread light—fireworks crafted for your family festival celebration.
-            </p>
-            <p className="text-xs text-slate-900 font-bold uppercase">📍 Deepa Crackers, RS Road, THIRUTHURAIPOONDI</p>
-          </div>
+            <div className="max-w-7xl mx-auto border-t border-white/10 mt-8 pt-6 text-center text-xs font-bold text-neutral-500">
+              © {new Date().getFullYear()} <span className="text-amber-400">Deepa Crackers</span> - THIRUTHURAIPOONDI. All rights reserved.
+            </div>
+          </footer>
+        </main>
+      </div>
 
-          <div>
-            <h2 className="text-lg font-black text-slate-900 mb-2">Contact Us</h2>
-            <p className="text-xs font-serif text-slate-700">Main Store Outlet Center,</p>
-            <p className="text-xs font-serif text-slate-700">RS Road, THIRUTHURAIPOONDI, Tamil Nadu</p>
-            <a href="tel:+918072897834" className="text-xs font-bold block mt-2 hover:underline">+91 8072 897 834</a>
-            <a href="https://www.instagram.com/deepa_crackers/" target="_blank" rel="noopener noreferrer" className="text-xs font-bold block mt-1 text-[#bc1888] hover:underline flex items-center gap-1">📸 @deepa_crackers</a>
-            <a href="mailto:deepatraders1985@gmail.com" className="text-xs font-bold block mt-1 hover:underline">deepatraders1985@gmail.com</a>
-            <p className="text-xs text-slate-500 mt-1">info@deepacrackers.com</p>
-          </div>
-
-          <div>
-            <h2 className="text-lg font-black text-slate-900 mb-2">Quick Navigation</h2>
-            <ul className="space-y-1 text-xs">
-              <li><a href="/" className="hover:underline">Home</a></li>
-              <li><a href="/status" className="hover:underline">Track Order</a></li>
-              <li><a href="/safety-tips" className="hover:underline">Safety Tips</a></li>
-              <li><a href="/about-us" className="hover:underline">About Us</a></li>
-              <li><a href="/contact-us" className="hover:underline">Contact Us</a></li>
-            </ul>
-          </div>
-        </div>
-
-        <div className="max-w-7xl mx-auto border-t-2 border-dashed border-slate-800 mt-8 pt-6 text-center text-xs font-bold text-slate-600">
-          © {new Date().getFullYear()} <span className="text-slate-900">Deepa Crackers</span> - THIRUTHURAIPOONDI. All rights reserved.
-        </div>
-      </footer>
-
-      {/* Floating WhatsApp Quick Chat Button */}
-      <WhatsAppButton hasActiveCart={cartItems.length > 0} />
+      {/* Promocode Bumping Rocket Burst — launches, explodes, and displays exclusive deals */}
+      {!showCheckoutModal && promoCodes.length > 0 && (
+        <PromoBurst promoCodes={promoCodes} onApplyPromo={(code) => handleApplyPromoCode(code)} />
+      )}
 
       {/* Fireworks Launch Screen — shown once per session */}
       {showLauncher && (
@@ -1713,6 +1778,39 @@ export default function Home() {
         />
       )}
 
+      {/* Click Micro Popper Sparkles Overlay */}
+      {popperSparks.length > 0 && (
+        <div className="fixed inset-0 pointer-events-none z-[100] overflow-hidden">
+          {popperSparks.map((spark) => (
+            <div
+              key={spark.id}
+              className="absolute"
+              style={{ left: spark.x, top: spark.y }}
+            >
+              {spark.particles.map((p) => (
+                <motion.div
+                  key={p.id}
+                  initial={{ x: 0, y: 0, opacity: 1, scale: 1.4 }}
+                  animate={{
+                    x: p.dx,
+                    y: p.dy,
+                    opacity: 0,
+                    scale: 0,
+                  }}
+                  transition={{ duration: 0.65, ease: "easeOut" }}
+                  className="absolute rounded-full"
+                  style={{
+                    width: p.size,
+                    height: p.size,
+                    backgroundColor: p.color,
+                    boxShadow: `0 0 10px ${p.color}, 0 0 4px #ffffff`,
+                  }}
+                />
+              ))}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

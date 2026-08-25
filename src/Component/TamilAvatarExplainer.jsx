@@ -82,7 +82,6 @@ export default function TamilAvatarExplainer({ onClose }) {
   const [step, setStep] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
   const [isMuted, setIsMuted] = useState(true);
-  const [dollVisible, setDollVisible] = useState(false);
   const autoTimer = useRef(null);
 
   const steps = phase === "explain" ? EXPLAIN_STEPS : TOUR_STEPS;
@@ -109,12 +108,6 @@ export default function TamilAvatarExplainer({ onClose }) {
     return () => clearInterval(autoTimer.current);
   }, [isPlaying, phase, steps.length]);
 
-  // Doll walk-in animation
-  useEffect(() => {
-    const t = setTimeout(() => setDollVisible(true), 300);
-    return () => clearTimeout(t);
-  }, []);
-
   const goNext = () => {
     clearInterval(autoTimer.current);
     if (step + 1 >= steps.length) {
@@ -140,23 +133,23 @@ export default function TamilAvatarExplainer({ onClose }) {
   const globalStep = phase === "explain" ? step : EXPLAIN_STEPS.length + step;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-sm p-3">
+    <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/85 backdrop-blur-md p-3">
       <motion.div
         initial={{ opacity: 0, y: 80 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: 80 }}
         transition={{ type: "spring", damping: 22, stiffness: 300 }}
-        className="w-full max-w-2xl bg-[#FAF6EE] rounded-3xl border-4 border-slate-900 shadow-[12px_12px_0px_0px_#0f172a] overflow-hidden font-mono"
+        className="w-full max-w-2xl bg-neutral-900 rounded-3xl border border-white/20 shadow-2xl overflow-hidden text-white"
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-3.5 bg-amber-300 border-b-4 border-slate-900">
+        <div className="flex items-center justify-between px-5 py-3.5 bg-black border-b border-neutral-800">
           <div className="flex items-center gap-2">
             <span className="text-xl">🎭</span>
             <div>
-              <h3 className="text-sm font-black text-slate-900">
+              <h3 className="text-sm font-black text-white">
                 {phase === "explain" ? "தீபா பட்டாஸ் விளக்கம் (Deepa Explains)" : "🛒 புக்கிங் வழிகாட்டி (Booking Tour)"}
               </h3>
-              <p className="text-[10px] font-bold text-slate-700">
+              <p className="text-[10px] font-bold text-red-500">
                 {phase === "explain" ? "ஏன் தீபா பட்டாஸ் தேர்வு செய்ய வேண்டும்?" : "எப்படி ஆர்டர் செய்வது? Step-by-step"}
               </p>
             </div>
@@ -164,23 +157,23 @@ export default function TamilAvatarExplainer({ onClose }) {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setIsMuted(!isMuted)}
-              className="p-2 rounded-xl bg-white border-2 border-slate-900 hover:bg-amber-100 shadow-[2px_2px_0px_0px_#0f172a]"
+              className="p-2 rounded-xl bg-neutral-800 border border-neutral-700 hover:bg-neutral-700 shadow-sm"
             >
-              {isMuted ? <VolumeX className="w-4 h-4 text-slate-700" /> : <Volume2 className="w-4 h-4 text-slate-700" />}
+              {isMuted ? <VolumeX className="w-4 h-4 text-neutral-300" /> : <Volume2 className="w-4 h-4 text-red-500" />}
             </button>
             <button
               onClick={onClose}
-              className="p-2 rounded-xl bg-white border-2 border-slate-900 hover:bg-red-50 shadow-[2px_2px_0px_0px_#0f172a]"
+              className="p-2 rounded-xl bg-neutral-800 border border-neutral-700 hover:bg-red-900/60 shadow-sm"
             >
-              <X className="w-4 h-4 text-slate-800" />
+              <X className="w-4 h-4 text-neutral-300" />
             </button>
           </div>
         </div>
 
         {/* Progress Bar */}
-        <div className="w-full bg-slate-200 h-2 border-b-2 border-slate-300">
+        <div className="w-full bg-neutral-800 h-2 border-b border-neutral-700">
           <motion.div
-            className="h-full bg-amber-500"
+            className="h-full bg-red-600"
             initial={{ width: "0%" }}
             animate={{ width: `${((globalStep + 1) / totalSteps) * 100}%` }}
             transition={{ duration: 0.5 }}
@@ -190,8 +183,8 @@ export default function TamilAvatarExplainer({ onClose }) {
         {/* Main Content */}
         <div className="flex flex-col sm:flex-row items-center gap-0 min-h-[300px]">
 
-          {/* 3D Avatar iframe from ReadyPlayerMe */}
-          <div className="w-full sm:w-[220px] shrink-0 bg-gradient-to-b from-amber-100 to-amber-200 border-r-0 sm:border-r-4 border-b-4 sm:border-b-0 border-slate-900 relative flex items-center justify-center" style={{ minHeight: 240 }}>
+          {/* Avatar Section */}
+          <div className="w-full sm:w-[220px] shrink-0 bg-black border-r-0 sm:border-r border-b sm:border-b-0 border-neutral-800 relative flex items-center justify-center" style={{ minHeight: 240 }}>
             <AnimatePresence mode="wait">
               <motion.div
                 key={phase + step}
@@ -201,15 +194,6 @@ export default function TamilAvatarExplainer({ onClose }) {
                 transition={{ type: "spring", stiffness: 260, damping: 20 }}
                 className="relative w-full h-60"
               >
-                {/* Ready Player Me 3D Avatar via iframe */}
-                <iframe
-                  src="https://models.readyplayer.me/64c3f5ac5924e9ade9a74a70.glb?autoRotate=false&background=transparent"
-                  title="Deepa 3D Avatar"
-                  className="w-full h-full opacity-0 absolute"
-                  allow="camera *; microphone *"
-                  onLoad={(e) => { e.target.style.opacity = 1; }}
-                />
-                {/* Fallback Premium CSS Avatar since iframe won't render glb directly */}
                 <div className="w-full h-full flex flex-col items-center justify-end pb-2">
                   {/* Head */}
                   <motion.div
@@ -224,10 +208,8 @@ export default function TamilAvatarExplainer({ onClose }) {
                       className="flex flex-col items-center"
                     >
                       {/* Face */}
-                      <div className="w-20 h-20 rounded-full bg-amber-300 border-4 border-slate-900 shadow-[3px_3px_0px_0px_#0f172a] flex items-center justify-center relative overflow-hidden">
-                        {/* Saree / Indian attire pattern */}
-                        <div className="absolute inset-0 bg-gradient-to-b from-amber-200 to-amber-400" />
-                        {/* Face elements */}
+                      <div className="w-20 h-20 rounded-full bg-red-600 border-2 border-white/40 shadow-md flex items-center justify-center relative overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-b from-red-500 to-red-700" />
                         <div className="relative z-10 text-4xl select-none">
                           {phase === "explain" 
                             ? (step === 0 ? "👩🏽" : step === 1 ? "😟" : step === 2 ? "😊" : "🤩")
@@ -236,10 +218,8 @@ export default function TamilAvatarExplainer({ onClose }) {
                         </div>
                       </div>
                       {/* Body */}
-                      <div className="w-16 h-20 rounded-b-2xl bg-gradient-to-b from-orange-500 to-red-600 border-4 border-t-0 border-slate-900 shadow-[3px_3px_0px_0px_#0f172a] flex items-center justify-center relative overflow-hidden mt-[-4px]">
-                        <div className="absolute inset-0 bg-gradient-to-r from-orange-400/30 to-red-500/30" />
-                        {/* Saree border pattern */}
-                        <div className="absolute bottom-0 left-0 right-0 h-3 bg-yellow-400 border-t-2 border-slate-900" />
+                      <div className="w-16 h-20 rounded-b-2xl bg-gradient-to-b from-neutral-900 to-black border-2 border-t-0 border-white/20 shadow-md flex items-center justify-center relative overflow-hidden mt-[-4px]">
+                        <div className="absolute bottom-0 left-0 right-0 h-3 bg-red-600 border-t border-white/30" />
                         <span className="text-2xl relative z-10">👐</span>
                       </div>
                       {/* Legs */}
@@ -247,19 +227,19 @@ export default function TamilAvatarExplainer({ onClose }) {
                         <motion.div
                           animate={isPlaying ? { y: [0, -5, 0] } : {}}
                           transition={{ repeat: Infinity, duration: 0.8, delay: 0 }}
-                          className="w-6 h-8 rounded-b-xl bg-amber-900 border-2 border-slate-900 shadow-[1px_1px_0px_0px_#0f172a]"
+                          className="w-6 h-8 rounded-b-xl bg-neutral-800 border border-neutral-700 shadow-sm"
                         />
                         <motion.div
                           animate={isPlaying ? { y: [0, -5, 0] } : {}}
                           transition={{ repeat: Infinity, duration: 0.8, delay: 0.4 }}
-                          className="w-6 h-8 rounded-b-xl bg-amber-900 border-2 border-slate-900 shadow-[1px_1px_0px_0px_#0f172a]"
+                          className="w-6 h-8 rounded-b-xl bg-neutral-800 border border-neutral-700 shadow-sm"
                         />
                       </div>
                     </motion.div>
                   </motion.div>
 
                   {/* Phase badge */}
-                  <span className="mt-2 px-2 py-0.5 rounded-full bg-slate-900 text-amber-300 text-[10px] font-black">
+                  <span className="mt-2 px-2.5 py-0.5 rounded-full bg-red-600 text-white text-[10px] font-black">
                     {phase === "explain" ? "தீபா 👩🏽" : "வழிகாட்டி 🧭"}
                   </span>
                 </div>
@@ -273,16 +253,16 @@ export default function TamilAvatarExplainer({ onClose }) {
             <div className="flex gap-2">
               <button
                 onClick={() => { setPhase("explain"); setStep(0); clearInterval(autoTimer.current); }}
-                className={`px-3 py-1.5 rounded-xl border-2 border-slate-900 text-xs font-black transition-all shadow-[2px_2px_0px_0px_#0f172a] ${
-                  phase === "explain" ? "bg-amber-300 text-slate-900" : "bg-white text-slate-600 hover:bg-amber-50"
+                className={`px-3 py-1.5 rounded-xl border text-xs font-black transition-all shadow-md ${
+                  phase === "explain" ? "bg-red-600 text-white border-red-500" : "bg-neutral-800 text-neutral-300 border-neutral-700 hover:bg-neutral-700"
                 }`}
               >
                 🎭 ஏன் தீபா? (Why Deepa?)
               </button>
               <button
                 onClick={() => { setPhase("tour"); setStep(0); clearInterval(autoTimer.current); }}
-                className={`px-3 py-1.5 rounded-xl border-2 border-slate-900 text-xs font-black transition-all shadow-[2px_2px_0px_0px_#0f172a] ${
-                  phase === "tour" ? "bg-emerald-300 text-slate-900" : "bg-white text-slate-600 hover:bg-emerald-50"
+                className={`px-3 py-1.5 rounded-xl border text-xs font-black transition-all shadow-md ${
+                  phase === "tour" ? "bg-white text-black border-white" : "bg-neutral-800 text-neutral-300 border-neutral-700 hover:bg-neutral-700"
                 }`}
               >
                 🛒 எப்படி புக்? (How to Book?)
@@ -299,45 +279,40 @@ export default function TamilAvatarExplainer({ onClose }) {
                 transition={{ duration: 0.25 }}
                 className="relative"
               >
-                {/* Bubble triangle pointing left */}
-                <div className="absolute left-[-10px] top-5 w-0 h-0 border-t-[8px] border-t-transparent border-b-[8px] border-b-transparent border-r-[12px] border-r-amber-300 hidden sm:block" />
-
-                <div className={`p-4 rounded-2xl border-3 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a] ${
-                  phase === "explain" ? "bg-amber-50" : "bg-emerald-50"
-                }`}>
-                  <div className="flex items-center gap-2 mb-2">
+                <div className="p-4 rounded-2xl bg-black border border-neutral-800 shadow-inner">
+                  <div className="flex items-center gap-2 mb-1">
                     <span className="text-xl">{currentStep.emoji}</span>
-                    <h4 className="text-sm font-black text-slate-900 font-mono">{currentStep.tamilTitle}</h4>
+                    <h4 className="text-sm font-black text-red-500">{currentStep.tamilTitle}</h4>
                   </div>
 
                   {/* Tamil text */}
-                  <p className="text-sm font-bold text-slate-900 font-sans leading-relaxed mb-2">
+                  <p className="text-sm font-bold text-white leading-relaxed mb-2">
                     {currentStep.tamilText}
                   </p>
 
                   {/* English subtitle */}
-                  <p className="text-[11px] text-slate-600 font-serif italic border-l-3 border-amber-400 pl-2">
+                  <p className="text-[11px] text-neutral-400 italic border-l-2 border-red-500 pl-2">
                     EN: {currentStep.englishText}
                   </p>
 
                   {/* Supply chain visual for explain steps */}
                   {phase === "explain" && currentStep.highlight === "other" && (
-                    <div className="mt-3 flex items-center gap-1 flex-wrap text-[11px] font-black bg-red-50 border-2 border-red-300 rounded-xl p-2">
-                      <span>🏭</span><span className="text-red-700">→</span>
-                      <span>👨‍💼 Agent</span><span className="text-red-700">→</span>
-                      <span>🏬 Distributor</span><span className="text-red-700">→</span>
-                      <span>🛒 Retailer</span><span className="text-red-700">→</span>
+                    <div className="mt-3 flex items-center gap-1 flex-wrap text-[11px] font-black bg-neutral-900 border border-red-800/60 rounded-xl p-2 text-red-300">
+                      <span>🏭</span><span className="text-red-500">→</span>
+                      <span>👨‍💼 Agent</span><span className="text-red-500">→</span>
+                      <span>🏬 Distributor</span><span className="text-red-500">→</span>
+                      <span>🛒 Retailer</span><span className="text-red-500">→</span>
                       <span>👨‍👩‍👧‍👦</span>
-                      <span className="ml-auto text-red-700 font-black">= HIGH PRICE! 📈</span>
+                      <span className="ml-auto text-red-500 font-black">= HIGH PRICE! 📈</span>
                     </div>
                   )}
                   {phase === "explain" && currentStep.highlight === "deepa" && (
-                    <div className="mt-3 flex items-center gap-1 flex-wrap text-[11px] font-black bg-emerald-50 border-2 border-emerald-400 rounded-xl p-2">
-                      <span>🏭</span><span className="text-emerald-700">→</span>
-                      <span className="text-emerald-900 font-black bg-amber-300 px-1 rounded border border-slate-900">🏬 DEEPA CRACKERS</span>
-                      <span className="text-emerald-700">→</span>
+                    <div className="mt-3 flex items-center gap-1 flex-wrap text-[11px] font-black bg-neutral-900 border border-white/20 rounded-xl p-2 text-white">
+                      <span>🏭</span><span className="text-red-500">→</span>
+                      <span className="text-white font-black bg-red-600 px-1.5 py-0.5 rounded border border-red-500">🏬 DEEPA CRACKERS</span>
+                      <span className="text-red-500">→</span>
                       <span>👨‍👩‍👧‍👦</span>
-                      <span className="ml-auto text-emerald-700 font-black">= 80% SAVINGS! 💚</span>
+                      <span className="ml-auto text-white font-black">= 80% SAVINGS! 💚</span>
                     </div>
                   )}
                 </div>
@@ -350,12 +325,12 @@ export default function TamilAvatarExplainer({ onClose }) {
                 <button
                   key={i}
                   onClick={() => { setStep(i); clearInterval(autoTimer.current); }}
-                  className={`h-2 rounded-full border border-slate-500 transition-all ${
-                    i === step ? "w-6 bg-amber-500" : "w-2 bg-slate-300"
+                  className={`h-2 rounded-full transition-all ${
+                    i === step ? "w-6 bg-red-600" : "w-2 bg-neutral-700"
                   }`}
                 />
               ))}
-              <span className="ml-auto text-[10px] font-black text-slate-600 font-mono">
+              <span className="ml-auto text-[10px] font-black text-neutral-400">
                 {step + 1}/{steps.length}
               </span>
             </div>
@@ -364,9 +339,9 @@ export default function TamilAvatarExplainer({ onClose }) {
             <div className="flex items-center justify-between gap-2">
               <button
                 onClick={() => { setIsPlaying(!isPlaying); clearInterval(autoTimer.current); }}
-                className="px-3 py-2 rounded-xl bg-white border-2 border-slate-900 text-xs font-bold shadow-[2px_2px_0px_0px_#0f172a] flex items-center gap-1.5 hover:bg-amber-50"
+                className="px-3 py-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-xs font-bold shadow-md flex items-center gap-1.5 text-neutral-200"
               >
-                {isPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 text-emerald-600" />}
+                {isPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 text-red-500" />}
                 {isPlaying ? "நிறுத்து" : "இயக்கு"}
               </button>
 
@@ -374,17 +349,17 @@ export default function TamilAvatarExplainer({ onClose }) {
                 <button
                   onClick={goPrev}
                   disabled={phase === "explain" && step === 0}
-                  className="px-3 py-2 rounded-xl bg-white border-2 border-slate-900 text-xs font-bold shadow-[2px_2px_0px_0px_#0f172a] flex items-center gap-1 hover:bg-amber-50 disabled:opacity-40"
+                  className="px-3 py-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-xs font-bold shadow-md flex items-center gap-1 text-neutral-200 disabled:opacity-40"
                 >
                   <ChevronLeft className="w-4 h-4" />
                   முந்தையது
                 </button>
                 <button
                   onClick={goNext}
-                  className={`px-4 py-2 rounded-xl border-2 border-slate-900 text-xs font-black shadow-[3px_3px_0px_0px_#0f172a] flex items-center gap-1 ${
+                  className={`px-4 py-2 rounded-xl text-xs font-black shadow-lg flex items-center gap-1 ${
                     phase === "explain" && step === EXPLAIN_STEPS.length - 1
-                      ? "bg-emerald-400 hover:bg-emerald-500 text-slate-900"
-                      : "bg-amber-300 hover:bg-amber-400 text-slate-900"
+                      ? "bg-white text-black border border-white"
+                      : "bg-gradient-to-r from-red-600 to-red-700 text-white border border-red-500"
                   }`}
                 >
                   {phase === "explain" && step === EXPLAIN_STEPS.length - 1
