@@ -10,6 +10,7 @@ import BackgroundFireworks from '../Component/BackgroundFireworks';
 import PromoBurst from '../Component/PromoBurst';
 import Card3D from '../Component/Card3D';
 import WhyDeepaCrackersModal from '../Component/WhyDeepaCrackersModal';
+import SkyShotBookingSuccessModal from '../Component/SkyShotBookingSuccessModal';
 import WhatsAppButton from '../Component/WhatsAppButton';
 import { API_BASE_URL } from '../../Config';
 import { translateProduct } from '../utils/tamilTranslation';
@@ -218,6 +219,7 @@ export default function Home() {
   const [checkoutStep, setCheckoutStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [bookingSuccess, setBookingSuccess] = useState(false);
+  const [lastCompletedOrderId, setLastCompletedOrderId] = useState("");
   const [previewMedia, setPreviewMedia] = useState(null);
   const [downloadingPDF, setDownloadingPDF] = useState(false);
 
@@ -365,7 +367,7 @@ export default function Home() {
     return ["All", ...sorted];
   }, [products, categoryOrder]);
 
-  // Micro Popper Sparkle Effect on Plus Button
+  // Micro Popper Sparkle Effect on Plus Button (Ultra-Bright & Radiant)
   const [popperSparks, setPopperSparks] = useState([]);
 
   const triggerPopperSparkle = (e) => {
@@ -375,22 +377,26 @@ export default function Home() {
     const y = rect ? rect.top + rect.height / 2 : e.clientY || window.innerHeight / 2;
     const id = Date.now() + Math.random();
 
-    const particles = Array.from({ length: 14 }).map((_, i) => {
-      const angle = (i * (360 / 14) + Math.random() * 20) * (Math.PI / 180);
-      const velocity = 35 + Math.random() * 45;
+    // 22 Radiant multi-color sparkler particles
+    const particleColors = ['#ffd700', '#ffffff', '#ff0055', '#10b981', '#00f0ff', '#ff9900', '#ec4899', '#ffffff', '#ffd700'];
+    const particles = Array.from({ length: 22 }).map((_, i) => {
+      const angle = (i * (360 / 22) + Math.random() * 15) * (Math.PI / 180);
+      const velocity = 35 + Math.random() * 55;
+      const color = particleColors[i % particleColors.length];
       return {
         id: `${id}-${i}`,
         dx: Math.cos(angle) * velocity,
         dy: Math.sin(angle) * velocity,
-        color: ['#ef4444', '#f59e0b', '#10b981', '#06b6d4', '#ec4899', '#ffd700', '#ffffff'][i % 7],
-        size: 3 + Math.random() * 3,
+        color,
+        size: i % 3 === 0 ? (6 + Math.random() * 4) : (4 + Math.random() * 3), // Varied prominent sizes (4px - 10px)
+        isStar: i % 2 === 0,
       };
     });
 
     setPopperSparks((prev) => [...prev, { id, x, y, particles }]);
     setTimeout(() => {
       setPopperSparks((prev) => prev.filter((p) => p.id !== id));
-    }, 700);
+    }, 850);
   };
 
   // Cart operations using Unique Key with Sparkle on Plus
@@ -791,6 +797,7 @@ export default function Home() {
         const data = await res.json();
         const serverOrderId = data.order_id || data.quotation_id || order_id;
 
+        setLastCompletedOrderId(serverOrderId);
         setBookingSuccess(true);
         setCart({});
         setShowCheckoutModal(false);
@@ -1632,7 +1639,7 @@ export default function Home() {
                                     <span className="w-5 text-center font-black text-xs text-white">{item.qty}</span>
                                     <button
                                       type="button"
-                                      onClick={() => updateQuantity(item, 1)}
+                                      onClick={(e) => updateQuantity(item, 1, e)}
                                       className="w-5 h-5 rounded bg-red-600 border border-red-500 text-white flex items-center justify-center font-bold text-xs hover:bg-red-500"
                                     >
                                       +
@@ -1688,31 +1695,14 @@ export default function Home() {
             )}
           </AnimatePresence>
 
-          {/* Success Modal */}
-          <AnimatePresence>
-            {bookingSuccess && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.8 }}
-                className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4"
-              >
-                <div className="p-8 rounded-3xl bg-neutral-900 border border-white/20 text-center max-w-md space-y-4 shadow-2xl text-white">
-                  <CheckCircle className="h-14 w-14 text-red-500 mx-auto" />
-                  <h2 className="text-2xl font-black text-white">Enquiry & Bill Generated!</h2>
-                  <p className="text-neutral-300 text-xs leading-relaxed">
-                    Thank you for inquiring with <strong className="text-red-500">Deepa Crackers, Thiruthuraipoondi</strong>. Your invoice PDF bill has been downloaded automatically. Our team will reach out to you shortly via phone or WhatsApp.
-                  </p>
-                  <button
-                    onClick={() => setBookingSuccess(false)}
-                    className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-red-600 to-red-700 text-white border border-red-500 font-black text-xs shadow-lg shadow-red-600/30 hover:from-red-500 hover:to-red-600"
-                  >
-                    Close & Continue
-                  </button>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          {/* Sky Shot Center Celebration Modal */}
+          <SkyShotBookingSuccessModal
+            isOpen={bookingSuccess}
+            onClose={() => setBookingSuccess(false)}
+            orderId={lastCompletedOrderId}
+            customerName={customer.name}
+            totalAmount={finalCheckoutTotal}
+          />
 
           {/* Footer */}
           <footer className="bg-black border-t border-white/10 text-neutral-400 py-12 px-6 mt-12 relative overflow-hidden">
@@ -1778,34 +1768,61 @@ export default function Home() {
         />
       )}
 
-      {/* Click Micro Popper Sparkles Overlay */}
+      {/* Click Micro Popper Sparkles Overlay (Ultra-Bright, Shockwave Ring & Core Flash) */}
       {popperSparks.length > 0 && (
-        <div className="fixed inset-0 pointer-events-none z-[100] overflow-hidden">
+        <div className="fixed inset-0 pointer-events-none z-[999999] overflow-hidden">
           {popperSparks.map((spark) => (
             <div
               key={spark.id}
               className="absolute"
               style={{ left: spark.x, top: spark.y }}
             >
+              {/* Expanding Golden Shockwave Ring */}
+              <motion.div
+                initial={{ scale: 0.3, opacity: 1 }}
+                animate={{ scale: 2.4, opacity: 0 }}
+                transition={{ duration: 0.55, ease: "easeOut" }}
+                className="absolute -translate-x-1/2 -translate-y-1/2 w-10 h-10 rounded-full border-2 border-amber-300 shadow-[0_0_20px_#ffd700]"
+              />
+
+              {/* Central Radiant Flash */}
+              <motion.div
+                initial={{ scale: 0, opacity: 1 }}
+                animate={{ scale: [0, 2.0, 0], opacity: [0, 0.9, 0] }}
+                transition={{ duration: 0.45, ease: "easeOut" }}
+                className="absolute -translate-x-1/2 -translate-y-1/2 w-12 h-12 rounded-full"
+                style={{
+                  background: "radial-gradient(circle, #ffffff 0%, #ffd700 40%, transparent 70%)",
+                  boxShadow: "0 0 25px #ffd700",
+                }}
+              />
+
+              {/* Radiant Multi-Color Sparkle Particles */}
               {spark.particles.map((p) => (
                 <motion.div
                   key={p.id}
-                  initial={{ x: 0, y: 0, opacity: 1, scale: 1.4 }}
+                  initial={{ x: 0, y: 0, opacity: 1, scale: 0.6 }}
                   animate={{
-                    x: p.dx,
-                    y: p.dy,
-                    opacity: 0,
-                    scale: 0,
+                    x: [0, p.dx * 0.45, p.dx],
+                    y: [0, p.dy * 0.45, p.dy + 8],
+                    opacity: [1, 1, 0.8, 0],
+                    scale: [0.6, 1.8, 1.2, 0],
                   }}
-                  transition={{ duration: 0.65, ease: "easeOut" }}
-                  className="absolute rounded-full"
+                  transition={{ duration: 0.75, ease: [0.16, 1, 0.3, 1] }}
+                  className="absolute rounded-full -translate-x-1/2 -translate-y-1/2"
                   style={{
                     width: p.size,
                     height: p.size,
                     backgroundColor: p.color,
-                    boxShadow: `0 0 10px ${p.color}, 0 0 4px #ffffff`,
+                    boxShadow: `0 0 16px ${p.color}, 0 0 8px #ffffff, 0 0 26px ${p.color}`,
+                    willChange: "transform, opacity",
                   }}
-                />
+                >
+                  {/* Bright Diamond White Core inside larger sparkles */}
+                  {p.size > 5 && (
+                    <div className="w-1/2 h-1/2 rounded-full bg-white mx-auto my-auto mt-[25%]" />
+                  )}
+                </motion.div>
               ))}
             </div>
           ))}

@@ -3,29 +3,61 @@ import React, { useEffect, useRef, useState, useCallback } from "react";
 const rand = (a, b) => Math.random() * (b - a) + a;
 const randInt = (a, b) => Math.floor(rand(a, b));
 
-// Strict Red, White, and Black Firework Palettes
+// Vibrant Festival & Sparkler Palettes (Gold, Crimson, Diamond White, Amber)
 const BURST_PALETTES = [
-  ["#ff0033", "#ffffff", "#cc0022", "#ffffff", "#ff4466"],
-  ["#ffffff", "#ef4444", "#ffffff", "#990022", "#dc2626"],
-  ["#ff1744", "#ffffff", "#b71c1c", "#ffffff", "#ff5252"],
-  ["#ffffff", "#ffffff", "#ff0033", "#ffffff", "#cc0000"],
+  ["#ff0033", "#ffffff", "#ffd700", "#ff4466", "#ffffff"],
+  ["#ffd700", "#ffea00", "#ffffff", "#ff9900", "#fff8dc"],
+  ["#ff1744", "#ffffff", "#ff5252", "#ffd700", "#ffffff"],
+  ["#ffffff", "#ffd700", "#ff0055", "#fff0f5", "#ffcc00"],
 ];
 
-// ── Multi-Point Sky Fireworks Engine ────────────────────────
+const GOLD_SPARKLER_COLORS = [
+  "#ffffff", "#fff8dc", "#ffd700", "#ffec8b", "#ffe4b5", "#ffaa00", "#ff4444"
+];
+
+// ── Ultra-Smooth, Elegant & Slower 60FPS High-Density Sparkler Engine ──
 function useSkyFireworksEngine(canvasRef) {
   const animRef = useRef(null);
   const particles = useRef([]);
+  const sparklers = useRef([]); // Shimmering sparkler dust & embers
   const rockets = useRef([]);
   const frame = useRef(0);
   const W = useRef(0);
   const H = useRef(0);
 
-  const burst = useCallback((x, y, palette, countOverride = null) => {
-    const pal = palette || BURST_PALETTES[randInt(0, BURST_PALETTES.length)];
-    const count = countOverride || randInt(110, 160);
+  // Spawn dense sparkling glitter shower with gentle, slow drift
+  const spawnSparklerDust = useCallback((x, y, count, spreadSpeed = 2.5, customPalette = null) => {
+    const pal = customPalette || GOLD_SPARKLER_COLORS;
     for (let i = 0; i < count; i++) {
-      const angle = (i / count) * Math.PI * 2 + rand(-0.06, 0.06);
-      const speed = rand(3, 11);
+      const angle = Math.random() * Math.PI * 2;
+      const speed = rand(0.3, spreadSpeed);
+      sparklers.current.push({
+        x: x + rand(-3, 3),
+        y: y + rand(-3, 3),
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed - rand(0.1, 1.2), // gentle upward spark float
+        color: pal[randInt(0, pal.length)],
+        alpha: rand(0.85, 1.0),
+        size: rand(1.2, 2.6),
+        decay: rand(0.007, 0.014), // Slower fade for lasting sparkle
+        gravity: rand(0.018, 0.04), // Slower floating descent
+        drag: rand(0.975, 0.988),
+        twinkleSpeed: rand(0.1, 0.22), // Slower, softer twinkling
+        twinklePhase: rand(0, Math.PI * 2),
+      });
+    }
+  }, []);
+
+  const burst = useCallback((x, y, palette, countOverride = null) => {
+    const isMob = (typeof window !== "undefined" ? window.innerWidth : 1000) < 768;
+    const pal = palette || BURST_PALETTES[randInt(0, BURST_PALETTES.length)];
+    const defaultCount = isMob ? randInt(55, 75) : randInt(95, 130);
+    const count = countOverride ? (isMob ? Math.floor(countOverride * 0.6) : countOverride) : defaultCount;
+
+    // 1. Primary shell burst stars with relaxed bloom speed
+    for (let i = 0; i < count; i++) {
+      const angle = (i / count) * Math.PI * 2 + rand(-0.08, 0.08);
+      const speed = rand(isMob ? 2.0 : 2.6, isMob ? 5.5 : 7.8); // Slower bloom
       particles.current.push({
         x,
         y,
@@ -33,40 +65,48 @@ function useSkyFireworksEngine(canvasRef) {
         vy: Math.sin(angle) * speed,
         color: pal[randInt(0, pal.length)],
         alpha: 1,
-        size: rand(2.0, 4.5),
-        decay: rand(0.013, 0.024),
-        gravity: rand(0.06, 0.12),
-        tail: [],
-        twinkle: Math.random() > 0.45,
-        twinkleSpeed: rand(0.09, 0.22),
+        size: rand(isMob ? 2.2 : 2.8, isMob ? 3.4 : 4.4),
+        decay: rand(0.008, 0.016), // Slower decay (hangs in the air)
+        gravity: rand(0.03, 0.065), // Gentler gravity
+        trail: [],
+        twinkle: Math.random() > 0.3,
+        twinkleSpeed: rand(0.09, 0.18),
         twinklePhase: rand(0, Math.PI * 2),
+        sparkDropCounter: 0,
       });
     }
-    // Crisp white ring
-    for (let i = 0; i < 24; i++) {
-      const angle = (i / 24) * Math.PI * 2;
+
+    // 2. Extra dense, crackling golden & diamond sparkler cloud
+    const sparklerCount = isMob ? randInt(45, 65) : randInt(85, 130);
+    spawnSparklerDust(x, y, sparklerCount, isMob ? 3.5 : 5.0, GOLD_SPARKLER_COLORS);
+
+    // 3. Crisp white center sparkle ring
+    const ringCount = isMob ? 16 : 26;
+    for (let i = 0; i < ringCount; i++) {
+      const angle = (i / ringCount) * Math.PI * 2;
       particles.current.push({
         x,
         y,
-        vx: Math.cos(angle) * rand(7, 12),
-        vy: Math.sin(angle) * rand(7, 12),
+        vx: Math.cos(angle) * rand(isMob ? 3.5 : 5.0, isMob ? 6.0 : 8.5),
+        vy: Math.sin(angle) * rand(isMob ? 3.5 : 5.0, isMob ? 6.0 : 8.5),
         color: "#ffffff",
         alpha: 1,
-        size: rand(1.4, 2.5),
-        decay: rand(0.025, 0.04),
-        gravity: 0.03,
-        tail: [],
-        twinkle: false,
-        twinkleSpeed: 0,
-        twinklePhase: 0,
+        size: rand(1.4, 2.2),
+        decay: rand(0.015, 0.028),
+        gravity: 0.025,
+        trail: [],
+        twinkle: true,
+        twinkleSpeed: 0.25,
+        twinklePhase: rand(0, Math.PI * 2),
+        sparkDropCounter: 999,
       });
     }
-  }, []);
+  }, [spawnSparklerDust]);
 
   const launchSkyBurst = useCallback((tx, ty, pal) => {
     const sx = W.current * rand(0.2, 0.8);
     const sy = H.current + 10;
-    const dur = rand(38, 55);
+    const dur = rand(54, 76); // Slower, graceful rocket ascent (~1.0s to 1.3s)
     rockets.current.push({
       x: sx,
       y: sy,
@@ -81,7 +121,8 @@ function useSkyFireworksEngine(canvasRef) {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext("2d", { alpha: true });
+    if (!ctx) return;
 
     const resize = () => {
       canvas.width = window.innerWidth;
@@ -90,24 +131,23 @@ function useSkyFireworksEngine(canvasRef) {
       H.current = canvas.height;
     };
     resize();
-    window.addEventListener("resize", resize);
+    window.addEventListener("resize", resize, { passive: true });
 
     const ids = [];
+    const isMob = window.innerWidth < 768;
 
-    // Instant initial center welcoming bursts
-    ids.push(setTimeout(() => burst(W.current * 0.5, H.current * 0.22, BURST_PALETTES[0], 220), 150));
-    ids.push(setTimeout(() => burst(W.current * 0.28, H.current * 0.18, BURST_PALETTES[1], 180), 400));
-    ids.push(setTimeout(() => burst(W.current * 0.72, H.current * 0.18, BURST_PALETTES[2], 180), 650));
+    // Gracefully timed welcoming multi-point sparkler bursts
+    ids.push(setTimeout(() => burst(W.current * 0.5, H.current * 0.22, BURST_PALETTES[0], 160), 150));
+    ids.push(setTimeout(() => burst(W.current * 0.25, H.current * 0.20, BURST_PALETTES[1], 550), 550));
+    ids.push(setTimeout(() => burst(W.current * 0.75, H.current * 0.20, BURST_PALETTES[2], 950), 950));
 
-    // Staggered sky rockets bursting across multiple positions
+    // Staggered sky rockets bursting across positions with relaxed timing
     const skyPositions = [
-      [0.2, 0.26],
-      [0.8, 0.26],
-      [0.38, 0.14],
-      [0.62, 0.14],
-      [0.15, 0.18],
-      [0.85, 0.18],
-      [0.5, 0.12],
+      [0.22, 0.26],
+      [0.78, 0.26],
+      [0.36, 0.16],
+      [0.64, 0.16],
+      [0.5, 0.13],
     ];
 
     skyPositions.forEach(([tx, ty], i) => {
@@ -118,47 +158,81 @@ function useSkyFireworksEngine(canvasRef) {
             H.current * ty,
             BURST_PALETTES[i % BURST_PALETTES.length]
           );
-        }, 800 + i * 280)
+        }, 1100 + i * 480)
       );
     });
 
-    // Continuous celebration loops
+    // Slower continuous celebration loops
     ids.push(
       setInterval(() => {
         launchSkyBurst(
-          W.current * rand(0.12, 0.88),
-          H.current * rand(0.08, 0.35),
+          W.current * rand(0.15, 0.85),
+          H.current * rand(0.1, 0.32),
           BURST_PALETTES[randInt(0, BURST_PALETTES.length)]
         );
-      }, 380)
+      }, isMob ? 950 : 750)
+    );
+
+    // Bottom-corner ambient flowerpot / sparkler fountains with gentle cadence
+    ids.push(
+      setInterval(() => {
+        if (Math.random() > 0.3) {
+          // Left corner fountain
+          spawnSparklerDust(W.current * rand(0.05, 0.18), H.current - 10, isMob ? 5 : 10, isMob ? 4.5 : 6.5, GOLD_SPARKLER_COLORS);
+          // Right corner fountain
+          spawnSparklerDust(W.current * rand(0.82, 0.95), H.current - 10, isMob ? 5 : 10, isMob ? 4.5 : 6.5, GOLD_SPARKLER_COLORS);
+        }
+      }, 300)
     );
 
     const draw = () => {
       frame.current++;
       ctx.clearRect(0, 0, W.current, H.current);
 
-      // 1. Draw Rising Rockets
+      // Hardware-accelerated additive blending for radiant glowing sparklers
+      ctx.globalCompositeOperation = "lighter";
+
+      // 1. Draw Rising Rockets & emit ascending sparkler trail
       rockets.current = rockets.current.filter((r) => {
         r.trail.push({ x: r.x, y: r.y });
-        if (r.trail.length > 12) r.trail.shift();
+        if (r.trail.length > (isMob ? 8 : 12)) r.trail.shift();
         r.x += r.vx;
         r.y += r.vy;
         r.life--;
 
-        r.trail.forEach((pt, i) => {
+        // Emit sparkling micro-embers from rocket tail (slower, floating sparks)
+        if (frame.current % 3 === 0) {
+          sparklers.current.push({
+            x: r.x + rand(-2, 2),
+            y: r.y + rand(0, 6),
+            vx: rand(-0.8, 0.8),
+            vy: rand(1.0, 2.5),
+            color: Math.random() > 0.4 ? "#ffd700" : "#ffffff",
+            alpha: 1,
+            size: rand(1.2, 2.2),
+            decay: rand(0.018, 0.035),
+            gravity: 0.03,
+            drag: 0.975,
+            twinkleSpeed: 0.2,
+            twinklePhase: rand(0, Math.PI * 2),
+          });
+        }
+
+        // Rocket Trail
+        for (let i = 0; i < r.trail.length; i++) {
+          const pt = r.trail[i];
           const a = (i / r.trail.length) * 0.75;
           ctx.beginPath();
-          ctx.arc(pt.x, pt.y, (i / r.trail.length) * 3.2, 0, Math.PI * 2);
+          ctx.arc(pt.x, pt.y, (i / r.trail.length) * 2.8, 0, Math.PI * 2);
           ctx.fillStyle = `rgba(239, 68, 68, ${a})`;
           ctx.fill();
-        });
+        }
+
+        // Rocket Head Spark
         ctx.beginPath();
-        ctx.arc(r.x, r.y, 3.5, 0, Math.PI * 2);
+        ctx.arc(r.x, r.y, 3.2, 0, Math.PI * 2);
         ctx.fillStyle = "#ffffff";
-        ctx.shadowColor = "#ff0033";
-        ctx.shadowBlur = 10;
         ctx.fill();
-        ctx.shadowBlur = 0;
 
         if (r.life <= 0) {
           burst(r.x, r.y, r.palette);
@@ -167,42 +241,108 @@ function useSkyFireworksEngine(canvasRef) {
         return true;
       });
 
-      // 2. Draw Firework Particles
+      // 2. Draw Primary Firework Stars (and shed sparkler dust while flying)
       particles.current = particles.current.filter((p) => {
-        p.tail.push({ x: p.x, y: p.y });
-        if (p.tail.length > 5) p.tail.shift();
+        p.trail.push({ x: p.x, y: p.y });
+        if (p.trail.length > (isMob ? 3 : 5)) p.trail.shift();
         p.x += p.vx;
         p.y += p.vy;
         p.vy += p.gravity;
         p.vx *= 0.985;
         p.alpha -= p.decay;
+
         if (p.alpha <= 0) return false;
 
+        // Occasionally drop a glittering sparkler ember in flight
+        p.sparkDropCounter++;
+        if (p.sparkDropCounter === 4 && p.alpha > 0.35 && sparklers.current.length < (isMob ? 180 : 350)) {
+          p.sparkDropCounter = 0;
+          sparklers.current.push({
+            x: p.x,
+            y: p.y,
+            vx: rand(-0.5, 0.5),
+            vy: rand(0.1, 1.0),
+            color: "#ffd700",
+            alpha: p.alpha * 0.85,
+            size: rand(1.0, 1.8),
+            decay: rand(0.012, 0.025),
+            gravity: 0.025,
+            drag: 0.985,
+            twinkleSpeed: 0.18,
+            twinklePhase: rand(0, Math.PI * 2),
+          });
+        }
+
         const tm = p.twinkle
-          ? 0.5 + 0.5 * Math.sin(frame.current * p.twinkleSpeed + p.twinklePhase)
+          ? 0.4 + 0.6 * Math.sin(frame.current * p.twinkleSpeed + p.twinklePhase)
           : 1;
 
-        p.tail.forEach((pt, i) => {
+        const effAlpha = Math.max(0, p.alpha * tm);
+
+        // Short glow trail
+        p.trail.forEach((pt, i) => {
           ctx.beginPath();
           ctx.arc(pt.x, pt.y, p.size * 0.35, 0, Math.PI * 2);
           ctx.fillStyle = p.color;
-          ctx.globalAlpha = (i / p.tail.length) * p.alpha * 0.35 * tm;
+          ctx.globalAlpha = (i / p.trail.length) * effAlpha * 0.35;
           ctx.fill();
         });
+
+        // Particle Core
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
         ctx.fillStyle = p.color;
-        ctx.globalAlpha = p.alpha * tm;
-        ctx.shadowColor = p.color;
-        ctx.shadowBlur = 8;
+        ctx.globalAlpha = effAlpha;
         ctx.fill();
-        ctx.shadowBlur = 0;
+
+        // Inner Bright White Core
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size * 0.4, 0, Math.PI * 2);
+        ctx.fillStyle = "#ffffff";
+        ctx.globalAlpha = effAlpha * 0.85;
+        ctx.fill();
+
         ctx.globalAlpha = 1;
         return true;
       });
 
+      // 3. Draw Ultra-Smooth Sparkling Glitter Shower (Sparklers)
+      sparklers.current = sparklers.current.filter((s) => {
+        s.x += s.vx;
+        s.y += s.vy;
+        s.vy += s.gravity;
+        s.vx *= s.drag;
+        s.alpha -= s.decay;
+
+        if (s.alpha <= 0) return false;
+
+        const twinkle = 0.35 + 0.65 * Math.sin(frame.current * s.twinkleSpeed + s.twinklePhase);
+        const effAlpha = Math.max(0, s.alpha * twinkle);
+
+        // Sparkling point
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+        ctx.fillStyle = s.color;
+        ctx.globalAlpha = effAlpha;
+        ctx.fill();
+
+        // High-twinkle white highlight
+        if (twinkle > 0.7) {
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, s.size * 0.5, 0, Math.PI * 2);
+          ctx.fillStyle = "#ffffff";
+          ctx.globalAlpha = effAlpha;
+          ctx.fill();
+        }
+
+        ctx.globalAlpha = 1;
+        return true;
+      });
+
+      ctx.globalCompositeOperation = "source-over";
       animRef.current = requestAnimationFrame(draw);
     };
+
     animRef.current = requestAnimationFrame(draw);
 
     return () => {
@@ -213,9 +353,10 @@ function useSkyFireworksEngine(canvasRef) {
       });
       window.removeEventListener("resize", resize);
       particles.current = [];
+      sparklers.current = [];
       rockets.current = [];
     };
-  }, [burst, launchSkyBurst]);
+  }, [burst, launchSkyBurst, spawnSparklerDust]);
 }
 
 // ── Stars ───────────────────────────────────────────────────
@@ -362,7 +503,7 @@ export default function Launch({ onComplete }) {
     t(() => setShowContent(true), 250);
 
     // Progress bar
-    const totalMs = 5000;
+    const totalMs = 5500;
     const start = Date.now();
     const tick = setInterval(() => {
       const pct = Math.min(((Date.now() - start) / totalMs) * 100, 100);
@@ -372,8 +513,8 @@ export default function Launch({ onComplete }) {
     ids.push(tick);
 
     // Exit
-    t(() => setExiting(true), 4600);
-    t(() => onComplete && onComplete(), 5000);
+    t(() => setExiting(true), 5100);
+    t(() => onComplete && onComplete(), 5500);
 
     return () => ids.forEach((id) => {
       clearTimeout(id);

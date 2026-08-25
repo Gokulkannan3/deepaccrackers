@@ -1,283 +1,234 @@
-import React, { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import React, { useEffect, useRef } from "react";
 
-export const BigFireworkAnimation = ({
-  delay = 0,
-  startPosition,
-  endPosition,
-  burstPosition,
-  color,
-  isPaused = false,
-}) => {
-  const [dimensions, setDimensions] = useState({
-    width: typeof window !== "undefined" ? window.innerWidth : 1920,
-    height: typeof window !== "undefined" ? window.innerHeight : 1080,
-  });
+const rand = (a, b) => Math.random() * (b - a) + a;
+const randInt = (a, b) => Math.floor(rand(a, b));
 
-  useEffect(() => {
-    const handleResize = () => {
-      setDimensions({
-        width: window.innerWidth,
-        height: window.innerHeight,
-      });
-    };
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  if (isPaused) return null;
-
-  const screenWidth = dimensions.width;
-  const flightDuration = 3.2; // Slow & smooth rocket travel
-  const burstDuration = 5.0; // Slow, luxurious sparkling burst
-
-  return (
-    <div className="absolute inset-0 pointer-events-none overflow-hidden">
-      {/* Smooth, elegant Rocket ascent */}
-      <motion.div
-        className="absolute w-4 h-4 rounded-full"
-        style={{
-          left: startPosition.x,
-          top: startPosition.y,
-          background: `linear-gradient(180deg, ${color.primary} 0%, ${color.secondary} 50%, ${color.tertiary} 100%)`,
-          boxShadow: `0 0 28px ${color.primary}, 0 0 16px ${color.secondary}, 0 0 8px #ffffff`,
-          transform: "rotate(45deg)",
-        }}
-        animate={{
-          x: [0, endPosition.x - startPosition.x],
-          y: [0, endPosition.y - startPosition.y],
-          opacity: [0, 1, 1, 0.8, 0],
-          scale: [0.8, 1.2, 1, 0.9, 0.4],
-        }}
-        transition={{
-          duration: flightDuration,
-          delay: delay,
-          repeat: Number.POSITIVE_INFINITY,
-          repeatDelay: 8,
-          ease: [0.25, 0.1, 0.25, 1], // Smooth cubic bezier
-        }}
-      />
-
-      {/* Burst particles with slow smooth dispersal */}
-      <motion.div
-        className="absolute"
-        style={{
-          left: burstPosition.x,
-          top: burstPosition.y,
-          transform: "translate(-50%, -50%)",
-        }}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: [0, 1, 0.9, 0.4, 0] }}
-        transition={{
-          duration: burstDuration,
-          delay: delay + flightDuration - 0.1,
-          repeat: Number.POSITIVE_INFINITY,
-          repeatDelay: 8,
-          ease: "easeOut",
-        }}
-      >
-        {/* Layer 1: Primary vibrant sparks */}
-        {Array.from({ length: 26 }).map((_, i) => {
-          const angle = i * (360 / 26) * (Math.PI / 180);
-          const distance = screenWidth * (screenWidth < 768 ? 0.26 : 0.38);
-          const x = Math.cos(angle) * distance;
-          const y = Math.sin(angle) * distance + 30; // slight gravity pull
-
-          return (
-            <motion.div
-              key={`main-${i}`}
-              className="absolute w-3 h-3 rounded-full"
-              style={{
-                background: color.primary,
-                boxShadow: `0 0 20px ${color.primary}, 0 0 10px #ffffff`,
-              }}
-              animate={{
-                x: [0, x * 0.25, x * 0.65, x],
-                y: [0, y * 0.25, y * 0.65, y],
-                opacity: [1, 0.95, 0.7, 0.3, 0],
-                scale: [0.8, 1.4, 1.1, 0.7, 0],
-              }}
-              transition={{
-                duration: burstDuration,
-                delay: delay + flightDuration - 0.1,
-                repeat: Number.POSITIVE_INFINITY,
-                repeatDelay: 8,
-                ease: [0.16, 1, 0.3, 1],
-              }}
-            />
-          );
-        })}
-
-        {/* Layer 2: Secondary multi-color sparks */}
-        {Array.from({ length: 32 }).map((_, i) => {
-          const angle = i * (360 / 32) * (Math.PI / 180);
-          const distance = screenWidth * (screenWidth < 768 ? 0.18 : 0.26);
-          const x = Math.cos(angle) * distance;
-          const y = Math.sin(angle) * distance + 20;
-
-          return (
-            <motion.div
-              key={`secondary-${i}`}
-              className="absolute w-2 h-2 rounded-full"
-              style={{
-                background: color.secondary,
-                boxShadow: `0 0 16px ${color.secondary}`,
-              }}
-              animate={{
-                x: [0, x * 0.3, x * 0.75, x],
-                y: [0, y * 0.3, y * 0.75, y],
-                opacity: [1, 0.9, 0.6, 0.2, 0],
-                scale: [0.6, 1.2, 0.9, 0.5, 0],
-              }}
-              transition={{
-                duration: burstDuration - 0.5,
-                delay: delay + flightDuration + 0.1,
-                repeat: Number.POSITIVE_INFINITY,
-                repeatDelay: 8,
-                ease: [0.16, 1, 0.3, 1],
-              }}
-            />
-          );
-        })}
-
-        {/* Layer 3: Tertiary glittering glimmers */}
-        {Array.from({ length: 36 }).map((_, i) => {
-          const angle = i * 10 * (Math.PI / 180);
-          const distance = screenWidth * (screenWidth < 768 ? 0.22 : 0.32);
-          const x = Math.cos(angle) * distance;
-          const y = Math.sin(angle) * distance + 40;
-
-          return (
-            <motion.div
-              key={`sparkle-${i}`}
-              className="absolute w-1.5 h-1.5 rounded-full"
-              style={{
-                background: color.tertiary,
-                boxShadow: `0 0 14px ${color.tertiary}, 0 0 6px #ffffff`,
-              }}
-              animate={{
-                x: [0, x * 0.2, x * 0.6, x * 1.1],
-                y: [0, y * 0.2, y * 0.6, y * 1.1],
-                opacity: [1, 0.9, 0.5, 0.15, 0],
-                scale: [0.5, 1, 0.7, 0.3, 0],
-              }}
-              transition={{
-                duration: burstDuration,
-                delay: delay + flightDuration + 0.2,
-                repeat: Number.POSITIVE_INFINITY,
-                repeatDelay: 8,
-                ease: [0.16, 1, 0.3, 1],
-              }}
-            />
-          );
-        })}
-
-        {/* Center Soft Radiant Flash */}
-        <motion.div
-          className="absolute w-40 h-40 rounded-full"
-          style={{
-            background: `radial-gradient(circle, ${color.primary} 0%, ${color.secondary} 40%, transparent 70%)`,
-            transform: "translate(-50%, -50%)",
-          }}
-          animate={{
-            scale: [0, 3.2, 1.5, 0],
-            opacity: [0, 0.85, 0.3, 0],
-          }}
-          transition={{
-            duration: 2.8,
-            delay: delay + flightDuration - 0.1,
-            repeat: Number.POSITIVE_INFINITY,
-            repeatDelay: 8,
-            ease: "easeOut",
-          }}
-        />
-      </motion.div>
-    </div>
-  );
-};
+// Vibrant festival color schemes (HEX and RGB for additive glowing blends)
+const FIREWORK_COLORS = [
+  { r: 239, g: 68, b: 68, hex: "#ef4444" },  // Vivid Crimson Red
+  { r: 245, g: 158, b: 11, hex: "#f59e0b" }, // Warm Golden Amber
+  { r: 16, g: 185, b: 129, hex: "#10b981" }, // Emerald Green
+  { r: 6, g: 182, b: 212, hex: "#06b6d4" },  // Radiant Cyan
+  { r: 217, g: 70, b: 239, hex: "#d946ef" }, // Brilliant Magenta
+  { r: 249, g: 115, b: 22, hex: "#f97316" }, // Flame Orange
+  { r: 59, g: 130, b: 246, hex: "#3b82f6" },  // Electric Royal Blue
+  { r: 255, g: 255, b: 255, hex: "#ffffff" } // Sparkling White
+];
 
 export default function BackgroundFireworks({ isPaused = false }) {
-  const [dimensions, setDimensions] = useState({
-    width: typeof window !== "undefined" ? window.innerWidth : 1920,
-    height: typeof window !== "undefined" ? window.innerHeight : 1080,
-  });
+  const canvasRef = useRef(null);
 
   useEffect(() => {
+    if (isPaused) return;
+
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d", { alpha: true });
+    if (!ctx) return;
+
+    let animId = null;
+    let isMobile = window.innerWidth < 768;
+    let width = (canvas.width = window.innerWidth);
+    let height = (canvas.height = window.innerHeight);
+
+    let rockets = [];
+    let particles = [];
+    let flashes = [];
+
     const handleResize = () => {
-      setDimensions({
-        width: window.innerWidth,
-        height: window.innerHeight,
+      if (!canvas) return;
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+      isMobile = width < 768;
+    };
+
+    window.addEventListener("resize", handleResize, { passive: true });
+
+    // Spawn a firework burst
+    const createBurst = (x, y, baseColor) => {
+      const isMob = width < 768;
+      // High performance count: 32-45 particles on mobile, 60-80 on desktop
+      const count = isMob ? randInt(28, 42) : randInt(60, 85);
+      const colorScheme = baseColor || FIREWORK_COLORS[randInt(0, FIREWORK_COLORS.length - 1)];
+
+      // Center glowing flash ring
+      flashes.push({
+        x,
+        y,
+        radius: isMob ? 20 : 35,
+        maxRadius: isMob ? 80 : 130,
+        color: colorScheme,
+        alpha: 0.8,
+        decay: 0.05,
+      });
+
+      for (let i = 0; i < count; i++) {
+        const angle = (i / count) * Math.PI * 2 + rand(-0.08, 0.08);
+        const speed = rand(isMob ? 2.5 : 3.5, isMob ? 6.5 : 9.5);
+        const altColor = Math.random() > 0.35 ? colorScheme : FIREWORK_COLORS[randInt(0, FIREWORK_COLORS.length)];
+
+        particles.push({
+          x,
+          y,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          color: altColor,
+          alpha: 1,
+          size: rand(isMob ? 1.6 : 2.0, isMob ? 2.8 : 3.6),
+          decay: rand(0.012, 0.022),
+          gravity: rand(0.06, 0.11),
+          drag: 0.982,
+          flicker: Math.random() > 0.4,
+          flickerPhase: rand(0, Math.PI * 2),
+        });
+      }
+    };
+
+    // Launch a rocket rising smoothly from bottom or lower edge
+    const launchRocket = () => {
+      const isMob = width < 768;
+      const startX = rand(width * 0.15, width * 0.85);
+      const startY = height + 10;
+      const targetX = startX + rand(-width * 0.15, width * 0.15);
+      const targetY = rand(height * 0.12, height * (isMob ? 0.45 : 0.5));
+      const dur = rand(36, 52);
+      const color = FIREWORK_COLORS[randInt(0, FIREWORK_COLORS.length - 1)];
+
+      rockets.push({
+        x: startX,
+        y: startY,
+        vx: (targetX - startX) / dur,
+        vy: (targetY - startY) / dur,
+        life: dur,
+        color,
+        trail: [],
       });
     };
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
+
+    // Rocket launch interval (every 1.6s on mobile, 1.1s on desktop for smooth festival ambience)
+    const launchIntervalMs = isMobile ? 1800 : 1200;
+    const rocketTimer = setInterval(launchRocket, launchIntervalMs);
+
+    // Initial instant welcome bursts
+    setTimeout(() => createBurst(width * 0.3, height * 0.25, FIREWORK_COLORS[0]), 200);
+    setTimeout(() => createBurst(width * 0.7, height * 0.28, FIREWORK_COLORS[2]), 700);
+
+    let frame = 0;
+
+    const render = () => {
+      frame++;
+      ctx.clearRect(0, 0, width, height);
+
+      // Hardware-accelerated glowing additive blending
+      ctx.globalCompositeOperation = "lighter";
+
+      // 1. Draw Flashes
+      flashes = flashes.filter((f) => {
+        f.radius += (f.maxRadius - f.radius) * 0.18;
+        f.alpha -= f.decay;
+        if (f.alpha <= 0) return false;
+
+        const grad = ctx.createRadialGradient(f.x, f.y, 0, f.x, f.y, f.radius);
+        grad.addColorStop(0, `rgba(255, 255, 255, ${f.alpha * 0.9})`);
+        grad.addColorStop(0.35, `rgba(${f.color.r}, ${f.color.g}, ${f.color.b}, ${f.alpha * 0.6})`);
+        grad.addColorStop(1, `rgba(${f.color.r}, ${f.color.g}, ${f.color.b}, 0)`);
+
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(f.x, f.y, f.radius, 0, Math.PI * 2);
+        ctx.fill();
+        return true;
+      });
+
+      // 2. Draw Rising Rockets
+      rockets = rockets.filter((r) => {
+        r.trail.push({ x: r.x, y: r.y });
+        if (r.trail.length > (isMobile ? 5 : 8)) r.trail.shift();
+
+        r.x += r.vx;
+        r.y += r.vy;
+        r.life--;
+
+        // Draw trail
+        for (let i = 0; i < r.trail.length; i++) {
+          const pt = r.trail[i];
+          const a = (i / r.trail.length) * 0.7;
+          ctx.beginPath();
+          ctx.arc(pt.x, pt.y, (i / r.trail.length) * 2.5, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(${r.color.r}, ${r.color.g}, ${r.color.b}, ${a})`;
+          ctx.fill();
+        }
+
+        // Rocket head spark
+        ctx.beginPath();
+        ctx.arc(r.x, r.y, 3, 0, Math.PI * 2);
+        ctx.fillStyle = "#ffffff";
+        ctx.fill();
+
+        if (r.life <= 0) {
+          createBurst(r.x, r.y, r.color);
+          return false;
+        }
+        return true;
+      });
+
+      // 3. Draw Sparking Particles
+      particles = particles.filter((p) => {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += p.gravity;
+        p.vx *= p.drag;
+        p.alpha -= p.decay;
+
+        if (p.alpha <= 0) return false;
+
+        let alpha = p.alpha;
+        if (p.flicker) {
+          alpha *= 0.6 + 0.4 * Math.sin(frame * 0.2 + p.flickerPhase);
+        }
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${p.color.r}, ${p.color.g}, ${p.color.b}, ${Math.max(0, alpha)})`;
+        ctx.fill();
+
+        // Inner bright spark core
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size * 0.45, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255, 255, 255, ${Math.max(0, alpha * 0.85)})`;
+        ctx.fill();
+
+        return true;
+      });
+
+      // Reset composite operation
+      ctx.globalCompositeOperation = "source-over";
+
+      animId = requestAnimationFrame(render);
+    };
+
+    animId = requestAnimationFrame(render);
+
+    return () => {
+      if (animId) cancelAnimationFrame(animId);
+      clearInterval(rocketTimer);
+      window.removeEventListener("resize", handleResize);
+    };
+  }, [isPaused]);
 
   if (isPaused) return null;
 
-  const screenWidth = dimensions.width;
-  const screenHeight = dimensions.height;
-
-  // Ultra-vibrant festival color configurations with smooth staggered delays
-  const fireworkConfigs = [
-    {
-      delay: 0,
-      startPosition: { x: -40, y: screenHeight * 0.1 },
-      endPosition: { x: screenWidth * 0.25, y: screenHeight * 0.22 },
-      burstPosition: { x: screenWidth * 0.25, y: screenHeight * 0.22 },
-      color: { primary: "#ef4444", secondary: "#f59e0b", tertiary: "#ffffff" }, // Red & Gold
-    },
-    {
-      delay: 2.2,
-      startPosition: { x: screenWidth + 40, y: screenHeight * 0.15 },
-      endPosition: { x: screenWidth * 0.75, y: screenHeight * 0.24 },
-      burstPosition: { x: screenWidth * 0.75, y: screenHeight * 0.24 },
-      color: { primary: "#10b981", secondary: "#06b6d4", tertiary: "#a7f3d0" }, // Emerald & Cyan
-    },
-    {
-      delay: 4.4,
-      startPosition: { x: -40, y: screenHeight * 0.65 },
-      endPosition: { x: screenWidth * 0.2, y: screenHeight * 0.48 },
-      burstPosition: { x: screenWidth * 0.2, y: screenHeight * 0.48 },
-      color: { primary: "#d946ef", secondary: "#ec4899", tertiary: "#fbcfe8" }, // Magenta & Pink
-    },
-    {
-      delay: 6.6,
-      startPosition: { x: screenWidth + 40, y: screenHeight * 0.65 },
-      endPosition: { x: screenWidth * 0.8, y: screenHeight * 0.46 },
-      burstPosition: { x: screenWidth * 0.8, y: screenHeight * 0.46 },
-      color: { primary: "#f97316", secondary: "#eab308", tertiary: "#ffffff" }, // Flame Orange & Sun Yellow
-    },
-    {
-      delay: 8.8,
-      startPosition: { x: screenWidth * 0.5, y: -40 },
-      endPosition: { x: screenWidth * 0.5, y: screenHeight * 0.3 },
-      burstPosition: { x: screenWidth * 0.5, y: screenHeight * 0.3 },
-      color: { primary: "#3b82f6", secondary: "#8b5cf6", tertiary: "#67e8f9" }, // Electric Blue & Violet
-    },
-  ];
-
   return (
-    <>
-      {/* Ambient background colorful aura lights for deep festival glow */}
-      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-        <div className="absolute top-1/4 left-1/5 w-96 h-96 rounded-full bg-red-600/10 blur-[140px] pointer-events-none animate-pulse" />
-        <div className="absolute top-1/3 right-1/5 w-96 h-96 rounded-full bg-amber-500/10 blur-[140px] pointer-events-none animate-pulse" style={{ animationDelay: "2s" }} />
-        <div className="absolute bottom-1/4 left-1/3 w-96 h-96 rounded-full bg-purple-600/10 blur-[140px] pointer-events-none animate-pulse" style={{ animationDelay: "4s" }} />
-        <div className="absolute bottom-1/5 right-1/4 w-96 h-96 rounded-full bg-emerald-500/10 blur-[140px] pointer-events-none animate-pulse" style={{ animationDelay: "1s" }} />
+    <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+      {/* Ambient background soft glow pulses */}
+      <div className="absolute top-1/4 left-1/6 w-72 sm:w-96 h-72 sm:h-96 rounded-full bg-red-600/10 blur-[100px] sm:blur-[140px] pointer-events-none" />
+      <div className="absolute bottom-1/4 right-1/6 w-72 sm:w-96 h-72 sm:h-96 rounded-full bg-emerald-500/10 blur-[100px] sm:blur-[140px] pointer-events-none" />
 
-        {fireworkConfigs.map((config, index) => (
-          <BigFireworkAnimation
-            key={`bg-${index}`}
-            delay={config.delay}
-            startPosition={config.startPosition}
-            endPosition={config.endPosition}
-            burstPosition={config.burstPosition}
-            color={config.color}
-            isPaused={isPaused}
-          />
-        ))}
-      </div>
-    </>
+      {/* 60FPS Hardware-Accelerated Additive Fireworks Canvas */}
+      <canvas
+        ref={canvasRef}
+        className="absolute inset-0 w-full h-full pointer-events-none"
+      />
+    </div>
   );
 }

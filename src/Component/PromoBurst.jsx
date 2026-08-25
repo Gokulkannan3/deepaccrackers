@@ -4,17 +4,20 @@ import { motion, AnimatePresence } from "framer-motion";
 
 // Multi-point Random Firework Explosion Component
 const MultiRandomFireworkBurst = () => {
+  const isMob = typeof window !== "undefined" ? window.innerWidth < 768 : false;
   const screenWidth = typeof window !== "undefined" ? window.innerWidth : 1920;
   const screenHeight = typeof window !== "undefined" ? window.innerHeight : 1080;
 
   // Multiple randomized burst locations across the display
   const burstLocations = [
     { x: screenWidth * 0.5, y: screenHeight * 0.35, color: "#ff4d4d", scale: 1.1, delay: 0 },
-    { x: screenWidth * 0.25, y: screenHeight * 0.28, color: "#ffd700", scale: 0.9, delay: 0.2 },
-    { x: screenWidth * 0.75, y: screenHeight * 0.32, color: "#00f0ff", scale: 0.95, delay: 0.35 },
-    { x: screenWidth * 0.4, y: screenHeight * 0.52, color: "#d946ef", scale: 0.85, delay: 0.5 },
-    { x: screenWidth * 0.65, y: screenHeight * 0.48, color: "#10b981", scale: 0.9, delay: 0.6 },
+    { x: screenWidth * 0.25, y: screenHeight * 0.28, color: "#ffd700", scale: 0.9, delay: 0.15 },
+    { x: screenWidth * 0.75, y: screenHeight * 0.32, color: "#00f0ff", scale: 0.95, delay: 0.28 },
+    { x: screenWidth * 0.4, y: screenHeight * 0.52, color: "#d946ef", scale: 0.85, delay: 0.4 },
+    { x: screenWidth * 0.65, y: screenHeight * 0.48, color: "#10b981", scale: 0.9, delay: 0.5 },
   ];
+
+  const particleCount = isMob ? 14 : 22;
 
   return (
     <div className="fixed inset-0 pointer-events-none overflow-hidden z-50">
@@ -25,29 +28,30 @@ const MultiRandomFireworkBurst = () => {
           style={{ left: burst.x, top: burst.y, transform: "translate(-50%, -50%)" }}
         >
           {/* Radial Firework Particles */}
-          {Array.from({ length: 24 }).map((_, i) => {
-            const angle = i * (360 / 24) * (Math.PI / 180);
-            const dist = (screenWidth < 768 ? 130 : 200) * burst.scale;
+          {Array.from({ length: particleCount }).map((_, i) => {
+            const angle = i * (360 / particleCount) * (Math.PI / 180);
+            const dist = (isMob ? 100 : 180) * burst.scale;
             const x = Math.cos(angle) * dist;
             const y = Math.sin(angle) * dist;
-            const hue = (bIdx * 70 + i * 15) % 360;
+            const hue = (bIdx * 70 + i * 18) % 360;
 
             return (
               <motion.div
                 key={`p-${bIdx}-${i}`}
-                className="absolute w-3 h-3 rounded-full"
+                className="absolute w-2.5 h-2.5 rounded-full"
                 style={{
                   background: `hsl(${hue}, 95%, 60%)`,
-                  boxShadow: `0 0 16px hsl(${hue}, 95%, 60%), 0 0 6px #ffffff`,
+                  boxShadow: `0 0 10px hsl(${hue}, 95%, 60%), 0 0 4px #ffffff`,
+                  willChange: "transform, opacity",
                 }}
                 animate={{
                   x: [0, x * 0.3, x * 0.8, x],
-                  y: [0, y * 0.3, y * 0.8, y + 15],
+                  y: [0, y * 0.3, y * 0.8, y + 12],
                   opacity: [1, 1, 0.6, 0],
-                  scale: [0.8, 1.4, 1, 0],
+                  scale: [0.8, 1.3, 0.9, 0],
                 }}
                 transition={{
-                  duration: 2.8,
+                  duration: 2.2,
                   delay: burst.delay,
                   ease: [0.16, 1, 0.3, 1],
                 }}
@@ -57,14 +61,15 @@ const MultiRandomFireworkBurst = () => {
 
           {/* Central Flash and Halo */}
           <motion.div
-            className="absolute w-28 h-28 rounded-full"
+            className="absolute w-24 h-24 rounded-full"
             style={{
               background: `radial-gradient(circle, #ffffff 0%, ${burst.color} 40%, transparent 70%)`,
               transform: "translate(-50%, -50%)",
-              boxShadow: `0 0 80px ${burst.color}`,
+              boxShadow: `0 0 40px ${burst.color}`,
+              willChange: "transform, opacity",
             }}
-            animate={{ scale: [0, 3, 0], opacity: [0, 1, 0] }}
-            transition={{ duration: 2.2, delay: burst.delay, ease: "easeOut" }}
+            animate={{ scale: [0, 2.5, 0], opacity: [0, 0.9, 0] }}
+            transition={{ duration: 1.8, delay: burst.delay, ease: "easeOut" }}
           />
         </motion.div>
       ))}
