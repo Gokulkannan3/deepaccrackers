@@ -35,12 +35,9 @@ export default function Navbar() {
               <span className="px-2.5 py-0.5 rounded-lg bg-red-950/80 border border-red-600/50 text-lg md:text-xl font-black tracking-tight text-white shadow-sm group-hover:border-red-500 transition-all">
                 DEEPA CRACKERS
               </span>
-              <span className="hidden sm:inline-block px-2 py-0.5 text-[10px] font-bold uppercase bg-red-950/50 text-red-200 border border-red-600/40 rounded shadow-sm">
-                Thiruthuraipoondi
-              </span>
             </div>
             <p className="text-[10px] font-semibold text-neutral-400 tracking-wider uppercase flex items-center gap-1.5 mt-0.5">
-              <span>Premium Fireworks</span> • <span className="text-red-400 font-bold">Direct Sivakasi Sourcing</span>
+              <span></span> • <span className="text-red-400 font-bold">Since 1985</span>
             </p>
           </div>
         </div>
@@ -54,8 +51,8 @@ export default function Navbar() {
                 key={link.name}
                 onClick={() => { navigate(link.path); window.scrollTo(0, 0); }}
                 className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${isActive
-                    ? "bg-gradient-to-r from-red-600 to-red-700 text-white shadow-lg shadow-red-600/40 border border-red-500 font-black scale-102"
-                    : "text-neutral-300 hover:text-white hover:bg-neutral-900 border border-transparent hover:border-white/15"
+                  ? "bg-gradient-to-r from-red-600 to-red-700 text-white shadow-lg shadow-red-600/40 border border-red-500 font-black scale-102"
+                  : "text-neutral-300 hover:text-white hover:bg-neutral-900 border border-transparent hover:border-white/15"
                   }`}
               >
                 {link.name}
@@ -87,8 +84,8 @@ export default function Navbar() {
                 key={link.name}
                 onClick={() => { navigate(link.path); window.scrollTo(0, 0); setMenuOpen(false); }}
                 className={`w-full py-2.5 px-3 text-center text-xs font-bold rounded-xl transition-all cursor-pointer ${isActive
-                    ? "bg-gradient-to-r from-red-600 to-red-700 text-white font-black shadow-md shadow-red-600/40 border border-red-500"
-                    : "text-neutral-300 hover:bg-neutral-900 hover:text-white"
+                  ? "bg-gradient-to-r from-red-600 to-red-700 text-white font-black shadow-md shadow-red-600/40 border border-red-500"
+                  : "text-neutral-300 hover:bg-neutral-900 hover:text-white"
                   }`}
               >
                 {link.name}
