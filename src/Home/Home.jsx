@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, Phone, Search, ArrowRight, ShieldCheck, FileText, LayoutGrid, List as ListIcon, X, Plus, Minus, ChevronLeft, ChevronRight, Bot, CheckCircle, MapPin, Tag } from 'lucide-react';
+import { Sparkles, Phone, Search, ArrowRight, ShieldCheck, FileText, LayoutGrid, List as ListIcon, X, Plus, Minus, ChevronLeft, ChevronRight, Bot, CheckCircle, MapPin, Tag, Star } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -125,13 +125,134 @@ const renderProductThumbnail = (media) => {
 };
 
 // Pencil Sketch Product Image Carousel Component
-const ProductCarousel = ({ media, onImageClick }) => {
+// Multi-Color Chromatic Festival Themes for Maximalist Product Cards
+const CARD_THEMES = [
+  {
+    name: "cyan",
+    glow: "#06b6d4",
+    accent: "#22d3ee",
+    border: "rgba(6, 182, 212, 0.35)",
+    borderHover: "rgba(6, 182, 212, 0.8)",
+    bgGradient: "linear-gradient(135deg, #050b10 0%, #0c1c28 50%, #050b10 100%)",
+    btnGrad: "linear-gradient(135deg, #06b6d4 0%, #0284c7 100%)",
+    btnText: "#02121c",
+    badgeBg: "rgba(6, 182, 212, 0.15)",
+    badgeBorder: "rgba(6, 182, 212, 0.4)",
+    tag: "#38bdf8",
+    shadow: "rgba(6, 182, 212, 0.25)",
+    pill: "from-cyan-500 to-blue-600"
+  },
+  {
+    name: "fuchsia",
+    glow: "#d946ef",
+    accent: "#f472b6",
+    border: "rgba(217, 70, 239, 0.35)",
+    borderHover: "rgba(217, 70, 239, 0.8)",
+    bgGradient: "linear-gradient(135deg, #0e050d 0%, #220d20 50%, #0e050d 100%)",
+    btnGrad: "linear-gradient(135deg, #d946ef 0%, #ec4899 100%)",
+    btnText: "#180215",
+    badgeBg: "rgba(217, 70, 239, 0.15)",
+    badgeBorder: "rgba(217, 70, 239, 0.4)",
+    tag: "#f472b6",
+    shadow: "rgba(217, 70, 239, 0.25)",
+    pill: "from-fuchsia-500 to-pink-600"
+  },
+  {
+    name: "emerald",
+    glow: "#10b981",
+    accent: "#34d399",
+    border: "rgba(16, 185, 129, 0.35)",
+    borderHover: "rgba(16, 185, 129, 0.8)",
+    bgGradient: "linear-gradient(135deg, #030e09 0%, #082216 50%, #030e09 100%)",
+    btnGrad: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+    btnText: "#02150c",
+    badgeBg: "rgba(16, 185, 129, 0.15)",
+    badgeBorder: "rgba(16, 185, 129, 0.4)",
+    tag: "#34d399",
+    shadow: "rgba(16, 185, 129, 0.25)",
+    pill: "from-emerald-500 to-teal-600"
+  },
+  {
+    name: "violet",
+    glow: "#8b5cf6",
+    accent: "#c084fc",
+    border: "rgba(139, 92, 246, 0.35)",
+    borderHover: "rgba(139, 92, 246, 0.8)",
+    bgGradient: "linear-gradient(135deg, #090512 0%, #160d2c 50%, #090512 100%)",
+    btnGrad: "linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)",
+    btnText: "#0d031c",
+    badgeBg: "rgba(139, 92, 246, 0.15)",
+    badgeBorder: "rgba(139, 92, 246, 0.4)",
+    tag: "#c084fc",
+    shadow: "rgba(139, 92, 246, 0.25)",
+    pill: "from-violet-500 to-indigo-600"
+  },
+  {
+    name: "rose",
+    glow: "#f43f5e",
+    accent: "#fb7185",
+    border: "rgba(244, 63, 94, 0.35)",
+    borderHover: "rgba(244, 63, 94, 0.8)",
+    bgGradient: "linear-gradient(135deg, #0e0507 0%, #240c13 50%, #0e0507 100%)",
+    btnGrad: "linear-gradient(135deg, #f43f5e 0%, #e11d48 100%)",
+    btnText: "#1b0207",
+    badgeBg: "rgba(244, 63, 94, 0.15)",
+    badgeBorder: "rgba(244, 63, 94, 0.4)",
+    tag: "#fb7185",
+    shadow: "rgba(244, 63, 94, 0.25)",
+    pill: "from-rose-500 to-red-600"
+  },
+  {
+    name: "amber",
+    glow: "#f59e0b",
+    accent: "#fbbf24",
+    border: "rgba(245, 158, 11, 0.35)",
+    borderHover: "rgba(245, 158, 11, 0.8)",
+    bgGradient: "linear-gradient(135deg, #0e0901 0%, #241703 50%, #0e0901 100%)",
+    btnGrad: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
+    btnText: "#180d00",
+    badgeBg: "rgba(245, 158, 11, 0.15)",
+    badgeBorder: "rgba(245, 158, 11, 0.4)",
+    tag: "#fbbf24",
+    shadow: "rgba(245, 158, 11, 0.25)",
+    pill: "from-amber-400 to-orange-500"
+  }
+];
+
+// Helper to assign a vibrant jewel-toned chromatic theme to each product
+const getProductTheme = (prod, index = 0) => {
+  if (!prod) return CARD_THEMES[0];
+  const str = String(prod.serial_number || prod.id || prod.productname || index);
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = (hash * 31 + str.charCodeAt(i)) >>> 0;
+  }
+  return CARD_THEMES[(hash + index) % CARD_THEMES.length];
+};
+
+// Helper to format category names cleanly (e.g., 'one_sound_crackers' -> 'One Sound Crackers')
+const formatCategoryName = (name) => {
+  if (!name) return "";
+  if (name.toLowerCase() === "all") return "All Categories";
+  return name
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+};
+
+// Illuminated Product Image Carousel with Ambient Spotlight
+const ProductCarousel = ({ media, onImageClick, theme }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const mediaItems = useMemo(() => parseMediaItems(media), [media]);
 
   if (mediaItems.length === 0) {
     return (
-      <div className="relative w-full h-36 sm:h-48 rounded-2xl bg-white border border-white/20 overflow-hidden select-none flex items-center justify-center p-2 shadow-sm">
+      <div
+        className="relative w-full h-36 sm:h-48 rounded-2xl overflow-hidden select-none flex items-center justify-center p-3 shadow-inner"
+        style={{
+          background: "linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)",
+          boxShadow: "inset 0 0 15px rgba(0,0,0,0.06)",
+        }}
+      >
         <img
           src={defaultImage}
           alt="Default Crackers"
@@ -145,7 +266,13 @@ const ProductCarousel = ({ media, onImageClick }) => {
   const isVideo = typeof currentItem === 'string' && (currentItem.includes('/video/') || currentItem.endsWith('.mp4') || currentItem.endsWith('.webm'));
 
   return (
-    <div className="relative w-full h-36 sm:h-48 rounded-2xl bg-white border border-white/20 overflow-hidden group select-none flex items-center justify-center p-2 shadow-sm">
+    <div
+      className="relative w-full h-36 sm:h-48 rounded-2xl overflow-hidden group select-none flex items-center justify-center p-3 shadow-inner"
+      style={{
+        background: "linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)",
+        boxShadow: "inset 0 0 15px rgba(0,0,0,0.06)",
+      }}
+    >
       {isVideo ? (
         <video
           src={currentItem}
@@ -161,7 +288,7 @@ const ProductCarousel = ({ media, onImageClick }) => {
           src={currentItem}
           alt="Product media"
           onClick={() => onImageClick && onImageClick(mediaItems)}
-          className="w-full h-full object-contain cursor-pointer hover:scale-105 transition-transform duration-300"
+          className="w-full h-full object-contain cursor-pointer hover:scale-108 transition-transform duration-300"
           onError={(e) => {
             e.target.onerror = null;
             e.target.src = defaultImage;
@@ -176,7 +303,7 @@ const ProductCarousel = ({ media, onImageClick }) => {
               e.stopPropagation();
               setCurrentIndex((prev) => (prev === 0 ? mediaItems.length - 1 : prev - 1));
             }}
-            className="absolute left-1.5 top-1/2 -translate-y-1/2 w-6 h-6 rounded bg-white/90 border border-slate-900 text-slate-900 flex items-center justify-center font-bold text-xs shadow-sm hover:bg-amber-300"
+            className="absolute left-1.5 top-1/2 -translate-y-1/2 w-7 h-7 rounded-xl bg-black/80 border border-white/20 text-white flex items-center justify-center font-bold text-xs shadow-md hover:scale-110 transition-all z-10 cursor-pointer"
           >
             ‹
           </button>
@@ -185,16 +312,20 @@ const ProductCarousel = ({ media, onImageClick }) => {
               e.stopPropagation();
               setCurrentIndex((prev) => (prev + 1) % mediaItems.length);
             }}
-            className="absolute right-1.5 top-1/2 -translate-y-1/2 w-6 h-6 rounded bg-white/90 border border-slate-900 text-slate-900 flex items-center justify-center font-bold text-xs shadow-sm hover:bg-amber-300"
+            className="absolute right-1.5 top-1/2 -translate-y-1/2 w-7 h-7 rounded-xl bg-black/80 border border-white/20 text-white flex items-center justify-center font-bold text-xs shadow-md hover:scale-110 transition-all z-10 cursor-pointer"
           >
             ›
           </button>
-          <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 flex gap-1 z-10">
+          <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 flex gap-1 z-10 bg-black/60 px-2 py-0.5 rounded-full backdrop-blur-sm">
             {mediaItems.map((_, idx) => (
               <span
                 key={idx}
-                className={`w-1.5 h-1.5 rounded-full border border-slate-900 ${idx === currentIndex ? "bg-amber-400" : "bg-white"
-                  }`}
+                className="w-1.5 h-1.5 rounded-full transition-all"
+                style={{
+                  background: idx === currentIndex ? (theme?.accent || "#fbbf24") : "rgba(255,255,255,0.4)",
+                  transform: idx === currentIndex ? "scale(1.2)" : "scale(1)",
+                  boxShadow: idx === currentIndex ? `0 0 6px ${theme?.glow || "#f59e0b"}` : "none",
+                }}
               />
             ))}
           </div>
@@ -834,17 +965,56 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white flex flex-col relative selection:bg-red-600 selection:text-white overflow-x-hidden">
+    <div className="min-h-screen bg-[#040404] text-white flex flex-col relative selection:bg-amber-400 selection:text-slate-950 overflow-x-hidden">
+      {/* Ambient neon orbs */}
+      <div className="fixed inset-0 pointer-events-none z-0">
+        <div className="absolute -top-40 -left-40 w-[600px] h-[600px] rounded-full" style={{ background: "radial-gradient(circle, #f59e0b18 0%, transparent 70%)", filter: "blur(60px)" }} />
+        <div className="absolute top-1/3 -right-40 w-[550px] h-[550px] rounded-full" style={{ background: "radial-gradient(circle, #ef444415 0%, transparent 70%)", filter: "blur(60px)" }} />
+        <div className="absolute bottom-1/4 -left-40 w-[500px] h-[500px] rounded-full" style={{ background: "radial-gradient(circle, #10b98114 0%, transparent 70%)", filter: "blur(60px)" }} />
+        <div className="absolute -bottom-40 right-1/4 w-[600px] h-[600px] rounded-full" style={{ background: "radial-gradient(circle, #8b5cf618 0%, transparent 70%)", filter: "blur(60px)" }} />
+      </div>
+
+      {/* Signature 28px Dot-grid overlay */}
+      <div
+        className="fixed inset-0 pointer-events-none z-0 opacity-[0.05]"
+        style={{ backgroundImage: "radial-gradient(circle, #ffffff 1px, transparent 1px)", backgroundSize: "28px 28px" }}
+      />
+
       {/* Continuous Background & Foreground Fireworks (paused during checkout address filling) */}
       <BackgroundFireworks isPaused={showCheckoutModal} />
 
       <div className="relative z-10 flex flex-col min-h-screen">
         <Navbar />
 
-        <main className="flex-grow pt-24 pb-20 px-3 md:px-8 max-w-7xl mx-auto w-full space-y-10">
+        <main className="flex-grow pt-24 pb-20 px-3 md:px-8 max-w-7xl mx-auto w-full space-y-12">
 
-          {/* Dynamic Interactive Banner Slider Section */}
-          <section className="relative hundred:mt-5 mobile:mt-5 w-full rounded-3xl border border-white/15 shadow-2xl overflow-hidden bg-neutral-900/90">
+          {/* Dynamic Interactive Banner Slider Section with Maximalist Ornate Frame */}
+          <section
+            className="relative hundred:mt-5 mobile:mt-5 w-full rounded-3xl overflow-hidden"
+            style={{
+              background: "linear-gradient(135deg, #090909 0%, #121212 50%, #090909 100%)",
+              border: "1.5px solid #f59e0b44",
+              boxShadow: "0 0 50px #f59e0b15, inset 0 1px 0 #fbbf2415",
+            }}
+          >
+            {/* Animated 5-stop rainbow top bar */}
+            <div
+              className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-red-500 via-amber-400 via-emerald-400 via-cyan-400 to-purple-500 z-20"
+              style={{ boxShadow: "0 0 16px #f59e0b" }}
+            />
+
+            {/* Corner brackets */}
+            <div className="absolute top-3 left-3 w-8 h-8 border-t-2 border-l-2 border-amber-500/60 rounded-tl-lg z-20 pointer-events-none" />
+            <div className="absolute top-3 right-3 w-8 h-8 border-t-2 border-r-2 border-amber-500/60 rounded-tr-lg z-20 pointer-events-none" />
+            <div className="absolute bottom-3 left-3 w-8 h-8 border-b-2 border-l-2 border-amber-500/60 rounded-bl-lg z-20 pointer-events-none" />
+            <div className="absolute bottom-3 right-3 w-8 h-8 border-b-2 border-r-2 border-amber-500/60 rounded-br-lg z-20 pointer-events-none" />
+
+            {/* Diagonal hatching texture */}
+            <div
+              className="absolute inset-0 pointer-events-none z-10 opacity-[0.03]"
+              style={{ backgroundImage: "repeating-linear-gradient(45deg, #f59e0b 0, #f59e0b 1px, transparent 0, transparent 50%)", backgroundSize: "16px 16px" }}
+            />
+
             {banners.length > 0 ? (
               <div className="relative w-full hundred:h-96 mobile:h-44">
                 <AnimatePresence mode="wait">
@@ -865,23 +1035,27 @@ export default function Home() {
                   <>
                     <button
                       onClick={() => setCurrentBannerIdx((prev) => (prev === 0 ? banners.length - 1 : prev - 1))}
-                      className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-xl bg-black/90 border border-white/20 text-white flex items-center justify-center font-bold shadow-lg hover:bg-neutral-800 hover:border-red-500 hover:text-red-500 transition-all"
+                      className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-2xl bg-black/90 border border-amber-500/50 text-amber-400 flex items-center justify-center font-bold shadow-xl hover:scale-110 hover:border-amber-400 transition-all z-20"
+                      style={{ boxShadow: "0 0 15px #f59e0b30" }}
                     >
                       <ChevronLeft className="h-5 w-5" />
                     </button>
                     <button
                       onClick={() => setCurrentBannerIdx((prev) => (prev + 1) % banners.length)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-xl bg-black/90 border border-white/20 text-white flex items-center justify-center font-bold shadow-lg hover:bg-neutral-800 hover:border-red-500 hover:text-red-500 transition-all"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-2xl bg-black/90 border border-amber-500/50 text-amber-400 flex items-center justify-center font-bold shadow-xl hover:scale-110 hover:border-amber-400 transition-all z-20"
+                      style={{ boxShadow: "0 0 15px #f59e0b30" }}
                     >
                       <ChevronRight className="h-5 w-5" />
                     </button>
 
-                    <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
+                    <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2 z-20">
                       {banners.map((_, idx) => (
                         <button
                           key={idx}
                           onClick={() => setCurrentBannerIdx(idx)}
-                          className={`w-3 h-3 rounded-full border transition-all ${idx === currentBannerIdx ? "bg-red-600 scale-125 border-red-500 shadow-sm shadow-red-600" : "bg-neutral-700 border-neutral-600"
+                          className={`h-2.5 rounded-full transition-all ${idx === currentBannerIdx
+                            ? "w-8 bg-gradient-to-r from-amber-400 to-red-500 shadow-[0_0_12px_#f59e0b]"
+                            : "w-2.5 bg-neutral-700 hover:bg-neutral-500"
                             }`}
                         />
                       ))}
@@ -890,72 +1064,152 @@ export default function Home() {
                 )}
               </div>
             ) : (
-              <div className="p-8 md:p-12 text-center space-y-4">
-                <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-red-600/20 border border-red-500/40 text-red-400 text-xs font-bold uppercase tracking-wider">
-                  <Sparkles className="h-4 w-4 text-red-500" /> ✏️ Deepa Crackers • THIRUTHURAIPOONDI
+              <div className="p-8 md:p-14 text-center space-y-6 relative z-10">
+                {/* Decorative rule */}
+                <div className="flex items-center gap-3 max-w-xs mx-auto">
+                  <div className="h-px flex-1 bg-gradient-to-r from-transparent via-amber-500/60 to-transparent" />
+                  <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
+                  <div className="h-px flex-1 bg-gradient-to-r from-transparent via-amber-500/60 to-transparent" />
                 </div>
-                <h1 className="text-3xl md:text-5xl font-black text-white">
-                  Illuminating Celebrations with Supreme Quality Fireworks
-                </h1>
+
+                {/* Badge row */}
+                <div className="flex flex-wrap items-center justify-center gap-2">
+                  {[
+                    { label: "✨ Supreme Quality 1985", bg: "#f59e0b", text: "#fbbf24" },
+                    { label: "🪔 Thiruthuraipoondi Hub", bg: "#10b981", text: "#34d399" },
+                    { label: "🎆 100% Legal Sivakasi", bg: "#d946ef", text: "#e879f9" },
+                  ].map((b, i) => (
+                    <span
+                      key={i}
+                      className="px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.2em] rounded-full"
+                      style={{ background: `${b.bg}20`, border: `1px solid ${b.bg}55`, color: b.text, boxShadow: `0 0 16px ${b.bg}18` }}
+                    >
+                      {b.label}
+                    </span>
+                  ))}
+                </div>
+
+                {/* Giant stacked headline */}
+                <div className="relative">
+                  <h1
+                    className="text-4xl sm:text-6xl md:text-7xl font-black tracking-tight leading-none uppercase text-amber-400"
+                    style={{
+                      textShadow: "0 0 35px rgba(245,158,11,0.55)",
+                    }}
+                  >
+                    Deepa Crackers
+                  </h1>
+                  <h2
+                    className="text-2xl sm:text-4xl md:text-5xl font-black tracking-tight leading-none uppercase mt-2 text-white"
+                  >
+                    Festival Celebration Hub
+                  </h2>
+                </div>
+
                 <p className="text-neutral-300 text-xs md:text-sm max-w-2xl mx-auto leading-relaxed">
-                  Discover supreme quality crackers, ground chakkars, sparklers, and multi-color sky shots. Directly dispatched to Thiruthuraipoondi & across Tamil Nadu with 100% legal compliance.
+                  Discover premier fireworks, ground chakkars, sparklers, and dazzling sky shots. Directly dispatched to <strong className="text-amber-400 font-black">Thiruthuraipoondi &amp; across Tamil Nadu</strong> with unmatched festive value.
                 </p>
+
+                {/* 5-color dot divider */}
+                <div className="flex items-center justify-center gap-4">
+                  <div className="h-px w-16 bg-gradient-to-r from-transparent to-amber-500" />
+                  <div className="flex gap-1.5">
+                    {["#ef4444", "#f59e0b", "#10b981", "#06b6d4", "#d946ef"].map((c, i) => (
+                      <div key={i} className="w-2 h-2 rounded-full" style={{ background: c, boxShadow: `0 0 8px ${c}` }} />
+                    ))}
+                  </div>
+                  <div className="h-px w-16 bg-gradient-to-l from-transparent to-amber-500" />
+                </div>
               </div>
             )}
           </section>
 
-          {/* Hero Action Bar */}
+          {/* Hero Action Bar - Maximalist Radiant Glow Controls */}
           <div className="flex flex-wrap items-center justify-center gap-4">
             <button
               onClick={() => setShowAiModal(true)}
-              className="px-6 py-3 rounded-xl bg-gradient-to-r from-red-600 to-red-700 text-white font-bold text-xs md:text-sm shadow-lg shadow-red-600/30 hover:from-red-500 hover:to-red-600 transition-all flex items-center gap-2 border border-red-500"
+              className="px-6 py-3.5 rounded-2xl text-slate-950 font-black text-xs md:text-sm shadow-xl transition-all flex items-center gap-2 hover:scale-105 active:scale-95 cursor-pointer"
+              style={{
+                background: "linear-gradient(135deg, #f59e0b 0%, #f97316 50%, #ef4444 100%)",
+                boxShadow: "0 0 30px #f59e0b40, 0 4px 20px #ef444430",
+                border: "1px solid #fbbf2455",
+              }}
             >
-              <Bot className="h-4 w-4 text-white" />
-              <span>AI Smart Fireworks Assistant</span>
+              <Bot className="h-4 w-4 text-slate-950" />
+              <span>AI Smart Fireworks Assistant 🤖</span>
             </button>
             <button
               onClick={downloadPDFPricelist}
               disabled={downloadingPDF}
-              className="px-6 py-3 rounded-xl bg-white hover:bg-neutral-200 text-black border border-white font-bold text-xs md:text-sm shadow-md transition-all flex items-center gap-2 disabled:opacity-50"
+              className="px-6 py-3.5 rounded-2xl bg-white hover:bg-neutral-100 text-slate-950 font-black text-xs md:text-sm shadow-xl transition-all flex items-center gap-2 disabled:opacity-50 hover:scale-105 active:scale-95 cursor-pointer"
+              style={{
+                boxShadow: "0 0 25px rgba(255,255,255,0.25)",
+                border: "1.5px solid #fbbf24",
+              }}
             >
               <FileText className="h-4 w-4 text-red-600" />
-              <span>{downloadingPDF ? "Generating PDF..." : "Download PDF Pricelist"}</span>
+              <span>{downloadingPDF ? "Generating PDF..." : "Download PDF Pricelist 📄"}</span>
             </button>
             <button
               onClick={() => navigate("/status")}
-              className="px-6 py-3 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white border border-neutral-700 font-bold text-xs md:text-sm shadow-md transition-all"
+              className="px-6 py-3.5 rounded-2xl text-white font-black text-xs md:text-sm shadow-xl transition-all flex items-center gap-2 hover:scale-105 active:scale-95 cursor-pointer"
+              style={{
+                background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)",
+                border: "1.5px solid #06b6d455",
+                boxShadow: "0 0 25px #06b6d425",
+              }}
             >
-              Track Order Status
+              <span className="text-cyan-400">⚡</span>
+              <span>Track Order Status</span>
             </button>
           </div>
 
           {/* Product Catalog Showcase with Admin Dynamic Ordering */}
           <section className="space-y-6">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-neutral-900/90 p-5 rounded-2xl border border-white/15 shadow-xl backdrop-blur-md">
+            <div
+              className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 rounded-3xl relative overflow-hidden backdrop-blur-md"
+              style={{
+                background: "linear-gradient(135deg, #090909 0%, #131313 50%, #090909 100%)",
+                border: "1.5px solid #f59e0b44",
+                boxShadow: "0 0 35px #f59e0b12, inset 0 1px 0 #fbbf2415",
+              }}
+            >
+              <div className="h-1 w-full absolute top-0 left-0 right-0 bg-gradient-to-r from-amber-400 via-rose-500 to-cyan-400" />
               <div>
-                <h2 className="text-xl md:text-2xl font-black text-white">Product Categories & Pricelist</h2>
-                <p className="text-neutral-400 text-xs mt-0.5">⚡ Display sequence dynamically arranged by Admin Drag & Drop</p>
+                <h2
+                  className="text-xl md:text-2xl font-black tracking-wide uppercase text-white"
+                  style={{
+                    textShadow: "0 0 20px rgba(251,191,36,0.3)",
+                  }}
+                >
+                  <span className="text-amber-400">Product Categories</span> &amp; Pricelist
+                </h2>
+                <p className="text-amber-400/80 text-xs mt-0.5 font-bold">⚡ Display sequence dynamically arranged by Admin Drag &amp; Drop</p>
               </div>
 
               {/* View Mode Controls */}
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setViewMode("grid")}
-                  className={`px-3.5 py-1.5 rounded-xl border text-xs font-bold flex items-center gap-1.5 transition-all ${viewMode === "grid" ? "bg-red-600 text-white border-red-500 shadow-md shadow-red-600/30 font-black" : "bg-neutral-800 text-neutral-300 border-neutral-700 hover:bg-neutral-700 hover:text-white"
+                  className={`px-4 py-2 rounded-xl border text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer ${viewMode === "grid"
+                    ? "bg-gradient-to-r from-amber-500 to-red-600 text-slate-950 border-amber-400 shadow-[0_0_18px_#f59e0b60]"
+                    : "bg-neutral-900 text-neutral-300 border-white/10 hover:border-amber-400/40 hover:text-white"
                     }`}
                 >
                   <LayoutGrid className="h-4 w-4" /> Grid
                 </button>
                 <button
                   onClick={() => setViewMode("table")}
-                  className={`px-3.5 py-1.5 rounded-xl border text-xs font-bold flex items-center gap-1.5 transition-all ${viewMode === "table" ? "bg-red-600 text-white border-red-500 shadow-md shadow-red-600/30 font-black" : "bg-neutral-800 text-neutral-300 border-neutral-700 hover:bg-neutral-700 hover:text-white"
+                  className={`px-4 py-2 rounded-xl border text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer ${viewMode === "table"
+                    ? "bg-gradient-to-r from-amber-500 to-red-600 text-slate-950 border-amber-400 shadow-[0_0_18px_#f59e0b60]"
+                    : "bg-neutral-900 text-neutral-300 border-white/10 hover:border-amber-400/40 hover:text-white"
                     }`}
                 >
                   <ListIcon className="h-4 w-4" /> Table
                 </button>
                 <button
                   onClick={downloadPDFPricelist}
-                  className="px-3.5 py-1.5 rounded-xl bg-white hover:bg-neutral-200 text-black border border-white text-xs font-bold flex items-center gap-1.5 shadow-md"
+                  className="px-4 py-2 rounded-xl bg-white hover:bg-neutral-100 text-slate-950 border border-amber-400 text-xs font-black flex items-center gap-1.5 shadow-[0_0_15px_rgba(255,255,255,0.2)] cursor-pointer"
                 >
                   <FileText className="h-4 w-4 text-red-600" /> PDF
                 </button>
@@ -963,31 +1217,64 @@ export default function Home() {
             </div>
 
             {/* Category Chips & Search Bar */}
-            <div data-tour="category-filter" className="space-y-4 p-4 bg-gradient-to-b from-neutral-900/95 to-neutral-950/90 rounded-3xl border border-white/15 shadow-[0_10px_30px_rgba(0,0,0,0.5)] backdrop-blur-md">
+            <div
+              data-tour="category-filter"
+              className="space-y-4 p-5 rounded-3xl relative overflow-hidden backdrop-blur-md"
+              style={{
+                background: "linear-gradient(135deg, #0a0a0a 0%, #111111 100%)",
+                border: "1.5px solid #ffffff12",
+                boxShadow: "0 10px 35px rgba(0,0,0,0.6)",
+              }}
+            >
+              {/* Corner brackets */}
+              <div className="absolute top-3 left-3 w-6 h-6 border-t-2 border-l-2 border-amber-500/40 rounded-tl-lg pointer-events-none" />
+              <div className="absolute top-3 right-3 w-6 h-6 border-t-2 border-r-2 border-amber-500/40 rounded-tr-lg pointer-events-none" />
+
               <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-thin">
-                {categories.map((cat) => (
-                  <button
-                    key={cat}
-                    onClick={() => setSelectedCategory(cat)}
-                    className={`px-4 py-2.5 rounded-2xl text-xs font-bold whitespace-nowrap border transition-all transform-gpu active:scale-95 ${selectedCategory === cat
-                      ? "bg-gradient-to-r from-red-600 via-red-500 to-rose-600 text-white border-red-400 font-black shadow-[0_6px_20px_rgba(239,68,68,0.4)]"
-                      : "bg-neutral-800/80 text-neutral-300 border-white/10 hover:bg-neutral-700/80 hover:text-white hover:border-amber-400/40"
-                      }`}
-                  >
-                    {cat}
-                  </button>
-                ))}
+                {categories.map((cat, catIdx) => {
+                  const catTheme = CARD_THEMES[catIdx % CARD_THEMES.length];
+                  const isSelected = selectedCategory === cat;
+                  return (
+                    <button
+                      key={cat}
+                      onClick={() => setSelectedCategory(cat)}
+                      className={`px-4 py-2.5 rounded-2xl text-xs font-black whitespace-nowrap border transition-all transform-gpu active:scale-95 cursor-pointer flex items-center gap-2 ${isSelected
+                        ? "scale-105"
+                        : "bg-neutral-900/90 text-neutral-300 border-white/10 hover:bg-neutral-800 hover:text-white"
+                        }`}
+                      style={isSelected ? {
+                        background: catTheme.btnGrad,
+                        color: catTheme.btnText,
+                        borderColor: catTheme.accent,
+                        boxShadow: `0 0 20px ${catTheme.shadow}`,
+                      } : {}}
+                    >
+                      <span
+                        className="w-2 h-2 rounded-full shrink-0"
+                        style={{ background: isSelected ? catTheme.btnText : catTheme.glow, boxShadow: isSelected ? "none" : `0 0 6px ${catTheme.glow}` }}
+                      />
+                      <span>{formatCategoryName(cat)}</span>
+                    </button>
+                  );
+                })}
               </div>
 
               {/* Search Bar */}
               <div className="relative max-w-md">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-cyan-400" />
                 <input
                   type="text"
                   placeholder="Search product in English or Tamil..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-black border border-white/20 text-white placeholder-neutral-500 text-xs focus:outline-none focus:border-red-500 focus:bg-neutral-950 shadow-inner"
+                  className="w-full pl-10 pr-4 py-3 rounded-2xl text-white placeholder-neutral-500 text-xs focus:outline-none transition-all"
+                  style={{
+                    background: "#060606",
+                    border: "1.5px solid rgba(6, 182, 212, 0.4)",
+                    boxShadow: "inset 0 0 20px #00000077",
+                  }}
+                  onFocus={e => e.target.style.borderColor = "#22d3ee"}
+                  onBlur={e => e.target.style.borderColor = "rgba(6, 182, 212, 0.4)"}
                 />
               </div>
             </div>
@@ -995,196 +1282,425 @@ export default function Home() {
             {/* Products Rendered according to Admin Category Sequence */}
             {loading ? (
               <div className="text-center py-16">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-500 mx-auto"></div>
-                <p className="text-neutral-400 text-xs mt-3">Loading product catalog...</p>
+                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-cyan-400 mx-auto" style={{ filter: "drop-shadow(0 0 12px #06b6d4)" }} />
+                <p className="text-cyan-400 text-xs font-bold mt-3 uppercase tracking-wider">Loading product catalog...</p>
               </div>
             ) : groupedProducts.length === 0 ? (
-              <div className="text-center py-12 rounded-2xl bg-neutral-900/80 border border-white/10 p-6 shadow-xl">
-                <p className="text-neutral-300 text-xs">No products found matching your search criteria.</p>
+              <div className="text-center py-12 rounded-3xl bg-neutral-900/80 border border-white/10 p-6 shadow-xl space-y-2">
+                <p className="text-neutral-300 text-sm font-bold">No products found matching your search criteria.</p>
+                <p className="text-neutral-500 text-xs">Try searching with a different keyword or select "All" categories.</p>
               </div>
             ) : (
-              <div data-tour="product-grid" className="space-y-8">
-                {groupedProducts.map((group) => (
-                  <div key={group.category} className="space-y-4">
-                    {/* Category Header */}
-                    <div className="flex items-center gap-2 border-b border-dashed border-neutral-700 pb-2">
-                      <span className="w-6 h-6 rounded-lg bg-red-600 text-white border border-red-500 flex items-center justify-center text-xs font-black">
-                        ★
-                      </span>
-                      <h3 className="text-lg font-black text-white uppercase tracking-tight">{group.category}</h3>
-                    </div>
+              <div data-tour="product-grid" className="space-y-12">
+                {groupedProducts.map((group, groupIdx) => {
+                  const groupTheme = CARD_THEMES[groupIdx % CARD_THEMES.length];
 
-                    {/* Grid View */}
-                    {viewMode === "grid" ? (
-                      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-6">
-                        {group.items.map((prod) => {
-                          const uKey = getProductUniqueKey(prod);
-                          const qty = cart[uKey] || 0;
-                          const price = parseFloat(prod.price || 0);
-                          const discount = parseFloat(prod.discount || 0);
-                          const netPrice = discount > 0 ? Math.round(price * (1 - discount / 100)) : price;
-                          const tamilName = translateProduct(prod.productname);
+                  return (
+                    <div key={group.category} className="space-y-6">
+                      {/* Category Header with Dynamic Jewel-Tone Accent */}
+                      <div className="flex items-center gap-3">
+                        <span
+                          className="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-black shadow-lg shrink-0"
+                          style={{
+                            background: groupTheme.btnGrad,
+                            color: groupTheme.btnText,
+                            boxShadow: `0 0 16px ${groupTheme.glow}55`,
+                            border: `1px solid ${groupTheme.accent}`,
+                          }}
+                        >
+                          ★
+                        </span>
+                        <h3
+                          className="text-xl md:text-2xl font-black uppercase tracking-wider"
+                          style={{
+                            color: groupTheme.accent,
+                            textShadow: `0 0 20px ${groupTheme.glow}66`,
+                          }}
+                        >
+                          {formatCategoryName(group.category)}
+                        </h3>
+                        <div
+                          className="h-[2px] flex-1 rounded-full"
+                          style={{ background: `linear-gradient(to right, ${groupTheme.glow}88, ${groupTheme.glow}22, transparent)` }}
+                        />
+                      </div>
 
-                          return (
-                            <Card3D key={uKey}>
-                              <div className="group relative bg-[#0e0e0e] hover:bg-[#141414] rounded-3xl p-3.5 sm:p-5 border border-white/15 hover:border-amber-500/70 shadow-[0_8px_25px_rgba(0,0,0,0.7)] hover:shadow-[0_15px_35px_rgba(239,68,68,0.2)] flex flex-col justify-between space-y-3 sm:space-y-4 transition-all duration-200 overflow-hidden h-full">
-                                {/* Subtle top shine accent */}
-                                <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-amber-400/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+                      {/* Grid View — Brand New Multi-Color Maximalist Product Cards */}
+                      {viewMode === "grid" ? (
+                        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-6">
+                          {group.items.map((prod, pIdx) => {
+                            const uKey = getProductUniqueKey(prod);
+                            const qty = cart[uKey] || 0;
+                            const price = parseFloat(prod.price || 0);
+                            const discount = parseFloat(prod.discount || 0);
+                            const netPrice = discount > 0 ? Math.round(price * (1 - discount / 100)) : price;
+                            const savings = Math.max(0, price - netPrice);
+                            const tamilName = translateProduct(prod.productname);
+                            const theme = getProductTheme(prod, pIdx);
 
-                                <div className="space-y-2 sm:space-y-3">
-                                  {/* Product Image Carousel */}
-                                  <div className="rounded-2xl overflow-hidden border border-white/10 shadow-sm group-hover:border-amber-500/30 transition-colors">
-                                    <ProductCarousel media={prod.image || prod.images} onImageClick={setPreviewMedia} />
-                                  </div>
+                            return (
+                              <Card3D key={uKey}>
+                                <div
+                                  className="group relative rounded-3xl p-3.5 sm:p-5 flex flex-col justify-between space-y-3 sm:space-y-4 transition-all duration-300 overflow-hidden h-full"
+                                  style={{
+                                    background: theme.bgGradient,
+                                    border: `1.5px solid ${qty > 0 ? theme.accent : theme.border}`,
+                                    boxShadow: qty > 0
+                                      ? `0 10px 30px rgba(0,0,0,0.8), 0 0 25px ${theme.glow}44`
+                                      : `0 8px 25px rgba(0,0,0,0.7)`,
+                                  }}
+                                >
+                                  {/* Dynamic Glowing Accent Top Bar matching theme */}
+                                  <div
+                                    className="absolute top-0 left-0 right-0 h-1 transition-opacity duration-300"
+                                    style={{
+                                      background: theme.btnGrad,
+                                      boxShadow: `0 0 14px ${theme.glow}`,
+                                      opacity: qty > 0 ? 1 : 0.75,
+                                    }}
+                                  />
 
-                                  <div>
-                                    <div className="flex items-start justify-between gap-1.5 flex-wrap">
-                                      <span className="text-[10px] sm:text-[11px] font-mono font-black px-2 py-0.5 rounded-lg bg-neutral-800 border border-white/15 text-neutral-200">
+                                  {/* Subtle Diagonal Texture Overlay */}
+                                  <div
+                                    className="absolute inset-0 pointer-events-none opacity-[0.025]"
+                                    style={{
+                                      backgroundImage: `repeating-linear-gradient(45deg, ${theme.glow} 0, ${theme.glow} 1px, transparent 0, transparent 50%)`,
+                                      backgroundSize: "12px 12px",
+                                    }}
+                                  />
+
+                                  {/* Decorative corner brackets matching card theme */}
+                                  <div
+                                    className="absolute top-3 right-3 w-5 h-5 border-t-2 border-r-2 rounded-tr pointer-events-none transition-all duration-300"
+                                    style={{ borderColor: qty > 0 ? theme.accent : `${theme.glow}55` }}
+                                  />
+
+                                  <div className="space-y-3 relative z-10">
+                                    {/* Product Image Aperture with Ambient Colored Spotlight */}
+                                    <div
+                                      className="rounded-2xl overflow-hidden p-1 transition-all duration-300"
+                                      style={{
+                                        background: `radial-gradient(circle at 50% 50%, ${theme.glow}18 0%, rgba(255,255,255,0.04) 70%, transparent 100%)`,
+                                        border: `1px solid ${theme.border}`,
+                                      }}
+                                    >
+                                      <ProductCarousel media={prod.image || prod.images} onImageClick={setPreviewMedia} theme={theme} />
+                                    </div>
+
+                                    {/* Meta Pills Row */}
+                                    <div className="flex items-center justify-between gap-1.5 flex-wrap">
+                                      <span
+                                        className="text-[10px] sm:text-[11px] font-mono font-black px-2.5 py-0.5 rounded-lg border flex items-center gap-1.5"
+                                        style={{
+                                          background: "#030303",
+                                          borderColor: theme.border,
+                                          color: theme.tag,
+                                        }}
+                                      >
+                                        <span className="w-1.5 h-1.5 rounded-full" style={{ background: theme.glow, boxShadow: `0 0 6px ${theme.glow}` }} />
                                         #{prod.serial_number || prod.id}
                                       </span>
-                                      {discount > 0 && (
-                                        <span className="text-[10px] sm:text-[11px] font-black px-2 py-0.5 rounded-lg bg-gradient-to-r from-red-600 to-rose-600 text-white border border-red-500 shadow-md shadow-red-600/30">
-                                          {discount}% OFF
-                                        </span>
-                                      )}
+
+                                      <div className="flex items-center gap-1.5">
+                                        {discount > 0 && (
+                                          <span
+                                            className="text-[10px] sm:text-[11px] font-black px-2.5 py-0.5 rounded-lg text-white"
+                                            style={{
+                                              background: "linear-gradient(135deg, #ef4444 0%, #f43f5e 100%)",
+                                              boxShadow: "0 0 12px rgba(239,68,68,0.45)",
+                                              border: "1px solid rgba(255,255,255,0.3)",
+                                            }}
+                                          >
+                                            🔥 {discount}% OFF
+                                          </span>
+                                        )}
+                                        {qty > 0 && (
+                                          <span
+                                            className="text-[10px] sm:text-[11px] font-black px-2 py-0.5 rounded-lg shadow-sm"
+                                            style={{
+                                              background: theme.btnGrad,
+                                              color: theme.btnText,
+                                              boxShadow: `0 0 10px ${theme.glow}`,
+                                            }}
+                                          >
+                                            ✓ {qty} in List
+                                          </span>
+                                        )}
+                                      </div>
                                     </div>
 
-                                    <h4 className="font-extrabold text-white text-sm sm:text-base mt-2 line-clamp-2 group-hover:text-amber-300 transition-colors tracking-tight">{prod.productname}</h4>
-                                    {tamilName && <p className="text-xs text-neutral-400 mt-0.5 font-medium line-clamp-1">{tamilName}</p>}
-                                  </div>
-                                </div>
-
-                                <div className="pt-3 border-t border-white/10 space-y-2.5">
-                                  <div className="flex items-baseline justify-between">
+                                    {/* Title & Tamil Translation */}
                                     <div>
-                                      <span className="text-base sm:text-2xl font-black text-white group-hover:text-amber-400 transition-colors">
-                                        ₹{netPrice.toFixed(2)}
-                                      </span>
-                                      {discount > 0 && (
-                                        <span className="ml-1.5 text-xs text-neutral-500 line-through">
-                                          ₹{price.toFixed(2)}
-                                        </span>
+                                      <h4 className="font-black text-white text-sm sm:text-base line-clamp-2 tracking-tight group-hover:text-white transition-colors">
+                                        {prod.productname}
+                                      </h4>
+                                      {tamilName && (
+                                        <div className="flex items-center gap-1.5 mt-1">
+                                          <span className="text-xs" style={{ color: theme.accent }}>🪔</span>
+                                          <p className="text-xs font-semibold line-clamp-1" style={{ color: `${theme.accent}dd` }}>
+                                            {tamilName}
+                                          </p>
+                                        </div>
                                       )}
                                     </div>
-                                    <span className="text-[10px] sm:text-xs text-neutral-400 uppercase font-bold tracking-wider">
-                                      per {prod.per || "pkt"}
-                                    </span>
                                   </div>
 
-                                  {/* Full-width touch-friendly Stepper Control matching real card width */}
-                                  <div className="w-full flex items-center justify-between p-1 rounded-2xl bg-black/90 border border-white/20 shadow-inner">
-                                    <button
-                                      onClick={() => updateQuantity(prod, -1)}
-                                      disabled={qty === 0}
-                                      className={`flex-1 h-8 sm:h-9 rounded-xl flex items-center justify-center font-black text-sm transition-all active:scale-95 ${qty > 0
-                                          ? "bg-neutral-800 hover:bg-neutral-700 text-white border border-white/10 cursor-pointer"
-                                          : "bg-neutral-900/60 text-neutral-600 cursor-not-allowed"
-                                        }`}
-                                    >
-                                      <Minus className="h-4 w-4" />
-                                    </button>
-                                    <span className="px-3 sm:px-4 text-center font-mono font-black text-sm sm:text-base text-white min-w-[36px]">
-                                      {qty}
-                                    </span>
-                                    <button
-                                      onClick={(e) => updateQuantity(prod, 1, e)}
-                                      className="flex-1 h-8 sm:h-9 rounded-xl bg-gradient-to-r from-red-600 via-red-500 to-rose-600 hover:from-red-500 hover:to-rose-500 border border-red-500 text-white flex items-center justify-center font-black text-sm shadow-md shadow-red-600/30 active:scale-95 transition-all cursor-pointer"
-                                    >
-                                      <Plus className="h-4 w-4" />
-                                    </button>
-                                  </div>
-                                </div>
-                              </div>
-                            </Card3D>
-                          );
-                        })}
-                      </div>
-                    ) : (
-                      /* Table View */
-                      <div className="bg-neutral-900/90 rounded-2xl border border-white/15 shadow-xl overflow-x-auto">
-                        <table className="w-full text-left text-xs">
-                          <thead className="bg-neutral-800 text-red-400 font-bold uppercase border-b border-neutral-700">
-                            <tr>
-                              <th className="p-3 border-r border-neutral-700">Code</th>
-                              <th className="p-3 border-r border-neutral-700">Product Name</th>
-                              <th className="p-3 border-r border-neutral-700">MRP</th>
-                              <th className="p-3 border-r border-neutral-700">Discount</th>
-                              <th className="p-3 border-r border-neutral-700">Net Rate</th>
-                              <th className="p-3 border-r border-neutral-700">Per</th>
-                              <th className="p-3 text-center">Quantity</th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-neutral-800">
-                            {group.items.map((prod) => {
-                              const uKey = getProductUniqueKey(prod);
-                              const qty = cart[uKey] || 0;
-                              const price = parseFloat(prod.price || 0);
-                              const discount = parseFloat(prod.discount || 0);
-                              const netPrice = discount > 0 ? Math.round(price * (1 - discount / 100)) : price;
-                              const tamilName = translateProduct(prod.productname);
+                                  {/* Pricing & Interactive Action Area */}
+                                  <div className="pt-3 border-t space-y-3 relative z-10" style={{ borderColor: `${theme.glow}25` }}>
+                                    <div className="flex items-baseline justify-between">
+                                      <div>
+                                        <span
+                                          className="text-lg sm:text-2xl font-black text-white tracking-tight"
+                                          style={{ textShadow: `0 0 18px ${theme.glow}33` }}
+                                        >
+                                          ₹{netPrice.toFixed(2)}
+                                        </span>
+                                        {discount > 0 && (
+                                          <span className="ml-2 text-xs text-neutral-500 line-through">
+                                            ₹{price.toFixed(2)}
+                                          </span>
+                                        )}
+                                      </div>
 
-                              return (
-                                <tr key={uKey} className="hover:bg-neutral-800/60">
-                                  <td className="p-3 font-bold text-white border-r border-neutral-800">
-                                    #{prod.serial_number || prod.id}
-                                  </td>
-                                  <td className="p-3 border-r border-neutral-800">
-                                    <span className="font-bold text-white block">{prod.productname}</span>
-                                    {tamilName && <span className="text-[11px] text-neutral-400 block">{tamilName}</span>}
-                                  </td>
-                                  <td className="p-3 text-neutral-500 line-through border-r border-neutral-800">
-                                    ₹{price.toFixed(2)}
-                                  </td>
-                                  <td className="p-3 text-red-400 font-bold border-r border-neutral-800">
-                                    {discount > 0 ? `${discount}%` : "-"}
-                                  </td>
-                                  <td className="p-3 font-black text-white border-r border-neutral-800">
-                                    ₹{netPrice.toFixed(2)}
-                                  </td>
-                                  <td className="p-3 uppercase text-neutral-400 border-r border-neutral-800">
-                                    {prod.per || "pkt"}
-                                  </td>
-                                  <td className="p-3 text-center">
-                                    <div className="inline-flex items-center gap-1.5 p-1 rounded-lg bg-black border border-neutral-700">
-                                      <button
-                                        onClick={() => updateQuantity(prod, -1)}
-                                        className="w-5 h-5 rounded bg-neutral-800 border border-neutral-700 text-white flex items-center justify-center font-bold text-xs hover:bg-neutral-700"
-                                      >
-                                        -
-                                      </button>
-                                      <span className="w-6 text-center font-black text-xs text-white">{qty}</span>
+                                      <div className="flex items-center gap-1.5">
+                                        <span className="text-[10px] sm:text-xs text-neutral-400 uppercase font-black tracking-wider">
+                                          /{prod.per || "pkt"}
+                                        </span>
+                                      </div>
+                                    </div>
+
+                                    {/* NEW INTERACTIVE ACTION BUTTON / STEPPER */}
+                                    {qty === 0 ? (
                                       <button
                                         onClick={(e) => updateQuantity(prod, 1, e)}
-                                        className="w-5 h-5 rounded bg-red-600 border border-red-500 text-white flex items-center justify-center font-bold text-xs hover:bg-red-500 active:scale-95"
+                                        className="w-full py-2.5 sm:py-3 rounded-2xl font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition-all duration-200 active:scale-95 hover:scale-[1.02] cursor-pointer"
+                                        style={{
+                                          background: theme.btnGrad,
+                                          color: theme.btnText,
+                                          boxShadow: `0 0 20px ${theme.shadow}`,
+                                          border: `1px solid ${theme.accent}66`,
+                                        }}
                                       >
-                                        +
+                                        <span>Add</span>
+                                        <Plus className="h-4 w-4 stroke-[3]" />
                                       </button>
-                                    </div>
-                                  </td>
-                                </tr>
-                              );
-                            })}
-                          </tbody>
-                        </table>
-                      </div>
-                    )}
-                  </div>
-                ))}
+                                    ) : (
+                                      <div
+                                        className="w-full flex items-center justify-between p-1 rounded-2xl transition-all"
+                                        style={{
+                                          background: "#050505",
+                                          border: `1.5px solid ${theme.accent}`,
+                                          boxShadow: `0 0 18px ${theme.glow}40`,
+                                        }}
+                                      >
+                                        <button
+                                          onClick={() => updateQuantity(prod, -1)}
+                                          className="flex-1 h-8 sm:h-9 rounded-xl flex items-center justify-center font-black text-sm transition-all active:scale-90 bg-neutral-800 hover:bg-neutral-700 text-white border border-white/10 cursor-pointer"
+                                        >
+                                          <Minus className="h-4 w-4" />
+                                        </button>
+                                        <div className="px-3 text-center">
+                                          <span className="font-mono font-black text-sm sm:text-base block leading-none" style={{ color: theme.accent }}>
+                                            {qty}
+                                          </span>
+                                          <span className="text-[9px] uppercase font-bold text-neutral-400 block tracking-wider mt-0.5">
+                                            IN LIST
+                                          </span>
+                                        </div>
+                                        <button
+                                          onClick={(e) => updateQuantity(prod, 1, e)}
+                                          className="flex-1 h-8 sm:h-9 rounded-xl flex items-center justify-center font-black text-sm active:scale-90 transition-all cursor-pointer shadow-md"
+                                          style={{
+                                            background: theme.btnGrad,
+                                            color: theme.btnText,
+                                            boxShadow: `0 0 12px ${theme.glow}66`,
+                                          }}
+                                        >
+                                          <Plus className="h-4 w-4 stroke-[3]" />
+                                        </button>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              </Card3D>
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        /* Table View with Multi-Color Theme Accents */
+                        <div
+                          className="rounded-3xl overflow-x-auto"
+                          style={{
+                            background: "linear-gradient(135deg, #070a0e 0%, #10151c 100%)",
+                            border: `1.5px solid ${groupTheme.border}`,
+                            boxShadow: "0 10px 30px rgba(0,0,0,0.6)",
+                          }}
+                        >
+                          <table className="w-full text-left text-xs">
+                            <thead
+                              className="font-bold uppercase border-b"
+                              style={{
+                                background: "rgba(0,0,0,0.5)",
+                                color: groupTheme.accent,
+                                borderColor: `${groupTheme.glow}33`,
+                              }}
+                            >
+                              <tr>
+                                <th className="p-3.5 border-r border-neutral-800">Code</th>
+                                <th className="p-3.5 border-r border-neutral-800">Product Name</th>
+                                <th className="p-3.5 border-r border-neutral-800">MRP</th>
+                                <th className="p-3.5 border-r border-neutral-800">Discount</th>
+                                <th className="p-3.5 border-r border-neutral-800">Net Rate</th>
+                                <th className="p-3.5 border-r border-neutral-800">Per</th>
+                                <th className="p-3.5 text-center">Action</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-neutral-800/80">
+                              {group.items.map((prod, pIdx) => {
+                                const uKey = getProductUniqueKey(prod);
+                                const qty = cart[uKey] || 0;
+                                const price = parseFloat(prod.price || 0);
+                                const discount = parseFloat(prod.discount || 0);
+                                const netPrice = discount > 0 ? Math.round(price * (1 - discount / 100)) : price;
+                                const tamilName = translateProduct(prod.productname);
+                                const theme = getProductTheme(prod, pIdx);
+
+                                return (
+                                  <tr key={uKey} className="hover:bg-white/[0.03] transition-colors">
+                                    <td className="p-3.5 font-mono font-black border-r border-neutral-800" style={{ color: theme.tag }}>
+                                      #{prod.serial_number || prod.id}
+                                    </td>
+                                    <td className="p-3.5 border-r border-neutral-800">
+                                      <span className="font-bold text-white block">{prod.productname}</span>
+                                      {tamilName && <span className="text-[11px] block mt-0.5" style={{ color: `${theme.accent}cc` }}>{tamilName}</span>}
+                                    </td>
+                                    <td className="p-3.5 text-neutral-500 line-through border-r border-neutral-800">
+                                      ₹{price.toFixed(2)}
+                                    </td>
+                                    <td className="p-3.5 font-bold border-r border-neutral-800" style={{ color: theme.glow }}>
+                                      {discount > 0 ? `${discount}%` : "-"}
+                                    </td>
+                                    <td className="p-3.5 font-black text-white border-r border-neutral-800 text-sm">
+                                      ₹{netPrice.toFixed(2)}
+                                    </td>
+                                    <td className="p-3.5 uppercase text-neutral-400 border-r border-neutral-800">
+                                      {prod.per || "pkt"}
+                                    </td>
+                                    <td className="p-3.5 text-center">
+                                      {qty === 0 ? (
+                                        <button
+                                          onClick={(e) => updateQuantity(prod, 1, e)}
+                                          className="px-3 py-1.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1 mx-auto transition-all active:scale-95 cursor-pointer"
+                                          style={{
+                                            background: theme.btnGrad,
+                                            color: theme.btnText,
+                                            boxShadow: `0 0 10px ${theme.shadow}`,
+                                          }}
+                                        >
+                                          <Plus className="h-3.5 w-3.5 stroke-[3]" /> Add
+                                        </button>
+                                      ) : (
+                                        <div
+                                          className="inline-flex items-center gap-1.5 p-1 rounded-xl bg-black border"
+                                          style={{ borderColor: theme.accent, boxShadow: `0 0 10px ${theme.glow}33` }}
+                                        >
+                                          <button
+                                            onClick={() => updateQuantity(prod, -1)}
+                                            className="w-6 h-6 rounded-lg bg-neutral-800 text-white flex items-center justify-center font-bold text-xs hover:bg-neutral-700 active:scale-90"
+                                          >
+                                            <Minus className="h-3 w-3" />
+                                          </button>
+                                          <span className="w-6 text-center font-mono font-black text-xs" style={{ color: theme.accent }}>
+                                            {qty}
+                                          </span>
+                                          <button
+                                            onClick={(e) => updateQuantity(prod, 1, e)}
+                                            className="w-6 h-6 rounded-lg text-slate-950 flex items-center justify-center font-bold text-xs active:scale-90"
+                                            style={{ background: theme.btnGrad }}
+                                          >
+                                            <Plus className="h-3 w-3 stroke-[3]" />
+                                          </button>
+                                        </div>
+                                      )}
+                                    </td>
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             )}
           </section>
 
 
 
-          {/* Statutory Compliance Notice */}
-          <section className="relative p-5 sm:p-6 rounded-3xl bg-gradient-to-r from-neutral-950 via-neutral-900 to-neutral-950 border border-white/15 shadow-[0_10px_30px_rgba(0,0,0,0.5)] space-y-2 overflow-hidden">
-            <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-red-600 via-amber-400 to-rose-600" />
-            <h3 className="text-red-400 font-black text-xs sm:text-sm flex items-center gap-2">
-              <ShieldCheck className="h-4 w-4 text-red-500 shrink-0" /> Supreme Court Compliance & Statutory Legal Notice
-            </h3>
-            <p className="text-[11px] sm:text-xs text-neutral-400 leading-relaxed">
-              As per 2018 Supreme Court regulations, direct online e-commerce transactions of firecrackers are prohibited. Deepa Crackers operates in 100% legal compliance. Please add your desired items to the estimate list and submit your enquiry. Our team in Thiruthuraipoondi will contact you within 24 hours to confirm order booking and dispatch details.
-            </p>
+          {/* Statutory Compliance Notice - Maximalist Security Banner */}
+          <section
+            className="relative p-6 sm:p-8 rounded-3xl overflow-hidden space-y-4"
+            style={{
+              background: "linear-gradient(135deg, #0a0700 0%, #111111 50%, #0a0700 100%)",
+              border: "1.5px solid #f59e0b44",
+              boxShadow: "0 0 40px #f59e0b15, inset 0 1px 0 #fbbf2415",
+            }}
+          >
+            {/* Top rainbow accent bar */}
+            <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-red-500 via-amber-400 via-emerald-400 via-cyan-400 to-purple-500" style={{ boxShadow: "0 0 15px #f59e0b" }} />
+
+            {/* Corner brackets */}
+            <div className="absolute top-3 left-3 w-7 h-7 border-t-2 border-l-2 border-amber-500/50 rounded-tl-lg pointer-events-none" />
+            <div className="absolute top-3 right-3 w-7 h-7 border-t-2 border-r-2 border-amber-500/50 rounded-tr-lg pointer-events-none" />
+            <div className="absolute bottom-3 left-3 w-7 h-7 border-b-2 border-l-2 border-amber-500/50 rounded-bl-lg pointer-events-none" />
+            <div className="absolute bottom-3 right-3 w-7 h-7 border-b-2 border-r-2 border-amber-500/50 rounded-br-lg pointer-events-none" />
+
+            {/* Hatching texture */}
+            <div
+              className="absolute inset-0 pointer-events-none opacity-[0.03]"
+              style={{ backgroundImage: "repeating-linear-gradient(45deg, #f59e0b 0, #f59e0b 1px, transparent 0, transparent 50%)", backgroundSize: "14px 14px" }}
+            />
+
+            <div className="relative z-10 space-y-3">
+              <div className="flex items-center gap-2.5">
+                <span className="w-8 h-8 rounded-xl bg-amber-500/20 border border-amber-500/50 flex items-center justify-center text-amber-400 shadow-md">
+                  <ShieldCheck className="h-5 w-5" />
+                </span>
+                <h3
+                  className="font-black text-sm sm:text-base uppercase tracking-wide text-amber-400"
+                  style={{ textShadow: "0 0 15px rgba(245,158,11,0.3)" }}
+                >
+                  Supreme Court Compliance &amp; Statutory Legal Notice
+                </h3>
+              </div>
+
+              <p className="text-xs text-neutral-300 leading-relaxed max-w-4xl">
+                As per 2018 Supreme Court regulations, direct online e-commerce transactions of firecrackers are prohibited. <strong className="text-amber-400 font-bold">Deepa Crackers operates in 100% legal compliance.</strong> Please add your desired items to the estimate list and submit your enquiry. Our team in Thiruthuraipoondi will contact you within 24 hours to confirm order booking and dispatch details.
+              </p>
+
+              {/* Tag badges */}
+              <div className="flex flex-wrap gap-2 pt-1">
+                {[
+                  { label: "⚖️ 100% Legal Compliance", color: "#10b981" },
+                  { label: "🏛️ Supreme Court 2018 Guidelines", color: "#f59e0b" },
+                  { label: "🚚 Direct Transport Dispatch", color: "#06b6d4" },
+                  { label: "🛡️ Safe Festival Fun", color: "#d946ef" },
+                ].map((tag, idx) => (
+                  <span
+                    key={idx}
+                    className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider"
+                    style={{ background: `${tag.color}15`, border: `1px solid ${tag.color}40`, color: tag.color }}
+                  >
+                    {tag.label}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Mirrored bottom bar */}
+            <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-purple-500 via-cyan-400 to-amber-400" />
           </section>
 
           {/* AI Assistant Modal */}
@@ -1387,21 +1903,45 @@ export default function Home() {
             )}
           </AnimatePresence>
 
-          {/* Floating Bottom Cart Summary Bar */}
+          {/* Floating Bottom Cart Summary Bar - Maximalist Luxury Bar */}
           <AnimatePresence>
             {cartItems.length > 0 && (
               <motion.div
                 data-tour="cart-summary"
-                initial={{ y: 100, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                exit={{ y: 100, opacity: 0 }}
-                className="fixed bottom-4 left-4 right-4 z-40 max-w-4xl mx-auto rounded-2xl p-4 bg-black/95 backdrop-blur-xl border border-red-600/50 shadow-[0_10px_35px_rgba(220,38,38,0.3)] flex items-center justify-between gap-4 text-white"
+                initial={{ y: 100, opacity: 0, scale: 0.95 }}
+                animate={{ y: 0, opacity: 1, scale: 1 }}
+                exit={{ y: 100, opacity: 0, scale: 0.95 }}
+                className="fixed bottom-5 left-4 right-4 z-40 max-w-4xl mx-auto rounded-3xl p-4 sm:p-5 flex items-center justify-between gap-4 text-white overflow-hidden"
+                style={{
+                  background: "linear-gradient(135deg, rgba(8,8,8,0.96) 0%, rgba(18,18,18,0.96) 100%)",
+                  backdropFilter: "blur(20px)",
+                  border: "1.5px solid #f59e0b55",
+                  boxShadow: "0 10px 40px rgba(0,0,0,0.8), 0 0 35px rgba(245,158,11,0.25)",
+                }}
               >
-                <div>
-                  <p className="text-xs font-bold text-neutral-400">{cartItems.length} Selected</p>
-                  <p className="text-xl md:text-2xl font-black text-red-500">
-                    ₹{finalCheckoutTotal.toFixed(2)}
-                  </p>
+                {/* 5-stop rainbow top bar */}
+                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-red-500 via-amber-400 via-emerald-400 via-cyan-400 to-purple-500" style={{ boxShadow: "0 0 14px #f59e0b" }} />
+
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-xl bg-amber-500/20 border border-amber-500/50 text-amber-300 shadow-md">
+                    🛒
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase font-mono bg-neutral-900 border border-amber-500/40 text-amber-300">
+                        {cartItems.length} Variety{cartItems.length > 1 ? "ies" : ""}
+                      </span>
+                      <span className="text-xs text-neutral-400 font-bold hidden sm:inline">Selected for Enquiry</span>
+                    </div>
+                    <p
+                      className="text-xl sm:text-3xl font-black mt-0.5 text-amber-400"
+                      style={{
+                        textShadow: "0 0 20px rgba(245,158,11,0.4)",
+                      }}
+                    >
+                      ₹{finalCheckoutTotal.toFixed(2)}
+                    </p>
+                  </div>
                 </div>
 
                 <button
@@ -1410,10 +1950,15 @@ export default function Home() {
                     setShowCheckoutModal(true);
                     setCheckoutStep(0);
                   }}
-                  className="px-6 py-3 rounded-xl bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white border border-red-500 font-black text-xs md:text-sm shadow-lg shadow-red-600/40 transition-all flex items-center gap-2"
+                  className="px-6 sm:px-8 py-3.5 sm:py-4 rounded-2xl text-slate-950 font-black text-xs sm:text-sm shadow-xl transition-all flex items-center gap-2 hover:scale-105 active:scale-95 cursor-pointer"
+                  style={{
+                    background: "linear-gradient(135deg, #f59e0b 0%, #f97316 50%, #ef4444 100%)",
+                    boxShadow: "0 0 25px rgba(245,158,11,0.5)",
+                    border: "1px solid #fbbf24",
+                  }}
                 >
-                  <span>Submit</span>
-                  <ArrowRight className="h-4 w-4" />
+                  <span>Submit Order Enquiry</span>
+                  <ArrowRight className="h-4 w-4 stroke-[3]" />
                 </button>
               </motion.div>
             )}
@@ -1704,42 +2249,63 @@ export default function Home() {
             totalAmount={finalCheckoutTotal}
           />
 
-          {/* Footer */}
-          <footer className="bg-black border-t border-white/10 text-neutral-400 py-12 px-6 mt-12 relative overflow-hidden">
-            <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-red-500 via-amber-400 to-cyan-500" />
-            <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
+          {/* ── FOOTER ───────────────────────────── */}
+          <footer
+            className="relative mx-1 sm:mx-4 mb-8 mt-14 rounded-3xl overflow-hidden"
+            style={{
+              background: "linear-gradient(135deg, #060606 0%, #0d0d0d 50%, #060606 100%)",
+              border: "1px solid #ffffff10",
+              boxShadow: "0 -4px 60px #00000066, inset 0 1px 0 #ffffff08",
+            }}
+          >
+            <div className="h-1.5 w-full bg-gradient-to-r from-red-500 via-amber-400 via-emerald-400 via-cyan-400 to-purple-500" />
+            <div className="absolute inset-0 pointer-events-none opacity-[0.03]" style={{ backgroundImage: "radial-gradient(circle, #ffffff 1px, transparent 1px)", backgroundSize: "20px 20px" }} />
+
+            <div className="relative z-10 max-w-7xl mx-auto px-6 py-12 grid grid-cols-1 md:grid-cols-3 gap-10">
               <div>
-                <h2 className="text-xl font-black text-amber-400 mb-2">DEEPA CRACKERS</h2>
-                <p className="text-xs text-neutral-400 leading-relaxed mb-2">
-                  Spark joy, spread light—fireworks crafted for your family festival celebration.
-                </p>
-                <p className="text-xs text-neutral-300 font-bold uppercase">📍 Deepa Crackers, RS Road, THIRUTHURAIPOONDI</p>
+                <h2 className="text-2xl font-black mb-1 uppercase tracking-widest" style={{ color: "#fbbf24", textShadow: "0 0 20px #f59e0b55" }}>DEEPA CRACKERS</h2>
+                <div className="h-px w-24 bg-gradient-to-r from-amber-500 to-transparent mb-3" />
+                <p className="text-neutral-400 text-xs leading-relaxed mb-2">Spark joy, spread light—fireworks crafted for your family festival celebration.</p>
+                <p className="text-neutral-300 text-xs font-black uppercase">📍 RS Road, THIRUTHURAIPOONDI</p>
+                <div className="flex gap-2 mt-4">{["🔥", "🎆", "🪔", "✨"].map((e, i) => <span key={i} className="text-lg">{e}</span>)}</div>
               </div>
 
               <div>
-                <h2 className="text-lg font-black text-white mb-2">Contact Us</h2>
-                <p className="text-xs text-neutral-400">Main Store Outlet Center,</p>
-                <p className="text-xs text-neutral-400">RS Road, THIRUTHURAIPOONDI, Tamil Nadu</p>
-                <a href="tel:+918072897834" className="text-xs font-bold block mt-2 text-amber-400 hover:underline">+91 8072 897 834</a>
-                <a href="https://www.instagram.com/deepa_crackers/" target="_blank" rel="noopener noreferrer" className="text-xs font-bold block mt-1 text-[#ff5277] hover:underline flex items-center gap-1">📸 @deepa_crackers</a>
-                <a href="mailto:deepatraders1985@gmail.com" className="text-xs font-bold block mt-1 text-neutral-300 hover:underline">deepatraders1985@gmail.com</a>
-                <p className="text-xs text-neutral-500 mt-1">info@deepacrackers.com</p>
+                <h2 className="text-base font-black text-white mb-1 uppercase tracking-widest">Contact Us</h2>
+                <div className="h-px w-16 bg-gradient-to-r from-cyan-500 to-transparent mb-3" />
+                <p className="text-xs text-neutral-400">RS Road, Thiruthuraipoondi,</p>
+                <p className="text-xs text-neutral-400">Tamil Nadu</p>
+                <a href="tel:+918072897834" className="text-xs font-black block mt-2 hover:underline" style={{ color: "#fbbf24" }}>+91 8072 897 834</a>
+                <a href="https://www.instagram.com/deepa_crackers/" target="_blank" rel="noopener noreferrer" className="text-xs font-black block mt-1 text-[#ff5277] hover:underline flex items-center gap-1">📸 @deepa_crackers</a>
+                <a href="mailto:deepatraders1985@gmail.com" className="text-xs font-black block mt-1 text-neutral-300 hover:underline">deepatraders1985@gmail.com</a>
               </div>
 
               <div>
-                <h2 className="text-lg font-black text-white mb-2">Quick Navigation</h2>
-                <ul className="space-y-1 text-xs text-neutral-400">
-                  <li><a href="/" className="hover:text-amber-400 transition">Home</a></li>
-                  <li><a href="/status" className="hover:text-amber-400 transition">Track Order</a></li>
-                  <li><a href="/safety-tips" className="hover:text-amber-400 transition">Safety Tips</a></li>
-                  <li><a href="/about-us" className="hover:text-amber-400 transition">About Us</a></li>
-                  <li><a href="/contact-us" className="hover:text-amber-400 transition">Contact Us</a></li>
+                <h2 className="text-base font-black text-white mb-1 uppercase tracking-widest">Quick Navigation</h2>
+                <div className="h-px w-16 bg-gradient-to-r from-purple-500 to-transparent mb-3" />
+                <ul className="space-y-1.5 text-xs text-neutral-400">
+                  {[
+                    { label: "Home", href: "/" },
+                    { label: "Track Order", href: "/status" },
+                    { label: "Safety Tips", href: "/safety-tips" },
+                    { label: "About Us", href: "/about-us" },
+                    { label: "Contact Us", href: "/contact-us" },
+                  ].map((link) => (
+                    <li key={link.href}>
+                      <a href={link.href} className="hover:text-amber-400 transition flex items-center gap-1.5 group">
+                        <span className="w-1 h-1 rounded-full bg-amber-500/40 group-hover:bg-amber-400 transition" />
+                        {link.label}
+                      </a>
+                    </li>
+                  ))}
                 </ul>
               </div>
             </div>
 
-            <div className="max-w-7xl mx-auto border-t border-white/10 mt-8 pt-6 text-center text-xs font-bold text-neutral-500">
-              © {new Date().getFullYear()} <span className="text-amber-400">Deepa Crackers</span> - THIRUTHURAIPOONDI. All rights reserved.
+            <div className="border-t border-white/[0.06] py-5 text-center text-xs text-neutral-600">
+              © {new Date().getFullYear()}{" "}
+              <span className="font-black" style={{ color: "#fbbf24" }}>Deepa Crackers</span>
+              {" "}— THIRUTHURAIPOONDI. All rights reserved.
             </div>
           </footer>
         </main>
