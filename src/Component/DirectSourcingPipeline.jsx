@@ -85,7 +85,7 @@ export default function DirectSourcingPipeline() {
 
   return (
     <section className="w-full rounded-3xl bg-neutral-900/90 backdrop-blur-md border border-white/15 shadow-2xl p-4 sm:p-8 space-y-6 overflow-hidden my-6 text-white relative">
-      
+
       {/* Top rainbow line */}
       <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-amber-400 via-emerald-400 via-cyan-400 to-rose-500" />
 
@@ -108,9 +108,8 @@ export default function DirectSourcingPipeline() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setIsAutoPlaying(!isAutoPlaying)}
-            className={`px-4 py-2 rounded-xl border text-xs font-bold shadow-md flex items-center gap-1.5 transition-all ${
-              isAutoPlaying ? "bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 border-emerald-400 font-black" : "bg-neutral-800 hover:bg-neutral-700 text-neutral-200 border-neutral-700"
-            }`}
+            className={`px-4 py-2 rounded-xl border text-xs font-bold shadow-md flex items-center gap-1.5 transition-all ${isAutoPlaying ? "bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 border-emerald-400 font-black" : "bg-neutral-800 hover:bg-neutral-700 text-neutral-200 border-neutral-700"
+              }`}
           >
             {isAutoPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 text-amber-400" />}
             <span>{isAutoPlaying ? "நிறுத்து (Pause)" : "தானாக இயக்கு (Auto Play)"}</span>
@@ -127,11 +126,10 @@ export default function DirectSourcingPipeline() {
               setActiveStep(idx);
               setIsAutoPlaying(false);
             }}
-            className={`p-2.5 rounded-xl border text-xs font-bold transition-all flex flex-col items-center justify-center gap-1 text-center ${
-              activeStep === idx
+            className={`p-2.5 rounded-xl border text-xs font-bold transition-all flex flex-col items-center justify-center gap-1 text-center ${activeStep === idx
                 ? `bg-gradient-to-r ${s.gradient} text-white border-white/40 font-black shadow-lg scale-102`
                 : "bg-neutral-800/80 border-neutral-700/80 text-neutral-300 hover:border-amber-400/40 hover:bg-neutral-700"
-            }`}
+              }`}
             style={{
               boxShadow: activeStep === idx ? `0 0 20px ${s.glowColor}` : 'none'
             }}
@@ -144,7 +142,7 @@ export default function DirectSourcingPipeline() {
 
       {/* Main Process Card Viewer */}
       <div className="relative bg-black rounded-2xl border border-neutral-800 shadow-xl p-5 sm:p-8 overflow-hidden">
-        
+
         {/* Step Progress Line Bar */}
         <div className="w-full bg-neutral-800 h-2 rounded-full overflow-hidden mb-6 border border-neutral-700">
           <motion.div
@@ -164,7 +162,7 @@ export default function DirectSourcingPipeline() {
           >
             {/* Left Icon Display */}
             <div className="md:col-span-4 flex flex-col items-center justify-center p-6 rounded-2xl bg-neutral-900 border border-neutral-800 text-center shadow-inner">
-              <div 
+              <div
                 className={`w-24 h-24 sm:w-28 sm:h-28 rounded-3xl bg-gradient-to-tr ${current.gradient} flex items-center justify-center text-5xl shadow-xl mb-3 animate-bounce`}
                 style={{ boxShadow: `0 0 30px ${current.glowColor}` }}
               >
@@ -252,9 +250,8 @@ export default function DirectSourcingPipeline() {
                 setActiveStep(idx);
                 setIsAutoPlaying(false);
               }}
-              className={`min-w-[260px] sm:min-w-[300px] p-4 rounded-2xl border cursor-pointer snap-center transition-all ${
-                activeStep === idx ? `bg-neutral-800 border-amber-400 shadow-lg scale-102` : "bg-black border-neutral-800 hover:border-neutral-700"
-              }`}
+              className={`min-w-[260px] sm:min-w-[300px] p-4 rounded-2xl border cursor-pointer snap-center transition-all ${activeStep === idx ? `bg-neutral-800 border-amber-400 shadow-lg scale-102` : "bg-black border-neutral-800 hover:border-neutral-700"
+                }`}
               style={{
                 boxShadow: activeStep === idx ? `0 0 20px ${s.glowColor}` : 'none'
               }}

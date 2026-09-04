@@ -1092,18 +1092,61 @@ export default function Home() {
                 {/* Giant stacked headline */}
                 <div className="relative">
                   <h1
-                    className="text-4xl sm:text-6xl md:text-7xl font-black tracking-tight leading-none uppercase text-amber-400"
+                    className="text-5xl sm:text-7xl md:text-8xl font-black tracking-tight leading-none uppercase"
                     style={{
-                      textShadow: "0 0 35px rgba(245,158,11,0.55)",
+                      background: "linear-gradient(135deg, #fbbf24 0%, #f97316 35%, #ef4444 70%, #f43f5e 100%)",
+                      WebkitBackgroundClip: "text",
+                      WebkitTextFillColor: "transparent",
+                      backgroundClip: "text",
+                      filter: "drop-shadow(0 0 50px rgba(245,158,11,0.55))",
                     }}
                   >
                     Deepa Crackers
                   </h1>
-                  <h2
-                    className="text-2xl sm:text-4xl md:text-5xl font-black tracking-tight leading-none uppercase mt-2 text-white"
+                  <h1
+                    className="text-3xl sm:text-5xl md:text-6xl font-black tracking-tight leading-none uppercase mt-1 sm:mt-2"
+                    style={{
+                      background: "linear-gradient(135deg, #a78bfa 0%, #818cf8 40%, #38bdf8 100%)",
+                      WebkitBackgroundClip: "text",
+                      WebkitTextFillColor: "transparent",
+                      backgroundClip: "text",
+                      filter: "drop-shadow(0 0 40px rgba(139,92,246,0.5))",
+                    }}
                   >
                     Festival Celebration Hub
-                  </h2>
+                  </h1>
+                  {/* Ghost outline depth */}
+                  <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none select-none opacity-[0.025]" aria-hidden>
+                    <span className="text-5xl sm:text-7xl md:text-8xl font-black tracking-tight leading-none uppercase" style={{ WebkitTextStroke: "1.5px white", color: "transparent" }}>DEEPA CRACKERS</span>
+                    <span className="text-3xl sm:text-5xl md:text-6xl font-black tracking-tight leading-none uppercase mt-1 sm:mt-2" style={{ WebkitTextStroke: "1.5px white", color: "transparent" }}>FESTIVAL HUB</span>
+                  </div>
+                </div>
+
+                {/* Animated pictographic icons row */}
+                <div className="flex items-end justify-center gap-5 sm:gap-8 py-2">
+                  {[
+                    { emoji: "🪔", label: "Diya", color: "#f59e0b" },
+                    { emoji: "🎇", label: "Sparkler", color: "#ffffff" },
+                    { emoji: "🎆", label: "Firework", color: "#06b6d4" },
+                    { emoji: "🚀", label: "Rocket", color: "#ef4444" },
+                    { emoji: "🌟", label: "Star", color: "#fbbf24" },
+                    { emoji: "💥", label: "Burst", color: "#d946ef" },
+                  ].map((ic, i) => (
+                    <div key={i} className="flex flex-col items-center gap-1 group cursor-default">
+                      <div
+                        className="text-2xl sm:text-3xl transition-transform group-hover:scale-125 group-hover:-translate-y-2 duration-300"
+                        style={{
+                          filter: `drop-shadow(0 0 8px ${ic.color}99)`,
+                          animation: `homePicFloat ${2 + i * 0.4}s ${i * 0.18}s ease-in-out infinite`,
+                        }}
+                      >
+                        {ic.emoji}
+                      </div>
+                      <span className="text-[8px] font-black uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity duration-200" style={{ color: ic.color }}>
+                        {ic.label}
+                      </span>
+                    </div>
+                  ))}
                 </div>
 
                 <p className="text-neutral-300 text-xs md:text-sm max-w-2xl mx-auto leading-relaxed">
@@ -1112,14 +1155,20 @@ export default function Home() {
 
                 {/* 5-color dot divider */}
                 <div className="flex items-center justify-center gap-4">
-                  <div className="h-px w-16 bg-gradient-to-r from-transparent to-amber-500" />
+                  <div className="h-px w-16 bg-gradient-to-r from-transparent to-amber-500 opacity-60" />
                   <div className="flex gap-1.5">
                     {["#ef4444", "#f59e0b", "#10b981", "#06b6d4", "#d946ef"].map((c, i) => (
                       <div key={i} className="w-2 h-2 rounded-full" style={{ background: c, boxShadow: `0 0 8px ${c}` }} />
                     ))}
                   </div>
-                  <div className="h-px w-16 bg-gradient-to-l from-transparent to-amber-500" />
+                  <div className="h-px w-16 bg-gradient-to-l from-transparent to-amber-500 opacity-60" />
                 </div>
+                <style>{`
+                  @keyframes homePicFloat {
+                    0%, 100% { transform: translateY(0px); }
+                    50% { transform: translateY(-8px); }
+                  }
+                `}</style>
               </div>
             )}
           </section>
