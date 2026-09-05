@@ -8,13 +8,13 @@ const MultiRandomFireworkBurst = () => {
   const screenWidth = typeof window !== "undefined" ? window.innerWidth : 1920;
   const screenHeight = typeof window !== "undefined" ? window.innerHeight : 1080;
 
-  // Multiple randomized burst locations across the display
+  // Multiple randomized burst locations across the display (Red and White palette)
   const burstLocations = [
-    { x: screenWidth * 0.5, y: screenHeight * 0.35, color: "#ff4d4d", scale: 1.1, delay: 0 },
-    { x: screenWidth * 0.25, y: screenHeight * 0.28, color: "#ffd700", scale: 0.9, delay: 0.15 },
-    { x: screenWidth * 0.75, y: screenHeight * 0.32, color: "#00f0ff", scale: 0.95, delay: 0.28 },
-    { x: screenWidth * 0.4, y: screenHeight * 0.52, color: "#d946ef", scale: 0.85, delay: 0.4 },
-    { x: screenWidth * 0.65, y: screenHeight * 0.48, color: "#10b981", scale: 0.9, delay: 0.5 },
+    { x: screenWidth * 0.5, y: screenHeight * 0.35, color: "#dc2626", scale: 1.1, delay: 0 },
+    { x: screenWidth * 0.25, y: screenHeight * 0.28, color: "#ffffff", scale: 0.9, delay: 0.15 },
+    { x: screenWidth * 0.75, y: screenHeight * 0.32, color: "#ef4444", scale: 0.95, delay: 0.28 },
+    { x: screenWidth * 0.4, y: screenHeight * 0.52, color: "#b91c1c", scale: 0.85, delay: 0.4 },
+    { x: screenWidth * 0.65, y: screenHeight * 0.48, color: "#ffffff", scale: 0.9, delay: 0.5 },
   ];
 
   const particleCount = isMob ? 14 : 22;
@@ -33,15 +33,15 @@ const MultiRandomFireworkBurst = () => {
             const dist = (isMob ? 100 : 180) * burst.scale;
             const x = Math.cos(angle) * dist;
             const y = Math.sin(angle) * dist;
-            const hue = (bIdx * 70 + i * 18) % 360;
+            const particleColor = i % 3 === 0 ? "#ffffff" : burst.color;
 
             return (
               <motion.div
                 key={`p-${bIdx}-${i}`}
                 className="absolute w-2.5 h-2.5 rounded-full"
                 style={{
-                  background: `hsl(${hue}, 95%, 60%)`,
-                  boxShadow: `0 0 10px hsl(${hue}, 95%, 60%), 0 0 4px #ffffff`,
+                  background: particleColor,
+                  boxShadow: `0 0 10px ${particleColor}, 0 0 4px #ffffff`,
                   willChange: "transform, opacity",
                 }}
                 animate={{
@@ -211,9 +211,9 @@ export default function PromoBurst({ promoCodes = [], onApplyPromo }) {
                 </div>
               </motion.div>
 
-              {/* Bouncing Glowing Label Pill */}
-              <div className="mt-1 px-3 py-1 rounded-full bg-gradient-to-r from-red-950 via-neutral-900 to-red-950 border border-amber-500/60 shadow-[0_0_15px_rgba(245,158,11,0.4)] text-[10px] font-black text-amber-300 uppercase tracking-wider flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+              {/* Bouncing Pill */}
+              <div className="mt-1 px-3 py-1 rounded-full bg-black border border-red-600 shadow-[0_0_15px_rgba(220,38,38,0.4)] text-[10px] font-black text-white uppercase tracking-wider flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping" />
                 <span>Offers Inside</span>
               </div>
             </motion.div>
@@ -224,11 +224,11 @@ export default function PromoBurst({ promoCodes = [], onApplyPromo }) {
       {/* Multi-Location Random Firework Explosions */}
       <AnimatePresence>{hasBursted && !showPromoCard && <MultiRandomFireworkBurst key="multi-burst" />}</AnimatePresence>
 
-      {/* Dark & Gold Themed Compact Promocode Modal */}
+      {/* Compact Promocode Modal (Red / Black / White Scheme) */}
       <AnimatePresence>
         {showPromoCard && (
           <div
-            className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4"
+            className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-3 sm:p-4"
             onClick={() => (setIsOpen(false), setHasBursted(false), setShowPromoCard(false))}
           >
             <motion.div
@@ -241,35 +241,35 @@ export default function PromoBurst({ promoCodes = [], onApplyPromo }) {
               }}
               exit={{ scale: 0.85, opacity: 0, y: 30 }}
               onClick={(e) => e.stopPropagation()}
-              className="relative w-full max-w-sm rounded-2xl bg-[#0d0d0d] border border-amber-500/40 p-4 sm:p-5 shadow-[0_0_50px_rgba(245,158,11,0.25)] text-white overflow-hidden"
+              className="relative w-full max-w-sm rounded-2xl bg-black border-2 border-white p-4 sm:p-5 shadow-[0_0_50px_rgba(255,255,255,0.15)] text-white overflow-hidden"
             >
-              {/* Subtle gold-red top border bar */}
-              <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-red-600 via-amber-400 to-rose-600" />
+              {/* Clean red top accent */}
+              <div className="absolute top-0 left-0 right-0 h-[3px] bg-red-600" />
 
               {/* Close button */}
               <button
                 onClick={() => (setIsOpen(false), setHasBursted(false), setShowPromoCard(false))}
-                className="absolute top-3.5 right-3.5 text-neutral-400 hover:text-white p-1 rounded-full bg-neutral-900 border border-white/10 hover:border-amber-400 transition"
+                className="absolute top-3.5 right-3.5 text-neutral-400 hover:text-white p-1 rounded-full bg-neutral-900 border border-white/10 hover:border-white transition"
               >
                 <X className="w-4 h-4" />
               </button>
 
               {/* Compact Header */}
               <div className="flex items-center gap-2.5 mb-3.5 pr-8">
-                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-red-600 to-amber-500 flex items-center justify-center shadow-md shrink-0">
+                <div className="w-8 h-8 rounded-xl bg-red-600 flex items-center justify-center shadow-md shrink-0">
                   <Gift className="w-4 h-4 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-base font-black text-amber-300 tracking-wide flex items-center gap-1.5 leading-tight">
-                    <span>Diwali Promocodes</span> ✨
+                  <h3 className="text-base font-black text-white tracking-wide leading-tight">
+                    Festival Promocodes
                   </h3>
                   <p className="text-[11px] text-neutral-400 leading-tight">
-                    Instant discounts on your festive order
+                    Instant wholesale discounts on your order
                   </p>
                 </div>
               </div>
 
-              {/* Promocode Cards List - Compact & Theme Matching */}
+              {/* Promocode Cards List */}
               <div className="space-y-2.5 max-h-[58vh] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-neutral-700">
                 {promoCodes.map((promo, i) => (
                   <motion.div
@@ -277,14 +277,14 @@ export default function PromoBurst({ promoCodes = [], onApplyPromo }) {
                     initial={{ x: 30, opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}
                     transition={{ delay: i * 0.08 }}
-                    className="p-2.5 rounded-xl bg-neutral-900/90 border border-white/10 hover:border-amber-400/70 transition-all duration-200 flex items-center justify-between gap-2.5"
+                    className="p-2.5 rounded-xl bg-neutral-900 border border-white/15 hover:border-white transition-all duration-200 flex items-center justify-between gap-2.5"
                   >
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2 mb-0.5">
-                        <span className="font-mono font-black text-amber-400 text-sm tracking-wider">
+                        <span className="font-mono font-black text-white text-sm tracking-wider">
                           {promo.code}
                         </span>
-                        <span className="px-1.5 py-0.5 rounded text-[9px] font-black bg-red-600/90 text-white uppercase tracking-wider">
+                        <span className="px-1.5 py-0.5 rounded text-[9px] font-black bg-red-600 text-white uppercase tracking-wider">
                           {promo.discount}% OFF
                         </span>
                       </div>
@@ -307,8 +307,8 @@ export default function PromoBurst({ promoCodes = [], onApplyPromo }) {
                       >
                         {copied === promo.code ? (
                           <>
-                            <Check className="w-3 h-3 text-emerald-400" />
-                            <span className="text-emerald-400">Copied</span>
+                            <Check className="w-3 h-3 text-red-500" />
+                            <span className="text-red-500">Copied</span>
                           </>
                         ) : (
                           <>
@@ -325,7 +325,7 @@ export default function PromoBurst({ promoCodes = [], onApplyPromo }) {
                           setHasBursted(false);
                           setShowPromoCard(false);
                         }}
-                        className="px-2.5 py-1 rounded-lg bg-gradient-to-r from-red-600 to-amber-500 hover:from-red-500 hover:to-amber-400 text-white text-[11px] font-black shadow-md transition"
+                        className="px-2.5 py-1 rounded-lg bg-red-600 hover:bg-red-700 text-white text-[11px] font-black shadow-md transition"
                       >
                         Apply
                       </button>

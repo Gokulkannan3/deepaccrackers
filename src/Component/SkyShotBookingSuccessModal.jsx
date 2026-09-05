@@ -7,13 +7,12 @@ const rand = (a, b) => Math.random() * (b - a) + a;
 const randInt = (a, b) => Math.floor(rand(a, b));
 
 const BURST_COLORS = [
-  { r: 255, g: 215, b: 0, hex: "#ffd700" },   // Gold
-  { r: 255, g: 255, b: 255, hex: "#ffffff" }, // Diamond White
-  { r: 255, g: 0, b: 85, hex: "#ff0055" },    // Crimson Red
-  { r: 16, g: 185, b: 129, hex: "#10b981" },  // Emerald
-  { r: 0, g: 240, b: 255, hex: "#00f0ff" },   // Cyan
-  { r: 255, g: 153, b: 0, hex: "#ff9900" },   // Flame Orange
-  { r: 236, g: 72, b: 153, hex: "#ec4899" },  // Pink
+  { r: 239, g: 68, b: 68, hex: "#ef4444" },   // Red
+  { r: 255, g: 255, b: 255, hex: "#ffffff" }, // Pure White
+  { r: 220, g: 38, b: 38, hex: "#dc2626" },   // Deep Red
+  { r: 254, g: 202, b: 202, hex: "#fecaca" }, // Light Red
+  { r: 245, g: 245, b: 245, hex: "#f5f5f5" }, // Silver White
+  { r: 185, g: 28, b: 28, hex: "#b91c1c" },   // Dark Red
 ];
 
 export default function SkyShotBookingSuccessModal({
@@ -301,10 +300,10 @@ export default function SkyShotBookingSuccessModal({
               transition: { type: "spring", stiffness: 220, damping: 18 },
             }}
             exit={{ scale: 0.8, opacity: 0, y: 20 }}
-            className="relative z-20 w-full max-w-md bg-[#0a0a0a] border-2 border-amber-400/80 rounded-3xl p-5 sm:p-7 text-center text-white shadow-[0_0_80px_rgba(245,158,11,0.35)] overflow-hidden"
+            className="relative z-20 w-full max-w-md bg-[#0a0a0a] border-2 border-white rounded-3xl p-5 sm:p-7 text-center text-white shadow-[0_0_80px_rgba(255,255,255,0.1)] overflow-hidden"
           >
-            {/* Top decorative gold-crimson gradient line */}
-            <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-red-600 via-amber-400 via-emerald-400 to-rose-600" />
+            {/* Top decorative red accent line */}
+            <div className="absolute top-0 left-0 right-0 h-[3px] bg-red-600" />
 
             {/* Close cross button */}
             <button
@@ -314,30 +313,30 @@ export default function SkyShotBookingSuccessModal({
               <X size={16} />
             </button>
 
-            {/* Glowing Festival Celebration Badge */}
+            {/* Celebration Badge */}
             <div className="relative mx-auto mb-4 w-18 h-18 sm:w-20 sm:h-20 flex items-center justify-center">
-              <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-amber-500 via-red-500 to-emerald-400 animate-spin blur-[8px] opacity-75" style={{ animationDuration: "8s" }} />
-              <div className="relative w-16 h-16 sm:w-18 sm:h-18 rounded-full bg-neutral-950 border-2 border-amber-400 flex items-center justify-center shadow-inner">
-                <PartyPopper className="w-8 h-8 sm:w-9 sm:h-9 text-amber-400 animate-bounce" />
+              <div className="absolute inset-0 rounded-full bg-red-600 animate-spin blur-[8px] opacity-40" style={{ animationDuration: "8s" }} />
+              <div className="relative w-16 h-16 sm:w-18 sm:h-18 rounded-full bg-neutral-950 border-2 border-red-600 flex items-center justify-center shadow-inner">
+                <PartyPopper className="w-8 h-8 sm:w-9 sm:h-9 text-red-500 animate-bounce" />
               </div>
             </div>
 
-            {/* Sky Shot Success Headings */}
+            {/* Success Headings */}
             <div className="space-y-1 mb-4">
-              <span className="inline-block px-3 py-0.5 rounded-full bg-emerald-950 border border-emerald-500 text-[10px] font-black text-emerald-300 uppercase tracking-wider mb-1">
-                ✨ SKY SHOT CELEBRATION
+              <span className="inline-block px-3 py-0.5 rounded-full bg-red-600 border border-red-500 text-[10px] font-black text-white uppercase tracking-wider mb-1">
+                ORDER CONFIRMED
               </span>
-              <h2 className="text-xl sm:text-2xl font-black bg-gradient-to-r from-amber-300 via-white to-amber-200 bg-clip-text text-transparent tracking-tight">
+              <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">
                 BOOKED SUCCESSFULLY!
               </h2>
-              <p className="text-xs sm:text-sm font-bold text-amber-400">
-                Check downloads to see the bill 📄
+              <p className="text-xs sm:text-sm font-bold text-neutral-300">
+                Check your downloads folder to view your bill
               </p>
             </div>
 
-            {/* Tamil Confirmation Text Box */}
-            <div className="p-3 rounded-2xl bg-neutral-900/90 border border-neutral-800 text-left space-y-1 mb-4 shadow-inner">
-              <div className="flex items-center gap-1.5 text-emerald-400 text-xs font-black">
+            {/* Confirmation Box */}
+            <div className="p-3 rounded-2xl bg-neutral-900 border border-white/20 text-left space-y-1 mb-4 shadow-inner">
+              <div className="flex items-center gap-1.5 text-red-500 text-xs font-black">
                 <CheckCircle2 className="w-4 h-4 shrink-0" />
                 <span>ஆர்டர் வெற்றிகரமாக பதிவு செய்யப்பட்டது!</span>
               </div>
@@ -347,9 +346,9 @@ export default function SkyShotBookingSuccessModal({
             </div>
 
             {/* Order Details & PDF Download Pill */}
-            <div className="p-3 rounded-2xl bg-neutral-950 border border-amber-500/30 flex items-center justify-between gap-2 mb-5">
+            <div className="p-3 rounded-2xl bg-neutral-950 border border-white/20 flex items-center justify-between gap-2 mb-5">
               <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-9 h-9 rounded-xl bg-red-950 border border-red-600/60 flex items-center justify-center text-red-400 shrink-0">
+                <div className="w-9 h-9 rounded-xl bg-red-600 border border-red-500 flex items-center justify-center text-white shrink-0">
                   <FileText className="w-5 h-5" />
                 </div>
                 <div className="text-left min-w-0">
@@ -362,7 +361,7 @@ export default function SkyShotBookingSuccessModal({
                 onClick={handleCopyOrderId}
                 className="px-2.5 py-1 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-white/15 text-[10px] font-bold text-neutral-300 flex items-center gap-1 shrink-0 transition"
               >
-                {copied ? <Check className="w-3 h-3 text-emerald-400" /> : null}
+                {copied ? <Check className="w-3 h-3 text-red-500" /> : null}
                 <span>{copied ? "Copied" : "Copy ID"}</span>
               </button>
             </div>
@@ -372,7 +371,7 @@ export default function SkyShotBookingSuccessModal({
               <button
                 onClick={handleDownloadAgain}
                 disabled={downloadingAgain}
-                className="w-full py-3 rounded-xl bg-gradient-to-r from-red-600 via-amber-500 to-red-600 hover:from-red-500 hover:to-amber-400 text-white font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-red-600/30 transition cursor-pointer"
+                className="w-full py-3 rounded-xl bg-red-600 hover:bg-red-700 text-white font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-red-600/30 transition cursor-pointer"
               >
                 <Download className="w-4 h-4" />
                 <span>{downloadingAgain ? "Downloading Bill..." : "Download Bill Again (PDF)"}</span>
@@ -380,7 +379,7 @@ export default function SkyShotBookingSuccessModal({
 
               <button
                 onClick={onClose}
-                className="w-full py-2.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-300 hover:text-white font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
+                className="w-full py-2.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-white/20 text-neutral-300 hover:text-white font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
               >
                 <span>Continue Shopping</span>
                 <ArrowRight className="w-3.5 h-3.5" />

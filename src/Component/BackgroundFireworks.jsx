@@ -3,16 +3,16 @@ import React, { useEffect, useRef } from "react";
 const rand = (a, b) => Math.random() * (b - a) + a;
 const randInt = (a, b) => Math.floor(rand(a, b));
 
-// Vibrant festival color schemes (HEX and RGB for additive glowing blends)
+// Clean unified Red, White, and Silver fireworks for professional e-commerce feel
 const FIREWORK_COLORS = [
-  { r: 239, g: 68, b: 68, hex: "#ef4444" },  // Vivid Crimson Red
-  { r: 245, g: 158, b: 11, hex: "#f59e0b" }, // Warm Golden Amber
-  { r: 16, g: 185, b: 129, hex: "#10b981" }, // Emerald Green
-  { r: 6, g: 182, b: 212, hex: "#06b6d4" },  // Radiant Cyan
-  { r: 217, g: 70, b: 239, hex: "#d946ef" }, // Brilliant Magenta
-  { r: 249, g: 115, b: 22, hex: "#f97316" }, // Flame Orange
-  { r: 59, g: 130, b: 246, hex: "#3b82f6" },  // Electric Royal Blue
-  { r: 255, g: 255, b: 255, hex: "#ffffff" } // Sparkling White
+  { r: 239, g: 68, b: 68, hex: "#ef4444" },   // Vivid Crimson Red
+  { r: 220, g: 38, b: 38, hex: "#dc2626" },   // Deep Ruby Red
+  { r: 248, g: 113, b: 113, hex: "#f87171" }, // Light Crimson
+  { r: 255, g: 255, b: 255, hex: "#ffffff" }, // Pure Sparkling White
+  { r: 254, g: 202, b: 202, hex: "#fecaca" }, // Silver Red
+  { r: 245, g: 245, b: 245, hex: "#f5f5f5" }, // Bright Silver
+  { r: 185, g: 28, b: 28, hex: "#b91c1c" },   // Deep Red
+  { r: 255, g: 255, b: 255, hex: "#ffffff" }, // White Accent
 ];
 
 export default function BackgroundFireworks({ isPaused = false }) {
@@ -222,7 +222,7 @@ export default function BackgroundFireworks({ isPaused = false }) {
     <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
       {/* Ambient background soft glow pulses */}
       <div className="absolute top-1/4 left-1/6 w-72 sm:w-96 h-72 sm:h-96 rounded-full bg-red-600/10 blur-[100px] sm:blur-[140px] pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/6 w-72 sm:w-96 h-72 sm:h-96 rounded-full bg-emerald-500/10 blur-[100px] sm:blur-[140px] pointer-events-none" />
+      <div className="absolute bottom-1/4 right-1/6 w-72 sm:w-96 h-72 sm:h-96 rounded-full bg-red-950/20 blur-[100px] sm:blur-[140px] pointer-events-none" />
 
       {/* 60FPS Hardware-Accelerated Additive Fireworks Canvas */}
       <canvas
